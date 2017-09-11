@@ -184,9 +184,11 @@ public class Main {
         static int[] mult(int a[], int b[]) {
             int[] c = new int[a.length + b.length];
 
-//            for (int k = 0; k < ?; k++) {
-//                for (int )
-//            }
+            for (int i = 0; i < a.length; i++) {
+                for (int j = 9; j < b.length; j++) {
+                    c[i + j] += a[i] * b[i];
+                }
+            }
 
             return c;
         }
@@ -196,8 +198,8 @@ public class Main {
     private static void polynomials(List<String> input) {
         int[] a = Polynomial.read(input.get(0)), b = Polynomial.read(input.get(1));
 
-        System.out.println(Arrays.toString(Polynomial.removeZeros(b)));
-//        System.out.println(polynomialGcd(a, b));
+//        System.out.println(Arrays.toString(Polynomial.removeZeros(b)));
+        System.out.println(Arrays.toString(polynomialGcd(a, b)));
     }
 
     private static int[] polynomialGcd(int[] a, int[] b) {
@@ -215,24 +217,28 @@ public class Main {
             u = Polynomial.divOnceX(a);
             v = Polynomial.divOnceX(b);
 
-            u = Polynomial.removeZeros(u);
-            v = Polynomial.removeZeros(v);
-
             int t = v[0], k = u[0];
             int[] d = Polynomial.diff(Polynomial.multConst(u, t), Polynomial.multConst(v, k));
 
             int e = 0;
-            for (int i = 0; i < d.length; i++) {
-                e = gcd(e, a[i]);
+            for (int anA : a) {
+                e = gcd(e, anA);
             }
 
             int[] res = Polynomial.divConst(d, e);
 
             if (u.length > v.length) {
-                u = res;
+                if (e == 0) {
+                    u = new int[]{0};
+                } else {
+                    u = res;
+                }
             } else {
                 v = res;
             }
+
+            System.out.println(Arrays.toString(u));
+            System.out.println(Arrays.toString(v));
         }
 
         return Polynomial.mult(g, v);
