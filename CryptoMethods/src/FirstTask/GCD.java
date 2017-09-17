@@ -1,3 +1,5 @@
+package FirstTask;
+
 public class GCD {
     public static long gcd(long a, long b) {
         if (b > a) {
