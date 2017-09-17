@@ -9,8 +9,8 @@ import java.util.stream.Stream;
 public class Main {
 
     public static void main(String[] args) {
-        nums();
-        //polynomials();
+        //nums();
+        polynomials();
     }
 
     private static void nums() {
@@ -33,7 +33,7 @@ public class Main {
 
         String out = "";
         long[] polGCD = GCD.polynomialGCD(a, b);
-        outToFile("НОД(" + polToStr(a) + ", " + polToStr(b) + ") = " + polToStr(polGCD));
+        outToFile("НОД(a, b) = " + polToStr(polGCD));
     }
 
     private static long[] parsePolynomials(String s) {
@@ -48,17 +48,20 @@ public class Main {
     private static String polToStr(long[] p) {
         String s = "";
         for (int i = 0; i < p.length; i++) {
-            if (i == 0) {
-                s += p[i];
-            } else if (i == 1) {
-                s += p[i] + "x";
-            } else {
-                String pn = p[i] == 1 ? "" : p[i] + "";
-                s += pn + "x^" + i;
-            }
+            if (p[i] != 0) {
+                if (i == 0) {
+                    s += p[i];
+                } else if (i == 1) {
+                    String pn = p[i] == 1 ? "" : p[i] + "";
+                    s += pn + "x";
+                } else {
+                    String pn = p[i] == 1 ? "" : p[i] + "";
+                    s += pn + "x^" + i;
+                }
 
-            if (i != p.length - 1) {
-                s += " + ";
+                if (i != p.length - 1) {
+                    s += " + ";
+                }
             }
         }
         return s;
