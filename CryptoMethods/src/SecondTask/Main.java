@@ -116,6 +116,6 @@ public class Main {
     public static void main(String[] args) {
         //taskOne();
         //taskTwo();
-        //taskThree();
+        taskThree();
     }
 }

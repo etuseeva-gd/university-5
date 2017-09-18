@@ -1,222 +1,233 @@
 package FirstLab;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Main {
 
-    public static void main(String[] args) {
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader("input.txt"))) {
-            int n = Integer.parseInt(bufferedReader.readLine());
-            int[][] matrix = new int[n][n];
-            int i = 0;
-            String line = null;
-            while ((line = bufferedReader.readLine()) != null) {
-                String[] items = line.split(" ");
-                for (int j = 0; j < items.length; j++) {
-                    matrix[++i][j] = Integer.parseInt(items[j]);
-                }
-            }
-
-            if (isRef(matrix)) {
-                System.out.println("Отношение является рефлексивным.");
-            } else {
-                if (isAntiRef(matrix)) {
-                    System.out.println("Отношение является антирефлексивным.");
-                } else {
-                    System.out.println("Отношение не является рефлексивным.");
-                }
-            }
-
-            if (isSim(matrix)) {
-                System.out.println("Отношение является симметричным.");
-            } else {
-                if (isAntiSim(matrix)) {
-                    System.out.println("Отношение является антисимметричным.");
-                } else {
-                    System.out.println("Отношение не является симметричным.");
-                }
-            }
-
-            if (isTran(matrix)) {
-                System.out.println("Отношение является транзитивным.");
-            } else {
-                System.out.println("Отношение является не транзитивным.");
-            }
-
-            if (FirstFull(matrix)) {
-                System.out.println("Отношение является 1-полным.");
-            } else {
-                System.out.println("Отношение не является 1-полным.");
-            }
-
-            if (SecondFull(matrix)) {
-                System.out.println("Отношение является 2-полным.");
-            } else {
-                System.out.println("Отношение не является 2-полным.");
-            }
-
-            System.out.println("Рефлексивное замыкание:");
-            RefClosing(matrix);
-            System.out.println("Симметричное замыкание:");
-            SimClosing(matrix);
-            System.out.println("Транзитивное замыкание:");
-            TranCLosing(matrix);
-
+    public static int[][] readMatrix() {
+        List<String> lines = new ArrayList<>();
+        try (Stream<String> stream = Files.lines(Paths.get("input.txt"))) {
+            lines = stream.collect(Collectors.toList());
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        int n = Integer.parseInt(lines.get(0));
+        int[][] m = new int[n][n];
+
+        for (int i = 1; i < lines.size(); i++) {
+            String[] nums = lines.get(i).split(" ");
+
+            for (int j = 0; j < nums.length; j++)
+                m[i - 1][j] = Integer.parseInt(nums[j]);
+        }
+
+        return m;
     }
 
-    static boolean isRef(int[][] a) {
-        for (int i = 0; i < a.length; i++) {
-            if (a[i][i] != 1) {
+    public static void printClosure(String name, int[][] m) {
+        int n = m.length;
+        System.out.println(name + ":");
+        for (int[] aM : m) {
+            for (int j = 0; j < n; j++) {
+                System.out.print(aM[j] + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    public static void main(String[] args) {
+        int[][] m = readMatrix();
+
+        System.out.println("Данное замыкание: ");
+
+        if (isReflexive(m))
+            System.out.println("- рефлексивное");
+        else if (isAntiReflexive(m))
+            System.out.println("- антирефлексивное");
+        else
+            System.out.println("- не рефлексивное");
+
+        if (isSymmetric(m))
+            System.out.println("- симметричное");
+        else if (isAntiSymmetric(m))
+            System.out.println("- антисимметричное");
+        else
+            System.out.println("- не симметричное");
+
+        if (isTransitive(m))
+            System.out.println("- транзитивное");
+        else
+            System.out.println("- не транзитивное");
+
+        if (isOneComplete(m))
+            System.out.println("- 1-полное");
+
+        if (isTwoComplete(m))
+            System.out.println("- 2-полное");
+
+        if (isSingleValued(m))
+            System.out.println("- однозначное");
+
+        if (isRevereSingleValued(m))
+            System.out.println("- обратно однозначное");
+
+        int[][] ref = reflexiveСlosure(m);
+        printClosure("Рефлексивное замыкание", ref);
+
+        int[][] sym = symmetricСlosure(m);
+        printClosure("Симметричное замыкание", sym);
+
+        int[][] trans = transitiveСlosure(m);
+        printClosure("Транзитивное замыкание", trans);
+    }
+
+    static boolean isReflexive(int[][] m) {
+        int n = m.length;
+        for (int i = 0; i < n; i++)
+            if (m[i][i] != 1)
                 return false;
-            }
-        }
         return true;
     }
 
-    static boolean isAntiRef(int[][] a) {
-        for (int i = 0; i < a.length; i++) {
-            if (a[i][i] != 0) {
+    static boolean isAntiReflexive(int[][] m) {
+        int n = m.length;
+        for (int i = 0; i < n; i++)
+            if (m[i][i] != 0)
                 return false;
-            }
-        }
         return true;
     }
 
-    static boolean isSim(int[][] a) {
-        for (int i = 0; i < a.length; i++) {
-            for (int j = 0; j < a.length; j++) {
-                if (a[i][j] != a[j][i]) {
+    static boolean isSymmetric(int[][] m) {
+        int n = m.length;
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                if (m[i][j] != m[j][i])
                     return false;
-                }
-            }
-        }
         return true;
     }
 
-    static boolean isAntiSim(int[][] a) {
-        for (int i = 0; i < a.length; i++) {
-            for (int j = 0; j < a.length; j++) {
-                if (a[i][j] == a[j][i]) {
+    static boolean isAntiSymmetric(int[][] m) {
+        int n = m.length;
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                if (m[i][j] == m[j][i])
                     return false;
-                }
-            }
-        }
         return true;
     }
 
-    static boolean isTran(int[][] a) {
-        for (int[] elem : a) {
-            for (int j = 0; j < a.length; j++) {
-                for (int k = 0; k < a.length; k++) {
-                    if (elem[j] == 1 && a[j][k] == 1 && elem[k] == 0) {
+    static boolean isTransitive(int[][] m) {
+        int n = m.length;
+        for (int[] aM : m)
+            for (int j = 0; j < n; j++)
+                for (int k = 0; k < n; k++)
+                    if (aM[j] == 1 && m[j][k] == 1 && aM[k] == 0)
                         return false;
-                    }
-                }
-            }
-        }
         return true;
     }
 
-    static boolean FirstFull(int[][] a) {
-        int count;
-        for (int[] elem : a) {
-            count = 0;
-            for (int j = 0; j < a.length; j++) {
-                count += elem[j];
-            }
-            if (count == 0) {
+    static boolean isOneComplete(int[][] m) {
+        int n = m.length;
+        for (int[] aM : m) {
+            int k = 0;
+            for (int j = 0; j < n; j++)
+                k += aM[j];
+            if (k == 0)
                 return false;
-            }
         }
         return true;
     }
 
-    static boolean SecondFull(int[][] a) {
-        int count;
-        for (int i = 0; i < a.length; i++) {
-            count = 0;
-            for (int[] elem : a) {
-                count += elem[i];
-            }
-            if (count == 0) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    static void RefClosing(int[][] a) {
-        for (int i = 0; i < a.length; i++) {
-            for (int j = 0; j < a.length; j++) {
-                if (i == j) {
-                    System.out.print("1 ");
-                } else {
-                    System.out.print(a[i][j] + " ");
-                }
-            }
-            System.out.println();
-        }
-    }
-
-    static void SimClosing(int[][] a) {
-        int[][] temp = a.clone();
-        for (int i = 0; i < a.length; i++) {
-            for (int j = 0; j < a.length; j++) {
-                if (a[i][j] == 1) {
-                    temp[j][i] = 1;
-                }
-            }
-        }
-        for (int i = 0; i < a.length; i++) {
-            for (int j = 0; j < a.length; j++) {
-                System.out.print(temp[i][j] + " ");
-            }
-            System.out.println();
-        }
-    }
-
-    static void add(int[][] a, int[][] b, int n) {
+    static boolean isTwoComplete(int[][] m) {
+        int n = m.length;
         for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                if (a[i][j] > 0 || b[i][j] > 0) {
-                    a[i][j] = 1;
-                }
-            }
+            int k = 0;
+            for (int[] aM : m)
+                k += aM[i];
+            if (k == 0)
+                return false;
         }
+        return true;
     }
 
-    static int[][] mul(int[][] a, int[][] b, int n) {
+    static boolean isSingleValued(int[][] m) {
+        int n = m.length;
+        for (int[] aM : m) {
+            int k = 0;
+            for (int j = 0; j < n; j++)
+                k += aM[j];
+            if (k != 1)
+                return false;
+        }
+        return true;
+    }
+
+    static boolean isRevereSingleValued(int[][] m) {
+        int n = m.length;
+        for (int i = 0; i < n; i++) {
+            int k = 0;
+            for (int[] aM : m)
+                k += aM[i];
+            if (k != 1)
+                return false;
+        }
+        return true;
+    }
+
+    static int[][] reflexiveСlosure(int[][] m) {
+        int n = m.length;
+        int[][] e = new int[n][n];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                if (i == j)
+                    e[i][j] = 1;
+                else
+                    e[i][j] = 0;
+
         int[][] result = new int[n][n];
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                for (int k = 0; k < n; k++) {
-                    result[i][j] += a[i][k] * b[k][j];
-                }
-                if (result[i][j] < 0) {
-                    result[i][j] = 1;
-                }
-            }
-        }
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                result[i][j] = m[i][j] | e[i][j];
         return result;
     }
 
-    static void TranCLosing(int[][] a) {
-        int[][] result = a.clone();
-        int[][] matrix1 = a.clone();
-        for (int[] elem : a) {
-            matrix1 = mul(matrix1, matrix1, a.length);
-            add(result, matrix1, a.length);
-        }
-        for (int[] aResult : result) {
-            for (int j = 0; j < result.length; j++) {
-                System.out.print(aResult[j] + " ");
-            }
-            System.out.println();
-        }
+    static int[][] symmetricСlosure(int[][] m) {
+        int n = m.length;
+        int[][] result = new int[n][n];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                result[i][j] = m[i][j] | m[j][i];
+        return result;
+    }
+
+    static int[][] mult(int[][] a, int[][] b) {
+        int n = a.length;
+        int[][] result = new int[n][n];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                for (int k = 0; k < n; k++)
+                    result[i][j] |= a[i][k] & b[k][j];
+        return result;
+    }
+
+    static int[][] add(int[][] a, int[][] b) {
+        int n = a.length;
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                a[i][j] |= b[i][j];
+        return a;
+    }
+
+    static int[][] transitiveСlosure(int[][] m) {
+        int[][] result = m.clone();
+        for (int[] aM : m)
+            result = add(result, mult(result, result));
+        return result;
     }
 }
