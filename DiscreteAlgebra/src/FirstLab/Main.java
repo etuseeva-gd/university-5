@@ -63,8 +63,6 @@ public class Main {
 
         if (isTransitive(m))
             System.out.println("- транзитивное");
-        else
-            System.out.println("- не транзитивное");
 
         if (isOneComplete(m))
             System.out.println("- 1-полное");
