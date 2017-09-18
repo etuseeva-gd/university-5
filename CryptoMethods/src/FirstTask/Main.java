@@ -11,8 +11,8 @@ import java.util.stream.Stream;
 public class Main {
 
     public static void main(String[] args) {
-        //nums();
-        polynomials();
+        nums();
+        //polynomials();
     }
 
     private static void nums() {
@@ -24,7 +24,7 @@ public class Main {
         out += "НОД(" + a + ", " + b + ") = " + GCD.binaryGCD(a, b) + " (бинарный алгоритм) \n";
 
         long[] extendedGCD = GCD.extendedGCD(a, b);
-        out += "НОД(" + a + ", " + b + ") = " + extendedGCD[0] + ", x1 = " + extendedGCD[1] + ", x2 = " + extendedGCD[2] + " (расширенный алгоритм) \n";
+        out += "НОД(" + a + ", " + b + ") = " + extendedGCD[0] + ", x = " + extendedGCD[1] + ", y = " + extendedGCD[2] + " (расширенный алгоритм) \n";
 
         outToFile(out);
     }
@@ -32,8 +32,6 @@ public class Main {
     private static void polynomials() {
         List<String> input = readFromFile();
         long[] a = parsePolynomials(input.get(0)), b = parsePolynomials(input.get(1));
-
-        String out = "";
         long[] polGCD = GCD.polynomialGCD(a, b);
         outToFile("НОД(a, b) = " + polToStr(polGCD));
     }
@@ -69,7 +67,7 @@ public class Main {
         return s;
     }
 
-    private static List<String> readFromFile() {
+    public static List<String> readFromFile() {
         List<String> lines = new ArrayList<>();
         try (Stream<String> stream = Files.lines(Paths.get("input.txt"))) {
             lines = stream.collect(Collectors.toList());
@@ -79,7 +77,7 @@ public class Main {
         return lines;
     }
 
-    private static void outToFile(String out) {
+    public static void outToFile(String out) {
         try {
             PrintWriter writer = new PrintWriter("output.txt", "UTF-8");
             writer.println(out);
