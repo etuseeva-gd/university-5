@@ -11,8 +11,8 @@ import java.util.stream.Stream;
 public class Main {
 
     public static void main(String[] args) {
-        nums();
-        //polynomials();
+        //nums();
+        polynomials();
     }
 
     private static void nums() {
@@ -20,6 +20,7 @@ public class Main {
         String[] nums = input.get(0).split(" ");
         long a = Long.parseLong(nums[0]), b = Long.parseLong(nums[1]);
 
+//        String out = "";
         String out = "НОД(" + a + ", " + b + ") = " + GCD.gcd(a, b) + "\n";
         out += "НОД(" + a + ", " + b + ") = " + GCD.binaryGCD(a, b) + " (бинарный алгоритм) \n";
 
