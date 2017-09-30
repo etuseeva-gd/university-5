@@ -23,9 +23,9 @@ namespace FirstTask
     
     internal class Program
     {
-        static long ONE_GB = 1073741824;
-        public static string s2 = "B\0e\0g\0i\0e\0S\0e\0a\0c\0h\0e\0r\0q\0q\0q\0";
-        public static string s = "BegieSeacherqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq";
+        static readonly long ONE_GB = 1073741824;
+        public static string PlaceWithHardDriveInfoExe = "H\0a\0r\0d\0D\0r\0i\0v\0e\0I\0n\0f\0o\0:\0";
+        public static string PlaceWithHardDriveInfo = "HardDriveInfo:zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz";
         
         public static void Main(string[] args)
         {
@@ -92,7 +92,7 @@ namespace FirstTask
             using (StreamReader read = new StreamReader(File.Open(name, FileMode.Open, FileAccess.Read, FileShare.Read), Encoding.Default))
             {
                 string row = read.ReadToEnd();
-                return row.IndexOf(s2);
+                return row.IndexOf(PlaceWithHardDriveInfoExe);
             }
         }
         
@@ -132,21 +132,21 @@ namespace FirstTask
         
         private static bool CheckHard(Drive drive)
         {
-            for (int i = s.Length - 1; i >= 0; i--)
+            for (int i = PlaceWithHardDriveInfo.Length - 1; i >= 0; i--)
             {
-                if (s[i] == 'q')
-                    s = s.Remove(i);
+                if (PlaceWithHardDriveInfo[i] == 'z')
+                    PlaceWithHardDriveInfo = PlaceWithHardDriveInfo.Remove(i);
             }
-            string[] ss = s.Split(new char[] { '@' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] s = PlaceWithHardDriveInfo.Split(new char[] { '@' }, StringSplitOptions.RemoveEmptyEntries);
             
             Console.Write("File can be executed on: ");
-            foreach (var s1 in ss)
+            foreach (var s1 in s)
             {
                 Console.Write(s1 + " ");
             }
             Console.WriteLine();
             
-            return ss[0] == drive.Model && ss[1] == drive.SerialNumber && ss[2] == drive.FirmwareRevision && ss[3] == drive.Size + "";
+            return s[0] == drive.Model && s[1] == drive.SerialNumber && s[2] == drive.FirmwareRevision && s[3] == drive.Size + "";
         }
         
         private static byte[] GetRowByte(string row)
