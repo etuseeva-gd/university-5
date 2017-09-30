@@ -2,3 +2,5 @@
 out/*
 *.iml
 */out/
+InfSecurity/FirstTask/*
+!InfSecurity/FirstTask/Program.cs
