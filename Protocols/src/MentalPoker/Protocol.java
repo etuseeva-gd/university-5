@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -280,24 +281,24 @@ public class Protocol {
     }
 
     void run(List<User> users) {
-        String CARDS = "cards", FIVE_CARDS = "five_cards", HEAD = "head", TXT = ".txt", END = "end";
+        String CARDS = "cards.txt", FIVE_CARDS = "five_cards.txt", FIVE_CARDS_HEAD = "five_cards_head.txt", FIVE_CARDS_END = "five_cards_end.txt";
 
         User headUser = users.get(0);
 
         //Head
         System.out.println("Head user 1");
-        headUser.sendCardsForNextUserHead("cards.txt");
+        headUser.sendCardsForNextUserHead(CARDS);
 
         //Other users
         System.out.println("Other 1");
         for (int i = 1; i < users.size(); i++) {
             User user = users.get(i);
 
-            user.selectionOfFiveCards(users.get(i - 1).name + "-cards.txt", "five_cards.txt");
-            user.sendCardsForNextUser("cards.txt");
+            user.selectionOfFiveCards(users.get(i - 1).name + "-" + CARDS, FIVE_CARDS);
+            user.sendCardsForNextUser(CARDS);
 
             if (i == users.size() - 1) {
-                user.selectionOfFiveCardsForHead(user.name + "-cards.txt", "five_cards_head.txt");
+                user.selectionOfFiveCardsForHead(user.name + "-" + CARDS, FIVE_CARDS_HEAD);
             }
         }
 
@@ -305,9 +306,9 @@ public class Protocol {
         System.out.println("Head user 2");
         for (int i = 0; i < users.size(); i++) {
             if (i == 0) {
-                headUser.decryptCards(users.get(users.size() - 1).name + "-five_cards_head.txt", "five_cards_end.txt");
+                headUser.decryptCards(users.get(users.size() - 1).name + "-" + FIVE_CARDS_HEAD, FIVE_CARDS_END);
             } else {
-                headUser.decryptCardsHead(users.get(i).name + "-five_cards.txt", "five_cards_for_" + users.get(i).name + ".txt");
+                headUser.decryptCardsHead(users.get(i).name + "-" + FIVE_CARDS, "for-" + users.get(i).name + "-" + FIVE_CARDS);
             }
         }
 
@@ -315,7 +316,7 @@ public class Protocol {
         System.out.println("Other 2");
         for (int i = 1; i < users.size(); i++) {
             User user = users.get(i);
-            user.decryptCards(headUser.name + "-five_cards_for_" + users.get(i).name + ".txt", "five_cards_end.txt");
+            user.decryptCards(headUser.name + "-for-" + users.get(i).name + "-" + FIVE_CARDS, FIVE_CARDS_END);
         }
 
         System.out.println("End");

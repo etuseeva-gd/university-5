@@ -4,3 +4,4 @@ out/*
 */out/
 InfSecurity/FirstTask/*
 !InfSecurity/FirstTask/Program.cs
+Protocols/protocolWork/*
