@@ -275,8 +275,15 @@ public class Protocol {
         }
     }
 
+    void continueExecution(Scanner scanner) {
+        //System.out.println("Продолжить? (enter)");
+        //scanner.nextLine();
+    }
+
     void run(List<User> users) {
         String CARDS = "cards.txt", FIVE_CARDS = "five_cards.txt", FIVE_CARDS_HEAD = "five_cards_head.txt", FIVE_CARDS_END = "five_cards_end.txt";
+
+        Scanner scanner = new Scanner(System.in);
 
         System.out.println("---------------------");
         System.out.println("Раздача началась");
@@ -287,29 +294,36 @@ public class Protocol {
         System.out.println("Организатор игры взял колоду, зашифровал, передал");
         headUser.sendCardsForNextUserHead(CARDS);
 
+        continueExecution(scanner);
+
         //Other users
         System.out.println("Участники выбирают себе карты (5 шт), шифруют их, и отправляют организатору");
-        System.out.println("Последний участник выбирает карты организатору (5 шт)");
         for (int i = 1; i < users.size(); i++) {
             User user = users.get(i);
 
             user.selectionOfFiveCards(users.get(i - 1).name + "-" + CARDS, FIVE_CARDS);
             user.sendCardsForNextUser(CARDS);
 
+            continueExecution(scanner);
+
             if (i == users.size() - 1) {
+                System.out.println("Последний участник выбирает карты организатору (5 шт)");
+
                 user.selectionOfFiveCardsForHead(user.name + "-" + CARDS, FIVE_CARDS_HEAD);
+                continueExecution(scanner);
             }
         }
 
         //Head do this
         System.out.println("Организатор дешифрует полученные карты и отправляет участникам");
-        System.out.println("Организатор дешифрует свои карты");
         for (int i = 0; i < users.size(); i++) {
             if (i == 0) {
+                System.out.println("Организатор дешифрует свои карты");
                 headUser.decryptCards(users.get(users.size() - 1).name + "-" + FIVE_CARDS_HEAD, FIVE_CARDS_END);
             } else {
                 headUser.decryptCardsHead(users.get(i).name + "-" + FIVE_CARDS, "for-" + users.get(i).name + "-" + FIVE_CARDS);
             }
+            continueExecution(scanner);
         }
 
         //Other
@@ -317,6 +331,7 @@ public class Protocol {
         for (int i = 1; i < users.size(); i++) {
             User user = users.get(i);
             user.decryptCards(headUser.name + "-for-" + users.get(i).name + "-" + FIVE_CARDS, FIVE_CARDS_END);
+            continueExecution(scanner);
         }
 
         System.out.println("Конец раздачи");
