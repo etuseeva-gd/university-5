@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -17,12 +16,8 @@ public class Protocol {
         String name;
         CryptoSystem.Keys keys;
 
-        Boolean isHead;
-
-        User(String name, BigInteger p, Boolean isHead) throws NoSuchAlgorithmException {
-            this.isHead = isHead;
+        User(String name, BigInteger p) throws NoSuchAlgorithmException {
             this.name = name;
-
             this.keys = new CryptoSystem.Keys(p);
         }
 
@@ -107,7 +102,7 @@ public class Protocol {
         int[] indexes = null;
 
         void selectionOfFiveCards(String path, String outPath) {
-            this.cards = Transport.read(path);
+            this.cards = Transport.read(path, true);
             this.indexes = getFiveRandIndexes(this.cards.size());
             List<String> fiveCards = getFiveCards(this.cards, this.indexes);
             StringBuilder out = this.encrypt(fiveCards, false);
@@ -115,7 +110,7 @@ public class Protocol {
         }
 
         void selectionOfFiveCardsForHead(String path, String outPath) {
-            List<String> cards = Transport.read(path);
+            List<String> cards = Transport.read(path, true);
             int[] randIndexes = getFiveRandIndexes(cards.size());
             List<String> fiveCards = getFiveCards(cards, randIndexes);
             StringBuilder out = this.listToStringBuilder(fiveCards);
@@ -132,7 +127,7 @@ public class Protocol {
         }
 
         void decryptCards(String path, String outPath) {
-            List<String> cards = Transport.read(path);
+            List<String> cards = Transport.read(path, true);
             StringBuilder userOut = this.decrypt(cards, true);
             Transport.write(this.name + "-" + outPath, String.valueOf(userOut));
         }
@@ -145,7 +140,7 @@ public class Protocol {
         }
 
         void decryptCardsHead(String path, String outPath) {
-            List<String> cards = Transport.read(path);
+            List<String> cards = Transport.read(path, true);
             StringBuilder userOut = this.decrypt(cards, false);
             Transport.write(this.name + "-" + outPath, String.valueOf(userOut));
         }
@@ -176,8 +171,6 @@ public class Protocol {
                 }
                 //Нахождение d
                 this.d = this.c.modInverse(p1);
-
-                //Запись всего этого добра в файл
             }
         }
 
@@ -203,7 +196,6 @@ public class Protocol {
         }
 
         BigInteger genPrimeNum() throws NoSuchAlgorithmException {
-            System.out.println("Генерация простого большого числа");
             return this.getRandBigInteger().nextProbablePrime();
         }
 
@@ -235,9 +227,11 @@ public class Protocol {
     static class Transport {
         private static final String pathPrefix = "./Protocols/protocolWork/";
 
-        public static List<String> read(String file) {
+        public static List<String> read(String file, boolean withPrefix) {
+            String prefix = withPrefix ? pathPrefix : "";
+
             List<String> lines = new ArrayList<>();
-            try (Stream<String> stream = Files.lines(Paths.get(pathPrefix + file))) {
+            try (Stream<String> stream = Files.lines(Paths.get(prefix + file))) {
                 lines = stream.collect(Collectors.toList());
             } catch (IOException e) {
                 e.printStackTrace();
@@ -261,36 +255,41 @@ public class Protocol {
         }
     }
 
-    Protocol() {
-
-    }
-
     void init() throws NoSuchAlgorithmException {
-        //Первый шаг - генерация простого числа
         BigInteger p = new CryptoSystem().genPrimeNum();
 
         List<User> users = new ArrayList<>();
-        //Создание пользователей и генерация ключей для них
-        users.add(new User("Alice", p, true));
-        users.add(new User("Bob", p, false));
-        users.add(new User("Mark", p, false));
-        users.add(new User("Lena", p, false));
-        users.add(new User("Masha", p, false));
+        List<String> usersName = Transport.read("input.txt", false);
+        usersName.forEach(name -> {
+            try {
+                users.add(new User(name, p));
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+        });
 
-        this.run(users);
+        if (users.size() > 1 && users.size() < 6) {
+            this.run(users);
+        } else {
+            System.out.println("У вас введено не корректное число участников.");
+        }
     }
 
     void run(List<User> users) {
         String CARDS = "cards.txt", FIVE_CARDS = "five_cards.txt", FIVE_CARDS_HEAD = "five_cards_head.txt", FIVE_CARDS_END = "five_cards_end.txt";
 
+        System.out.println("---------------------");
+        System.out.println("Раздача началась");
+
         User headUser = users.get(0);
 
         //Head
-        System.out.println("Head user 1");
+        System.out.println("Организатор игры взял колоду, зашифровал, передал");
         headUser.sendCardsForNextUserHead(CARDS);
 
         //Other users
-        System.out.println("Other 1");
+        System.out.println("Участники выбирают себе карты (5 шт), шифруют их, и отправляют организатору");
+        System.out.println("Последний участник выбирает карты организатору (5 шт)");
         for (int i = 1; i < users.size(); i++) {
             User user = users.get(i);
 
@@ -303,7 +302,8 @@ public class Protocol {
         }
 
         //Head do this
-        System.out.println("Head user 2");
+        System.out.println("Организатор дешифрует полученные карты и отправляет участникам");
+        System.out.println("Организатор дешифрует свои карты");
         for (int i = 0; i < users.size(); i++) {
             if (i == 0) {
                 headUser.decryptCards(users.get(users.size() - 1).name + "-" + FIVE_CARDS_HEAD, FIVE_CARDS_END);
@@ -313,12 +313,12 @@ public class Protocol {
         }
 
         //Other
-        System.out.println("Other 2");
+        System.out.println("Участники дешифруют свои карты");
         for (int i = 1; i < users.size(); i++) {
             User user = users.get(i);
             user.decryptCards(headUser.name + "-for-" + users.get(i).name + "-" + FIVE_CARDS, FIVE_CARDS_END);
         }
 
-        System.out.println("End");
+        System.out.println("Конец раздачи");
     }
 }
