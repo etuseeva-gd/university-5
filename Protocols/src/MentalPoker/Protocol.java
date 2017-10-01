@@ -1,7 +1,5 @@
 package MentalPoker;
 
-import com.sun.corba.se.spi.ior.TaggedProfileTemplate;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigInteger;
@@ -10,7 +8,6 @@ import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -28,7 +25,7 @@ public class Protocol {
             this.keys = new CryptoSystem.Keys(p);
         }
 
-        StringBuilder encrypt(List<String> cards, Boolean isCardsStr) {
+        private StringBuilder encrypt(List<String> cards, Boolean isCardsStr) {
             StringBuilder encryptCards = new StringBuilder();
             cards.forEach(card -> {
                 if (isCardsStr) {
@@ -40,7 +37,7 @@ public class Protocol {
             return encryptCards;
         }
 
-        StringBuilder decrypt(List<String> cryptCards, Boolean isCardsStr) {
+        private StringBuilder decrypt(List<String> cryptCards, Boolean isCardsStr) {
             StringBuilder decryptCards = new StringBuilder();
             cryptCards.forEach(card -> {
                 if (isCardsStr) {
@@ -52,6 +49,105 @@ public class Protocol {
             return decryptCards;
         }
 
+        private int[] getFiveRandIndexes(int n) {
+            boolean[] used = new boolean[n];
+            for (int i = 0; i < n; i++) {
+                used[i] = false;
+            }
+
+            int[] indexes = new int[5];
+            Random random = new Random();
+            for (int i = 0; i < 5; i++) {
+                int r = random.nextInt(n);
+                while (used[r]) {
+                    r = random.nextInt(n);
+                }
+                indexes[i] = r;
+                used[r] = true;
+            }
+
+            return indexes;
+        }
+
+        private List<String> getFiveCards(List<String> cards, int[] indexes) {
+            List<String> fiveCards = new ArrayList<>();
+            for (int index : indexes) {
+                fiveCards.add(cards.get(index));
+            }
+            return fiveCards;
+        }
+
+        private List<String> getCardsForNextUser() {
+            List<String> nextCards = new ArrayList<>();
+            for (int i = 0; i < this.cards.size(); i++) {
+                boolean ok = true;
+                for (int j = 0; j < this.indexes.length; j++) {
+                    if (i == j) {
+                        ok = false;
+                        break;
+                    }
+                }
+                if (ok) {
+                    nextCards.add(cards.get(i));
+                }
+            }
+            return nextCards;
+        }
+
+        private StringBuilder listToStringBuilder(List<String> items) {
+            StringBuilder str = new StringBuilder();
+            items.forEach(item -> {
+                str.append(item).append("\n");
+            });
+            return str;
+        }
+
+        List<String> cards = null;
+        int[] indexes = null;
+
+        void selectionOfFiveCards(String path, String outPath) {
+            this.cards = Transport.read(path);
+            this.indexes = getFiveRandIndexes(this.cards.size());
+            List<String> fiveCards = getFiveCards(this.cards, this.indexes);
+            StringBuilder out = this.encrypt(fiveCards, false);
+            Transport.write(this.name + "-" + outPath, String.valueOf(out));
+        }
+
+        void selectionOfFiveCardsForHead(String path, String outPath) {
+            List<String> cards = Transport.read(path);
+            int[] randIndexes = getFiveRandIndexes(cards.size());
+            List<String> fiveCards = getFiveCards(cards, randIndexes);
+            StringBuilder out = this.listToStringBuilder(fiveCards);
+            Transport.write(this.name + "-" + outPath, String.valueOf(out));
+        }
+
+        void sendCardsForNextUser(String outPath) {
+            List<String> cards = getCardsForNextUser();
+            StringBuilder out = listToStringBuilder(cards);
+            Transport.write(this.name + "-" + outPath, String.valueOf(out));
+
+            this.cards = null;
+            this.indexes = null;
+        }
+
+        void decryptCards(String path, String outPath) {
+            List<String> cards = Transport.read(path);
+            StringBuilder userOut = this.decrypt(cards, true);
+            Transport.write(this.name + "-" + outPath, String.valueOf(userOut));
+        }
+
+        //For head
+        void sendCardsForNextUserHead(String outPath) {
+            List<String> cards = Arrays.asList(Cards.getCards());
+            StringBuilder out = this.encrypt(cards, true);
+            Transport.write(this.name + "-" + outPath, String.valueOf(out));
+        }
+
+        void decryptCardsHead(String path, String outPath) {
+            List<String> cards = Transport.read(path);
+            StringBuilder userOut = this.decrypt(cards, false);
+            Transport.write(this.name + "-" + outPath, String.valueOf(userOut));
+        }
 
         @Override
         public String toString() {
@@ -183,109 +279,35 @@ public class Protocol {
         this.run(users);
     }
 
-    static int[] getFiveRandIndexes(int n) {
-        boolean[] used = new boolean[n];
-        for (int i = 0; i < n; i++) {
-            used[i] = false;
-        }
-
-        int[] indexes = new int[5];
-        Random random = new Random();
-        for (int i = 0; i < 5; i++) {
-            int r = random.nextInt(n);
-            while (used[r]) {
-                r = random.nextInt(n);
-            }
-            indexes[i] = r;
-            used[r] = true;
-        }
-
-        return indexes;
-    }
-
-    static List<String> getFiveCards(List<String> cards, int[] indexes) {
-        List<String> fiveCards = new ArrayList<>();
-        for (int index : indexes) {
-            fiveCards.add(cards.get(index));
-        }
-        return fiveCards;
-    }
-
-    static List<String> getCardsForNextUser(List<String> cards, int[] indexes) {
-        List<String> nextCards = new ArrayList<>();
-        for (int i = 0; i < cards.size(); i++) {
-            boolean ok = true;
-            for (int j = 0; j < indexes.length; j++) {
-                if (i == j) {
-                    ok = false;
-                    break;
-                }
-            }
-            if (ok) {
-                nextCards.add(cards.get(i));
-            }
-        }
-        return nextCards;
-    }
-
-    StringBuilder listToStringBuilder(List<String> items) {
-        StringBuilder str = new StringBuilder();
-        items.forEach(item -> {
-            str.append(item).append("\n");
-        });
-        return str;
-    }
-
     void run(List<User> users) {
-        User alice = users.get(0);
-        User bob = users.get(1);
+        String CARDS = "cards", FIVE_CARDS = "five_cards", HEAD = "head", TXT = ".txt", END = "end";
 
-        //Alice
-        System.out.println("Alice 1");
-        StringBuilder out = alice.encrypt(Arrays.asList(Cards.getCards()), true);
-        Transport.write(alice.name + "_1_step_cards.txt", String.valueOf(out));
+        User headUser = users.get(0);
+
+        //Head
+        System.out.println("Head user 1");
+        headUser.sendCardsForNextUserHead("cards.txt");
 
         //Other users
         System.out.println("Other 1");
         for (int i = 1; i < users.size(); i++) {
             User user = users.get(i);
-            List<String> cards = Transport.read(users.get(i - 1).name + "_1_step_cards.txt");
 
-            int[] randIndexes = getFiveRandIndexes(cards.size());
-            List<String> fiveCards = getFiveCards(cards, randIndexes);
-            StringBuilder userOut = user.encrypt(fiveCards, false);
-            Transport.write(user.name + "_1_step_five_card.txt", String.valueOf(userOut));
-
-            List<String> nextCards = getCardsForNextUser(cards, randIndexes);
-            userOut = listToStringBuilder(nextCards);
-            Transport.write(user.name + "_1_step_cards.txt", String.valueOf(userOut));
+            user.selectionOfFiveCards(users.get(i - 1).name + "-cards.txt", "five_cards.txt");
+            user.sendCardsForNextUser("cards.txt");
 
             if (i == users.size() - 1) {
-                cards = Transport.read(user.name + "_1_step_cards.txt");
-
-                randIndexes = getFiveRandIndexes(cards.size());
-                fiveCards = getFiveCards(cards, randIndexes);
-                userOut = listToStringBuilder(fiveCards);
-                Transport.write(user.name + "_1_step_five_card_for_alice.txt", String.valueOf(userOut));
-
-                //Maybe don't need
-                nextCards = getCardsForNextUser(cards, randIndexes);
-                userOut = listToStringBuilder(nextCards);
-                Transport.write(user.name + "_1_step_cards.txt", String.valueOf(userOut));
+                user.selectionOfFiveCardsForHead(user.name + "-cards.txt", "five_cards_head.txt");
             }
         }
 
-        //Alice do this
-        System.out.println("Alice 2");
+        //Head do this
+        System.out.println("Head user 2");
         for (int i = 0; i < users.size(); i++) {
             if (i == 0) {
-                List<String> cards = Transport.read(users.get(users.size() - 1).name + "_1_step_five_card_for_alice.txt");
-                StringBuilder userOut = alice.decrypt(cards, true);
-                Transport.write(alice.name + "_2_step_five_cards_end.txt", String.valueOf(userOut));
+                headUser.decryptCards(users.get(users.size() - 1).name + "-five_cards_head.txt", "five_cards_end.txt");
             } else {
-                List<String> cards = Transport.read(users.get(i).name + "_1_step_five_card.txt");
-                StringBuilder userOut = alice.decrypt(cards, false);
-                Transport.write(alice.name + "_2_step_five_cards_for" + users.get(i).name + "_decrypt.txt", String.valueOf(userOut));
+                headUser.decryptCardsHead(users.get(i).name + "-five_cards.txt", "five_cards_for_" + users.get(i).name + ".txt");
             }
         }
 
@@ -293,9 +315,7 @@ public class Protocol {
         System.out.println("Other 2");
         for (int i = 1; i < users.size(); i++) {
             User user = users.get(i);
-            List<String> cards = Transport.read(alice.name + "_2_step_five_cards_for" + user.name + "_decrypt.txt");
-            StringBuilder userOut = user.decrypt(cards, true);
-            Transport.write(user.name + "_2_step_five_cards_end.txt", String.valueOf(userOut));
+            user.decryptCards(headUser.name + "-five_cards_for_" + users.get(i).name + ".txt", "five_cards_end.txt");
         }
 
         System.out.println("End");
