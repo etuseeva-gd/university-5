@@ -68,7 +68,7 @@ public class Protocol {
 
         //Дешифроавть
         static String decryptString(String message, Keys keys) {
-            BigInteger res = new BigInteger(message).modPow(keys.d, keys.p);
+            BigInteger res = CryptoSystem.decrypt(message, keys);
             byte[] byteRes = res.toByteArray();
             return new String(byteRes);
         }
@@ -89,8 +89,8 @@ public class Protocol {
 
     public static class Cards {
         static String[] getCards() {
-            String[] suits = new String[]{"Черви", "Пики", "Крести", "Буби"};
-            String[] digs = new String[]{"Валет", "Дама", "Король", "Туз"};
+            String[] suits = new String[]{"Hearts", "Spades", "Clubs", "Diamonds"};
+            String[] digs = new String[]{"Jack", "Queen", "King", "Ace"};
             String[] cards = new String[52];
 
             int k = 0;
@@ -116,6 +116,11 @@ public class Protocol {
                 lines = stream.collect(Collectors.toList());
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+            for (int i = 0; i < lines.size(); i++) {
+                if (Objects.equals(lines.get(i), "")) {
+                    lines.remove(i--);
+                }
             }
             return lines;
         }
@@ -199,7 +204,6 @@ public class Protocol {
             usedCards[r] = true;
         }
 
-        //Check this encrypt
         bobOut = new StringBuilder();
         for (int i = 0; i < numCardsForBob.length; i++) {
             bobOut.append(CryptoSystem.encrypt(aliceCards.get(numCardsForBob[i]), bob.keys)).append("\n");
@@ -228,7 +232,7 @@ public class Protocol {
         Transport.write("alice_4_step_bob_5_card.txt", String.valueOf(aliceOut2));
 
         //Bob 4 step
-        List<String> bobCardsForGame = Transport.read("bob_3_step_cards_for_bob.txt");
+        List<String> bobCardsForGame = Transport.read("alice_4_step_bob_5_card.txt");
 
         StringBuilder bobOut1 = new StringBuilder();
         bobCardsForGame.forEach(card -> {
