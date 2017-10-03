@@ -119,6 +119,7 @@ public class Protocol {
 
         void sendCardsForNextUser(String outPath) {
             List<String> cards = getCardsForNextUser();
+            Collections.shuffle(cards);
             StringBuilder out = listToStringBuilder(cards);
             Transport.write(this.name + "-" + outPath, String.valueOf(out));
 
@@ -135,6 +136,7 @@ public class Protocol {
         //For head
         void sendCardsForNextUserHead(String outPath) {
             List<String> cards = Arrays.asList(Cards.getCards());
+            Collections.shuffle(cards);
             StringBuilder out = this.encrypt(cards, true);
             Transport.write(this.name + "-" + outPath, String.valueOf(out));
         }
@@ -171,6 +173,11 @@ public class Protocol {
                 }
                 //Нахождение d
                 this.d = this.c.modInverse(p1);
+            }
+
+            @Override
+            public String toString() {
+                return "c = " + this.c + "\nd = " + this.d + " ";
             }
         }
 
@@ -267,6 +274,13 @@ public class Protocol {
                 e.printStackTrace();
             }
         });
+
+        StringBuilder out = new StringBuilder();
+        out.append("p = ").append(p).append('\n');
+        users.forEach(user -> {
+            out.append(user.name).append('\n').append(user.keys.toString()).append('\n');
+        });
+        Transport.write("!user_params.txt", String.valueOf(out));
 
         if (users.size() > 1 && users.size() < 6) {
             this.run(users);
