@@ -5,3 +5,5 @@ out/*
 InfSecurity/FirstTask/*
 !InfSecurity/FirstTask/Program.cs
 Protocols/protocolWork/*
+Protocols/.DS_Store
+.DS_Store
