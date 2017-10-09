@@ -36,7 +36,7 @@ public class Protocol {
             return new CryptoSystem.Keys(p);
         }
 
-        private StringBuilder encrypt(List<String> cards, boolean isStr) {
+        private StringBuilder encrypt(List<String> cards) {
             StringBuilder encryptCards = new StringBuilder();
             cards.forEach(card -> {
                 encryptCards.append(CryptoSystem.encrypt(card, this.keys)).append("\n");
@@ -44,7 +44,7 @@ public class Protocol {
             return encryptCards;
         }
 
-        private StringBuilder decrypt(List<String> cryptCards, boolean isStr) {
+        private StringBuilder decrypt(List<String> cryptCards) {
             StringBuilder decryptCards = new StringBuilder();
             cryptCards.forEach(card -> {
                 decryptCards.append(CryptoSystem.decrypt(card, this.keys)).append("\n");
@@ -193,19 +193,13 @@ public class Protocol {
         }
 
         //Шифровать
-        static String encrypt(String message, Keys keys) {
-            byte[] byteMessage = message.getBytes();
-            BigInteger encrypt = new BigInteger(byteMessage).modPow(keys.c, keys.p);
-            byte[] byteRes = encrypt.toByteArray();
-            return new String(byteRes);
+        static BigInteger encrypt(String message, Keys keys) {
+            return new BigInteger(message).modPow(keys.c, keys.p);
         }
 
         //Дешифроавть
-        static String decrypt(String message, Keys keys) {
-            byte[] byteMessage = message.getBytes();
-            BigInteger decrypt = new BigInteger(byteMessage).modPow(keys.d, keys.p);
-            byte[] byteRes = decrypt.toByteArray();
-            return new String(byteRes);
+        static BigInteger decrypt(String message, Keys keys) {
+            return new BigInteger(message).modPow(keys.d, keys.p);
         }
 
         BigInteger genPrimeNum() throws NoSuchAlgorithmException {
@@ -267,7 +261,7 @@ public class Protocol {
     }
 
     String[] files(Scanner sc) {
-        String[] files = {"!start_cards.txt", "cards.txt"};
+        String[] files = {"!start_cards.txt", "cards.txt", "cards5.txt", "1cards5.txt", "2cards5.txt"};
         System.out.println("Выберите имя файла, с которым хотите работать");
         for (int i = 0; i < files.length; i++) {
             System.out.println(i + " " + files[i]);
@@ -294,10 +288,12 @@ public class Protocol {
 
         System.out.println("5 - Шифрование карт");
         System.out.println("6 - Дешифрование карт");
+
+        System.out.println("7 - Сопоставить карты числам (или наоборот)");
         int action = sc.nextInt();
 
         String name = "";
-        if (action > 0) {
+        if (action == 2 || (action > 3 && action < 7)) {
             System.out.println("Выберите имя участника:");
             List<String> users = Transport.read("!users.txt");
             for (int i = 0; i < users.size(); i++) {
@@ -309,7 +305,8 @@ public class Protocol {
 
         switch (action) {
             case 0: {
-                System.out.println("Введите имя участников через запятую"); sc.nextLine();
+                System.out.println("Введите имя участников через запятую");
+                sc.nextLine();
                 String line = sc.nextLine();
                 String[] names = line.split(",");
                 StringBuilder out = new StringBuilder();
@@ -354,6 +351,13 @@ public class Protocol {
                 user.decryptCards(files[0], files[1]);
                 break;
             }
+            case 7: {
+                String[] files = files(sc);
+                System.out.println("Перевести карты в числа? (да - 1, наоборот - 2)");
+                boolean isCardToByte = sc.nextInt() == 1;
+                convertCards(files[0], files[1], isCardToByte);
+                break;
+            }
         }
     }
 
@@ -389,5 +393,20 @@ public class Protocol {
             out.append(card).append(random.nextInt(10000000)).append('\n');
         });
         Transport.write("!start_cards.txt", String.valueOf(out));
+    }
+
+    void convertCards(String path, String outPath, boolean isCardToByte) {
+        List<String> cards = Transport.read(path);
+        StringBuilder out = new StringBuilder();
+        for (String card : cards) {
+            if (isCardToByte) {
+                byte[] bytes = card.getBytes();
+                out.append(new BigInteger(bytes)).append('\n');
+            } else {
+                byte[] bytes = new BigInteger(card).toByteArray();
+                out.append(new String(bytes)).append('\n');
+            }
+        }
+        Transport.write(outPath, String.valueOf(out));
     }
 }
