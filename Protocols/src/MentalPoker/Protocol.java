@@ -36,7 +36,7 @@ public class Protocol {
             return new CryptoSystem.Keys(p);
         }
 
-        private StringBuilder encrypt(List<String> cards) {
+        private StringBuilder encrypt(List<String> cards, boolean isStr) {
             StringBuilder encryptCards = new StringBuilder();
             cards.forEach(card -> {
                 encryptCards.append(CryptoSystem.encrypt(card, this.keys)).append("\n");
@@ -44,7 +44,7 @@ public class Protocol {
             return encryptCards;
         }
 
-        private StringBuilder decrypt(List<String> cryptCards) {
+        private StringBuilder decrypt(List<String> cryptCards, boolean isStr) {
             StringBuilder decryptCards = new StringBuilder();
             cryptCards.forEach(card -> {
                 decryptCards.append(CryptoSystem.decrypt(card, this.keys)).append("\n");
@@ -183,6 +183,15 @@ public class Protocol {
             }
         }
 
+        private static boolean isNum(String str) {
+            for (int i = 0; i < str.length(); i++) {
+                if (str.charAt(i) < '0' || str.charAt(i) > '9') {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         //Шифровать
         static String encrypt(String message, Keys keys) {
             byte[] byteMessage = message.getBytes();
@@ -257,13 +266,26 @@ public class Protocol {
         }
     }
 
+    String[] files(Scanner sc) {
+        String[] files = {"!start_cards.txt", "cards.txt"};
+        System.out.println("Выберите имя файла, с которым хотите работать");
+        for (int i = 0; i < files.length; i++) {
+            System.out.println(i + " " + files[i]);
+        }
+        Integer ii = sc.nextInt();
+        System.out.println("Выберите имя файла, в котором будет храниться результат действий");
+        for (int i = 0; i < files.length; i++) {
+            System.out.println(i + " " + files[i]);
+        }
+        Integer jj = sc.nextInt();
+        return new String[]{files[ii], files[jj]};
+    }
+
     void init() throws Exception {
         Scanner sc = new Scanner(System.in);
 
-        System.out.println("Введите имя участника:");
-        String name = sc.nextLine();
-
         System.out.println("Что вы хотите сделать?");
+        System.out.println("0 - Ввести участников прокола");
         System.out.println("1 - Сгенерировать простое p");
         System.out.println("2 - Сгенерировать параметры системы (c, d)");
         System.out.println("3 - Сгенерировать новую колоду карт");
@@ -274,7 +296,29 @@ public class Protocol {
         System.out.println("6 - Дешифрование карт");
         int action = sc.nextInt();
 
+        String name = "";
+        if (action > 0) {
+            System.out.println("Выберите имя участника:");
+            List<String> users = Transport.read("!users.txt");
+            for (int i = 0; i < users.size(); i++) {
+                System.out.println(i + " " + users.get(i));
+            }
+            Integer nameIndex = sc.nextInt();
+            name = users.get(nameIndex);
+        }
+
         switch (action) {
+            case 0: {
+                System.out.println("Введите имя участников через запятую"); sc.nextLine();
+                String line = sc.nextLine();
+                String[] names = line.split(",");
+                StringBuilder out = new StringBuilder();
+                for (String n : names) {
+                    out.append(n.trim()).append('\n');
+                }
+                Transport.write("!users.txt", String.valueOf(out));
+                break;
+            }
             case 1: {
                 genPrimal();
                 break;
@@ -294,32 +338,20 @@ public class Protocol {
                 System.out.println("Карты нужно шифровать? (да - 1, нет - 2)"); // sc.nextLine(); //??
                 boolean withCrypt = sc.nextInt() == 1;
 
-                System.out.println("Введите имя файла, в котором хранятся карты"); sc.nextLine();
-                String path = sc.nextLine();
-                System.out.println("Введите имя файла, в котором будет храниться результат действий");
-                String outPath = sc.nextLine();
-
-                user.selectCards(path, outPath, amountCard, withCrypt);
+                String[] files = files(sc);
+                user.selectCards(files[0], files[1], amountCard, withCrypt);
                 break;
             }
             case 5: {
-                System.out.println("Введите имя файла, в котором хранятся карты"); sc.nextLine();
-                String path = sc.nextLine();
-                System.out.println("Введите имя файла, в котором будет храниться результат действий");
-                String outPath = sc.nextLine();
-
+                String[] files = files(sc);
                 User user = new User(name);
-                user.encryptCards(path, outPath);
+                user.encryptCards(files[0], files[1]);
                 break;
             }
             case 6: {
-                System.out.println("Введите имя файла, в котором хранятся карты"); sc.nextLine();
-                String path = sc.nextLine();
-                System.out.println("Введите имя файла, в котором будет храниться результат действий");
-                String outPath = sc.nextLine();
-
+                String[] files = files(sc);
                 User user = new User(name);
-                user.decryptCards(path, outPath);
+                user.decryptCards(files[0], files[1]);
                 break;
             }
         }
