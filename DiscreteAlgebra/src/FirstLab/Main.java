@@ -86,7 +86,7 @@ public class Main {
         printClosure("Транзитивное замыкание", trans);
     }
 
-    static boolean isReflexive(int[][] m) {
+    public static boolean isReflexive(int[][] m) {
         int n = m.length;
         for (int i = 0; i < n; i++)
             if (m[i][i] != 1)
@@ -102,7 +102,7 @@ public class Main {
         return true;
     }
 
-    static boolean isSymmetric(int[][] m) {
+    public static boolean isSymmetric(int[][] m) {
         int n = m.length;
         for (int i = 0; i < n; i++)
             for (int j = 0; j < n; j++)
@@ -111,7 +111,7 @@ public class Main {
         return true;
     }
 
-    static boolean isAntiSymmetric(int[][] m) {
+    public static boolean isAntiSymmetric(int[][] m) {
         int n = m.length;
         for (int i = 0; i < n; i++)
             for (int j = 0; j < n; j++)
@@ -120,7 +120,7 @@ public class Main {
         return true;
     }
 
-    static boolean isTransitive(int[][] m) {
+    public static boolean isTransitive(int[][] m) {
         int n = m.length;
         for (int[] aM : m)
             for (int j = 0; j < n; j++)
@@ -178,7 +178,7 @@ public class Main {
         return true;
     }
 
-    static int[][] reflexiveСlosure(int[][] m) {
+    public static int[][] reflexiveСlosure(int[][] m) {
         int n = m.length;
         int[][] e = new int[n][n];
         for (int i = 0; i < n; i++)
@@ -195,7 +195,7 @@ public class Main {
         return result;
     }
 
-    static int[][] symmetricСlosure(int[][] m) {
+    public static int[][] symmetricСlosure(int[][] m) {
         int n = m.length;
         int[][] result = new int[n][n];
         for (int i = 0; i < n; i++)
@@ -222,7 +222,7 @@ public class Main {
         return a;
     }
 
-    static int[][] transitiveСlosure(int[][] m) {
+    public static int[][] transitiveСlosure(int[][] m) {
         int[][] result = m.clone();
         for (int[] aM : m)
             result = add(result, mult(result, result));
