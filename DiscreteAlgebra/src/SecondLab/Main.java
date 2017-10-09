@@ -6,7 +6,6 @@ import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.ArcType;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
@@ -29,7 +28,6 @@ public class Main extends Application {
         closure = transitiveСlosure(closure);
         printClosure("Эквивалентное замыкание", closure);
 
-
         //Система представителей
         Set<String> s = new HashSet<>();
         System.out.println("Система представителей:");
@@ -41,7 +39,6 @@ public class Main extends Application {
             }
         }
         System.out.println();
-
     }
 
     public static List<Object> readData() {
@@ -82,21 +79,20 @@ public class Main extends Application {
         Group root = new Group();
         Canvas canvas = new Canvas(600, 600);
         GraphicsContext gc = canvas.getGraphicsContext2D();
-        drawHasseDiagram(gc);
+        second(gc);
         root.getChildren().add(canvas);
         primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }
 
-    void drawHasseDiagram(GraphicsContext gc) {
+    void second(GraphicsContext gc) {
         List<Object> data = readData();
         int[][] m = (int[][]) data.get(0);
         int[] set = (int[]) data.get(1);
 
-        //???
         if (!(isReflexive(m) && isAntiSymmetric(m) && isTransitive(m))) {
-            //System.out.println("Данное отношение не является отношением порядка");
-            //return;
+            System.out.println("Данное отношение не является отношением порядка");
+            return;
         }
 
         for (int i = 0; i < m.length; i++) {
@@ -225,10 +221,11 @@ public class Main extends Application {
         }
     }
 
-
     public static void main(String[] args) {
+        //Fot fist task
         //first();
-        launch(args);
 
+        //For second task
+        launch(args);
     }
 }
