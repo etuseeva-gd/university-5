@@ -1,9 +1,8 @@
 package FourthTask;
 
-import java.io.*;
 import java.math.BigInteger;
+import java.text.MessageFormat;
 import java.util.List;
-import java.util.Scanner;
 
 import static FirstTask.Main.outToFile;
 import static FirstTask.Main.readFromFile;
@@ -11,7 +10,7 @@ import static FirstTask.Main.readFromFile;
 public class Main {
 
     public static void main(String[] args) {
-        first();
+        //first();
         second();
     }
 
@@ -20,17 +19,19 @@ public class Main {
         String s = lines.get(0);
         String ss[] = s.split(" ");
         int a = Integer.parseInt(ss[0]), n = Integer.parseInt(ss[1]);
-        outToFile(String.valueOf(Y(a, n)));
+        outToFile(MessageFormat.format("Y({0}, {1}) = {2}", a, n, Y(a, n)));
     }
 
     static void second() {
         List<String> lines = readFromFile();
         String ss[] = lines.get(0).split(" ");
         long a = Long.parseLong(ss[0]), p = Long.parseLong(ss[1]);
-        if (ComparisonSolution(a, p) == -1)
+        if (ComparisonSolution(a, p)[0] == -1)
             outToFile("Нет решений");
-        else
-            outToFile("+-" + ComparisonSolution(a, p));
+        else {
+            long[] r = ComparisonSolution(a, p);
+            outToFile(r[0] + " " + r[1]);
+        }
     }
 
     public static int Y(int a, int n) {
@@ -72,9 +73,9 @@ public class Main {
         }
     }
 
-    public static long ComparisonSolution(long a, long p) {
+    public static long[] ComparisonSolution(long a, long p) {
         if (Y((int) a, (int) p) == -1)
-            return -1;
+            return new long[]{-1};
         int n = 0;
         if (Y((int) a, (int) p) == 1) {
             for (int i = 2; i < p; i++) {
@@ -110,6 +111,6 @@ public class Main {
                 ji = 1;
             n2 = n2 * Long.parseLong(String.valueOf(BigInteger.valueOf(n1).pow(((int) Math.pow(2, i) * ji)))) % p;
         }
-        return (a1 * n2) % p;
+        return new long[]{(a1 * n2) % p, ((-1) * (a1 * n2) % p) + p};
     }
 }

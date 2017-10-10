@@ -89,6 +89,10 @@ public class Main {
         int a = Integer.parseInt(nums[0]),
                 p = Integer.parseInt(nums[1]);
 
-        outToFile(MessageFormat.format("L({0}, {1}) = {2}", a, p, legendre(a, p)));
+//        String out = MessageFormat.format("L({0}, {1}) = {2}", a, p, getLegendreSymbol(a, p)) + "\n" +
+//                MessageFormat.format("L({0}, {1}) = {2}", a, p, legendre(a, p));
+//        outToFile(out);
+
+        outToFile(MessageFormat.format("L({0}, {1}) = {2}", a, p, getLegendreSymbol(a, p)));
     }
 }
