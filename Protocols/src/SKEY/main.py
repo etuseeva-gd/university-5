@@ -1,5 +1,4 @@
-# coding=utf-8
-from md5 import md5
+from hashlib import md5
 import sys, os
 
 
@@ -7,22 +6,22 @@ def register():
     name = input("Введите ваше имя: ")
     pwd = name + ".txt"
     if os.path.exists(pwd):
-        print ("Ошибка. такой пользователь уже существует")
+        print("Ошибка. такой пользователь уже существует")
         sys.exit(-1)
-    r = input("Введите ваше секретное число: ")
+    r = input("Введите ваше секретное число:")
     new_name = name + "-keys.txt"
     d = open(new_name, "w")
     for i in range(100):
-        r = md5(r).hexdigest()
+        r = md5(r.encode("utf-8")).hexdigest()
         k = str(i) + " " + r
         d.write("%s\n" % (k))
     d.close()
-    key = md5(r).hexdigest()
+    key = md5(r.encode("utf-8")).hexdigest()
     try:
         f = open(pwd, "w")
-        print "Ваши ключи сгенерированны"
+        print("Ваши ключи сгенерированны")
     except:
-        print "Ошибка"
+        print("Ошибка")
         sys.exit(-1)
     f.write(key)
     f.close()
@@ -33,16 +32,16 @@ def login():
     try:
         f = open(name, "r")
     except:
-        print "error!"
+        print("Ошибка")
         sys.exit(-1)
     passwd = f.read()
     f.close()
     upasswd = input("Введите пароль: ")
-    new_upasswd = md5(upasswd).hexdigest()
+    new_upasswd = md5(upasswd.encode("utf-8")).hexdigest()
     if new_upasswd != passwd:
-        print "Неверный пароль!"
+        print("Неверный пароль!")
     else:
-        print "Успешная авторизация!"
+        print("Успешная авторизация!")
         f = open(name, "w")
         f.write(upasswd)
         f.close()
