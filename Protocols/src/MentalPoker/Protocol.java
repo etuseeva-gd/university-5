@@ -47,7 +47,8 @@ public class Protocol {
         private StringBuilder decrypt(List<String> cryptCards) {
             StringBuilder decryptCards = new StringBuilder();
             cryptCards.forEach(card -> {
-                decryptCards.append(CryptoSystem.decrypt(card, this.keys)).append("\n");
+                String normalCards = CryptoSystem.decrypt(card, this.keys);
+                decryptCards.append(normalCards).append("\n");
             });
             return decryptCards;
         }
@@ -192,14 +193,39 @@ public class Protocol {
             return true;
         }
 
-        //Шифровать
-        static BigInteger encrypt(String message, Keys keys) {
-            return new BigInteger(message).modPow(keys.c, keys.p);
+        private static boolean isCard(String str) {
+            String[] suits = new String[]{"Hearts", "Spades", "Clubs", "Diamonds"};
+            for (int i = 0; i < suits.length; i++) {
+                if (str.contains(suits[i])) {
+                    return true;
+                }
+            }
+            return false;
         }
 
-        //Дешифроавть
-        static BigInteger decrypt(String message, Keys keys) {
-            return new BigInteger(message).modPow(keys.d, keys.p);
+        //Шифровать
+        static BigInteger encrypt(String message, Keys keys) {
+            BigInteger bi = null;
+            if (isNum(message)) {
+                bi = new BigInteger(message);
+            } else {
+                bi = new BigInteger(message.getBytes());
+            }
+            return bi.modPow(keys.c, keys.p);
+        }
+
+        //Дешифровать
+        static String decrypt(String message, Keys keys) {
+            BigInteger res = new BigInteger(message).modPow(keys.d, keys.p);
+
+            byte[] bytes = res.toByteArray();
+            String str = new String(bytes);
+
+            if (isCard(str)) {
+                return str;
+            } else {
+                return String.valueOf(res);
+            }
         }
 
         BigInteger genPrimeNum() throws NoSuchAlgorithmException {
@@ -248,49 +274,6 @@ public class Protocol {
             return lines;
         }
 
-        private List<byte[]> splitFile(File file) throws IOException {
-            FileInputStream fis = new FileInputStream(file);
-            List<byte[]> bytes = new ArrayList<>();
-            try {
-                byte[] buffer = new byte[];
-                int remaining = buffer.length;
-                int blockNumber = 1;
-                while (true) {
-                    int read = fis.read(buffer, buffer.length - remaining, remaining);
-                    if (read >= 0) {
-                        remaining -= read;
-                        if (remaining == 0) {
-                            bytes.add(buffer);
-                            writeBlock(blockNumber, buffer, buffer.length - remaining);
-                            blockNumber++;
-                            remaining = buffer.length;
-                        }
-                    }
-                    else {
-                        if (remaining < buffer.length) {
-                            bytes.add(buffer);
-                            writeBlock(blockNumber, buffer, buffer.length - remaining);
-                        }
-                        break;
-                    }
-                }
-            }
-            finally {
-                fis.close();
-                return bytes;
-            }
-        }
-
-        private void writeBlock(int blockNumber, byte[] buffer, int length) throws IOException {
-            FileOutputStream fos = new FileOutputStream("output_" + blockNumber + ".dat");
-            try {
-                fos.write(buffer, 0, length);
-            }
-            finally {
-                fos.close();
-            }
-        }
-
         public static void write(String file, String out) {
             try {
                 PrintWriter writer = new PrintWriter(pathPrefix + file, "UTF-8");
@@ -318,9 +301,6 @@ public class Protocol {
     }
 
     void init() throws Exception {
-        List<byte[]> t = new Transport().splitFile(new File("./Protocols/protocolWork/!start_cards.txt"));
-        t.forEach(System.out::println);
-
         Scanner sc = new Scanner(System.in);
 
         System.out.println("Что вы хотите сделать?");
@@ -333,8 +313,6 @@ public class Protocol {
 
         System.out.println("5 - Шифрование карт");
         System.out.println("6 - Дешифрование карт");
-
-        System.out.println("7 - Сопоставить карты числам (или наоборот)");
         int action = sc.nextInt();
 
         String name = "";
@@ -396,13 +374,6 @@ public class Protocol {
                 user.decryptCards(files[0], files[1]);
                 break;
             }
-            case 7: {
-                String[] files = files(sc);
-                System.out.println("Перевести карты в числа? (да - 1, наоборот - 2)");
-                boolean isCardToByte = sc.nextInt() == 1;
-                convertCards(files[0], files[1], isCardToByte);
-                break;
-            }
         }
     }
 
@@ -438,20 +409,5 @@ public class Protocol {
             out.append(card).append(random.nextInt(10000000)).append('\n');
         });
         Transport.write("!start_cards.txt", String.valueOf(out));
-    }
-
-    void convertCards(String path, String outPath, boolean isCardToByte) throws IOException {
-        List<String> cards = Transport.read(path);
-        StringBuilder out = new StringBuilder();
-        for (String card : cards) {
-            if (isCardToByte) {
-                byte[] bytes = card.getBytes();
-                out.append(new BigInteger(bytes)).append('\n');
-            } else {
-                byte[] bytes = new BigInteger(card).toByteArray();
-                out.append(new String(bytes)).append('\n');
-            }
-        }
-        Transport.write(outPath, String.valueOf(out));
     }
 }
