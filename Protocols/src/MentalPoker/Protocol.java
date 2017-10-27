@@ -308,9 +308,7 @@ public class Protocol {
         System.out.println("1 - Сгенерировать простое p");
         System.out.println("2 - Сгенерировать параметры системы (c, d)");
         System.out.println("3 - Сгенерировать новую колоду карт");
-
         System.out.println("4 - Выбрать карты (с/без шифрование)");
-
         System.out.println("5 - Шифрование карт");
         System.out.println("6 - Дешифрование карт");
         int action = sc.nextInt();
