@@ -1,8 +1,8 @@
 package MentalPoker;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
@@ -21,7 +21,7 @@ public class Protocol {
             this.keys = genKeys(p);
         }
 
-        User(String name) {
+        User(String name) throws IOException {
             List<String> r = Transport.read("!" + name + "_params.txt");
             this.name = name;
 
@@ -131,13 +131,13 @@ public class Protocol {
             Transport.write("cards.txt", String.valueOf(out));
         }
 
-        void encryptCards(String path, String outPath) {
+        void encryptCards(String path, String outPath) throws IOException {
             List<String> cards = Transport.read(path);
             StringBuilder out = this.encrypt(cards);
             Transport.write(outPath, String.valueOf(out));
         }
 
-        void decryptCards(String path, String outPath) {
+        void decryptCards(String path, String outPath) throws IOException {
             List<String> cards = Transport.read(path);
             StringBuilder userOut = this.decrypt(cards);
             Transport.write(outPath, String.valueOf(userOut));
@@ -234,19 +234,61 @@ public class Protocol {
     static class Transport {
         private static final String pathPrefix = "./Protocols/protocolWork/";
 
-        public static List<String> read(String file) {
+        public static List<String> read(String file) throws IOException {
+            BufferedInputStream bf = new BufferedInputStream(new FileInputStream(pathPrefix + file));
+            BufferedReader r = new BufferedReader(new InputStreamReader(bf, StandardCharsets.UTF_8));
             List<String> lines = new ArrayList<>();
-            try (Stream<String> stream = Files.lines(Paths.get(pathPrefix + file))) {
-                lines = stream.collect(Collectors.toList());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            for (int i = 0; i < lines.size(); i++) {
-                if (Objects.equals(lines.get(i), "")) {
-                    lines.remove(i--);
+            while (true) {
+                String line = r.readLine();
+                if (Objects.equals(line, "")) {
+                    break;
                 }
+                lines.add(line);
             }
             return lines;
+        }
+
+        private List<byte[]> splitFile(File file) throws IOException {
+            FileInputStream fis = new FileInputStream(file);
+            List<byte[]> bytes = new ArrayList<>();
+            try {
+                byte[] buffer = new byte[];
+                int remaining = buffer.length;
+                int blockNumber = 1;
+                while (true) {
+                    int read = fis.read(buffer, buffer.length - remaining, remaining);
+                    if (read >= 0) {
+                        remaining -= read;
+                        if (remaining == 0) {
+                            bytes.add(buffer);
+                            writeBlock(blockNumber, buffer, buffer.length - remaining);
+                            blockNumber++;
+                            remaining = buffer.length;
+                        }
+                    }
+                    else {
+                        if (remaining < buffer.length) {
+                            bytes.add(buffer);
+                            writeBlock(blockNumber, buffer, buffer.length - remaining);
+                        }
+                        break;
+                    }
+                }
+            }
+            finally {
+                fis.close();
+                return bytes;
+            }
+        }
+
+        private void writeBlock(int blockNumber, byte[] buffer, int length) throws IOException {
+            FileOutputStream fos = new FileOutputStream("output_" + blockNumber + ".dat");
+            try {
+                fos.write(buffer, 0, length);
+            }
+            finally {
+                fos.close();
+            }
         }
 
         public static void write(String file, String out) {
@@ -261,7 +303,7 @@ public class Protocol {
     }
 
     String[] files(Scanner sc) {
-        String[] files = {"!start_cards.txt", "cards.txt", "cards5.txt", "1cards5.txt", "2cards5.txt"};
+        String[] files = {"!start_cards.txt", "cards.txt", "cards5.txt", "1cards5.txt", "2cards5.txt", "3cards.txt"};
         System.out.println("Выберите имя файла, с которым хотите работать");
         for (int i = 0; i < files.length; i++) {
             System.out.println(i + " " + files[i]);
@@ -276,6 +318,9 @@ public class Protocol {
     }
 
     void init() throws Exception {
+        List<byte[]> t = new Transport().splitFile(new File("./Protocols/protocolWork/!start_cards.txt"));
+        t.forEach(System.out::println);
+
         Scanner sc = new Scanner(System.in);
 
         System.out.println("Что вы хотите сделать?");
@@ -370,7 +415,7 @@ public class Protocol {
         Transport.write("!common_params.txt", String.valueOf(out));
     }
 
-    void genParams(String user) {
+    void genParams(String user) throws IOException {
         List<String> pStr = Transport.read("!common_params.txt");
         BigInteger p = new BigInteger(pStr.get(1));
 
@@ -395,7 +440,7 @@ public class Protocol {
         Transport.write("!start_cards.txt", String.valueOf(out));
     }
 
-    void convertCards(String path, String outPath, boolean isCardToByte) {
+    void convertCards(String path, String outPath, boolean isCardToByte) throws IOException {
         List<String> cards = Transport.read(path);
         StringBuilder out = new StringBuilder();
         for (String card : cards) {
