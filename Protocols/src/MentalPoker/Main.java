@@ -5,3 +5,6 @@ public class Main {
         new Protocol().init();
     }
 }
+
+//3
+//Протокол аутентификации Шнура 2.6
