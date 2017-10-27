@@ -124,18 +124,21 @@ public class Protocol {
 
             List<String> newCards = getNewCards(cards, indexes);
             out = listToStringBuilder(newCards);
+            Collections.shuffle(newCards);
 
             Transport.write("cards.txt", String.valueOf(out));
         }
 
         void encryptCards(String path, String outPath) throws IOException {
             List<String> cards = Transport.read(path);
+            Collections.shuffle(cards);
             StringBuilder out = this.encrypt(cards);
             Transport.write(outPath, String.valueOf(out));
         }
 
         void decryptCards(String path, String outPath) throws IOException {
             List<String> cards = Transport.read(path);
+            Collections.shuffle(cards);
             StringBuilder userOut = this.decrypt(cards);
             Transport.write(outPath, String.valueOf(userOut));
         }
