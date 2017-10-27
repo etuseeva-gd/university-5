@@ -3,13 +3,9 @@ package MentalPoker;
 import java.io.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Protocol {
     static class User {
@@ -93,7 +89,7 @@ public class Protocol {
             for (int i = 0; i < cards.size(); i++) {
                 boolean ok = true;
                 for (int j = 0; j < indexes.length; j++) {
-                    if (i == j) {
+                    if (i == indexes[j]) {
                         ok = false;
                         break;
                     }
