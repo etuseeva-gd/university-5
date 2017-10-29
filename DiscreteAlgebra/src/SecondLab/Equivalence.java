@@ -268,25 +268,32 @@ public class Equivalence {
             }
             list = getMinMaxElements(tmp, false);
         }
-        int id = 1;
+
         System.out.println("Диаграмма Хаccе:");
-        for (List<Integer> level : levels) {
+
+        int id = 1;
+        for (int i = 0; i < levels.size(); i++) {
             System.out.print("Уровень " + id + ": ");
-            for (Integer integer : level) {
-                System.out.print((integer + 1) + " ");
-            }
-            System.out.println();
-            id++;
-        }
-        for (int i = 0; i < levels.size() - 1; i++) {
-            for (int j = 0; j < levels.get(i).size(); j++) {
-                int from = levels.get(i).get(j);
-                for (int k = 0; k < n; k++) {
-                    if (m[from][k] == 1 && levels.get(i + 1).contains(k)) {
-                        System.out.println("Элемент " + (from + 1) + " соединяется с элементом " + (k + 1));
+            for (Integer el : levels.get(i)) {
+                System.out.print((el + 1) + " ");
+                if (i < levels.size() - 1) {
+                    List<Integer> edge = new ArrayList<>();
+                    for (int k = 0; k < n; k++) {
+                        if (m[el][k] == 1 && levels.get(i + 1).contains(k)) {
+                            edge.add(k + 1);
+                        }
+                    }
+                    if (edge.size() > 0) {
+                        System.out.print("соединяется с ");
+                        for (int j = 0; j < edge.size(); j++) {
+                            String end = j == edge.size() - 1 ? "; " : ", ";
+                            System.out.print(edge.get(j) + end);
+                        }
                     }
                 }
             }
+            System.out.println();
+            id++;
         }
     }
 
