@@ -28,12 +28,11 @@ public class Solution {
 
         switch (action) {
             case "1": {
-                rel.getAllEquiv();
+                rel.getEquivalences();
                 break;
             }
             case "2": {
-                rel.getOrder();
-                rel.createHaas();
+                rel.workWithOrder();
                 break;
             }
             case "3": {

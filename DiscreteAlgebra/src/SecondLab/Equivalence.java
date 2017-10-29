@@ -3,20 +3,21 @@ package SecondLab;
 import java.util.*;
 
 public class Equivalence {
-    private int size;
-    private int[][] relation;
+    private int n;
+    private int[][] m;
 
-    public Equivalence(int[][] relation) {
-        this.size = relation.length;
-        this.relation = relation;
+    public Equivalence(int[][] m) {
+        this.n = m.length;
+        this.m = m;
     }
 
     private void print(String s) {
         System.out.println(s);
     }
 
-    //first action
-    void getAllEquiv() {
+    //--------------------------------------
+
+    void getEquivalences() {
         getEquivalenceClosing();
 
         if (!(isReflection() && isSymmetry() && isTransitivity())) {
@@ -28,7 +29,7 @@ public class Equivalence {
 
     //Вычислить эквивалентное отношение
     private void getEquivalenceClosing() {
-        int[][] result = reflectionClosing(relation);
+        int[][] result = reflectionClosing(m);
         result = symmetryClosing(result);
         result = transitivityClosing(result);
 
@@ -39,10 +40,10 @@ public class Equivalence {
     //Вычислить классы эквивалентности и представителей
     private void getEquivalenceClasses() {
         Map<String, List<Integer>> map = new HashMap<String, List<Integer>>();
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < n; i++) {
             StringBuilder s = new StringBuilder();
-            for (int j = 0; j < size; j++) {
-                s.append(relation[i][j] - '0');
+            for (int j = 0; j < n; j++) {
+                s.append(m[i][j] - '0');
             }
             if (!map.containsKey(s.toString())) {
                 map.put(s.toString(), new ArrayList<Integer>());
@@ -72,62 +73,61 @@ public class Equivalence {
         }
     }
 
-    int[][] transitivityClosing(int[][] relation) {
-        int[][] result = cloneMass(relation);
-        int[][] tmp = cloneMass(relation);
-        for (int[] a : relation) {
+    private int[][] transitivityClosing(int[][] m) {
+        int[][] result = cloneMass(m);
+        int[][] tmp = cloneMass(m);
+        for (int[] a : m) {
             tmp = mult(tmp, tmp);
             add(result, tmp);
         }
         return result;
     }
 
-    int[][] symmetryClosing(int[][] relation) {
-        int[][] result = cloneMass(relation);
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                result[i][j] = relation[i][j] | relation[j][i];
+    private int[][] symmetryClosing(int[][] m) {
+        int[][] result = cloneMass(m);
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                result[i][j] = m[i][j] | m[j][i];
             }
         }
         return result;
     }
 
-    int[][] reflectionClosing(int[][] relation) {
-        int[][] result = add(relation, getSingleMass(size));
-        return result;
+    private int[][] reflectionClosing(int[][] m) {
+        return add(m, getSingleMass(n));
     }
 
-    boolean isTransitivity() {
-        for (int[] aM : relation)
-            for (int j = 0; j < size; j++)
-                for (int k = 0; k < size; k++)
-                    if (aM[j] == 1 && relation[j][k] == 1 && aM[k] == 0)
+    private boolean isTransitivity() {
+        for (int[] aM : m)
+            for (int j = 0; j < n; j++)
+                for (int k = 0; k < n; k++)
+                    if (aM[j] == 1 && m[j][k] == 1 && aM[k] == 0)
                         return false;
         return true;
     }
 
-    boolean isSymmetry() {
-        for (int i = 0; i < size; i++)
-            for (int j = 0; j < size; j++)
-                if (i != j && relation[i][j] == 1 && relation[i][j] != relation[j][i])
+    private boolean isSymmetry() {
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                if (i != j && m[i][j] == 1 && m[i][j] != m[j][i])
                     return false;
         return true;
     }
 
-    boolean isAntiSymmetric() {
-        for (int i = 0; i < size; i++)
-            for (int j = 0; j < size; j++)
-                if (i != j && relation[i][j] == 1 && relation[i][j] == relation[j][i])
+    private boolean isAntiSymmetric() {
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                if (i != j && m[i][j] == 1 && m[i][j] == m[j][i])
                     return false;
         return true;
     }
 
-    boolean isReflection() {
+    private boolean isReflection() {
         int sum = 0;
-        for (int i = 0; i < size; i++) {
-            sum += relation[i][i];
+        for (int i = 0; i < n; i++) {
+            sum += m[i][i];
         }
-        if (sum == size) {
+        if (sum == n) {
             return true;
         } else if (sum == 0) {
             return false;
@@ -136,7 +136,7 @@ public class Equivalence {
         }
     }
 
-    int[][] add(int[][] a, int[][] b) {
+    private int[][] add(int[][] a, int[][] b) {
         int[][] result = new int[a.length][a.length];
         for (int i = 0; i < result.length; i++) {
             for (int j = 0; j < result.length; j++) {
@@ -146,7 +146,7 @@ public class Equivalence {
         return result;
     }
 
-    int[][] mult(int[][] a, int[][] b) {
+    private int[][] mult(int[][] a, int[][] b) {
         int[][] result = new int[a.length][a.length];
         for (int i = 0; i < result.length; i++) {
             for (int j = 0; j < result.length; j++) {
@@ -158,7 +158,7 @@ public class Equivalence {
         return result;
     }
 
-    int[][] getSingleMass(int n) {
+    private int[][] getSingleMass(int n) {
         int[][] result = new int[n][n];
         for (int i = 0; i < n; i++) {
             result[i][i] = 1;
@@ -166,10 +166,10 @@ public class Equivalence {
         return result;
     }
 
-    int[][] cloneMass(int[][] a) {
-        int[][] tmp = new int[size][size];
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
+    private int[][] cloneMass(int[][] a) {
+        int[][] tmp = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
                 tmp[i][j] = a[i][j];
             }
         }
@@ -185,15 +185,14 @@ public class Equivalence {
         }
     }
 
-    //----------------
+    //--------------------------------------
 
-    //second action
     //Поиск максимальных, минимальных, наименьших, наибольших элементов
-    void getOrder() {
+    void workWithOrder() {
         if (!(isReflection() && isAntiSymmetric() && isTransitivity())) {
-            print("Введенное отношение не является порядоком!");
+            print("Введенное отношение не является порядком!");
         } else {
-            List<Integer> list = getMinMaxElements(relation, true);
+            List<Integer> list = getMinMaxElements(m, true);
             if (list.size() > 0) {
                 print("Максимальные элементы:");
                 for (Integer integer : list) {
@@ -210,7 +209,7 @@ public class Equivalence {
                 print("Максимального и наибольшего элементов нет.");
             }
 
-            list = getMinMaxElements(relation, false);
+            list = getMinMaxElements(m, false);
             if (list.size() > 0) {
                 print("Минимальные элементы:");
                 for (Integer integer : list) {
@@ -226,22 +225,24 @@ public class Equivalence {
             } else {
                 print("Минимального и наименьшего элементов нет.");
             }
+
+            createHaasDiagram();
         }
     }
 
     //Вычислить мин/макс элементы
-    private List<Integer> getMinMaxElements(int[][] relation, boolean isMax) {
+    private List<Integer> getMinMaxElements(int[][] m, boolean isMax) {
         List<Integer> list = new ArrayList<Integer>();
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < n; i++) {
             int k = 0;
-            if (relation[i][i] == -1)
+            if (m[i][i] == -1)
                 continue;
-            for (int j = 0; j < size; j++) {
+            for (int j = 0; j < n; j++) {
                 if (i != j) {
                     if (isMax) {
-                        k += relation[i][j];
+                        k += m[i][j];
                     } else {
-                        k += relation[j][i];
+                        k += m[j][i];
                     }
                 }
             }
@@ -253,18 +254,14 @@ public class Equivalence {
     }
 
     //Диаграмма Хаcсе
-    void createHaas() {
-        int[][] tmp = cloneMass(relation);
-
+    private void createHaasDiagram() {
+        int[][] tmp = cloneMass(m);
         List<Integer> list = getMinMaxElements(tmp, false);
         List<List<Integer>> levels = new ArrayList<List<Integer>>();
         while (list.size() > 0) {
-            levels.add(new ArrayList<Integer>());
+            levels.add(list);
             for (Integer integer : list) {
-                levels.get(levels.size() - 1).add(integer);
-            }
-            for (Integer integer : list) {
-                for (int i = 0; i < size; i++) {
+                for (int i = 0; i < n; i++) {
                     tmp[integer][i] = 0;
                 }
                 tmp[integer][integer] = -1;
@@ -284,8 +281,8 @@ public class Equivalence {
         for (int i = 0; i < levels.size() - 1; i++) {
             for (int j = 0; j < levels.get(i).size(); j++) {
                 int from = levels.get(i).get(j);
-                for (int k = 0; k < size; k++) {
-                    if (relation[from][k] == 1 && levels.get(i + 1).contains(k)) {
+                for (int k = 0; k < n; k++) {
+                    if (m[from][k] == 1 && levels.get(i + 1).contains(k)) {
                         System.out.println("Элемент " + (from + 1) + " соединяется с элементом " + (k + 1));
                     }
                 }
@@ -293,26 +290,20 @@ public class Equivalence {
         }
     }
 
-    //-----------
+    //--------------------------------------
 
     void getConcept() {
-        System.out.println();
-        int[][] tmp = cloneMass(relation);
-        System.out.println("Концепты");
-        getAllConcept();
-    }
-
-    private void getAllConcept() {
+        System.out.println("Решетка концептов:");
         List<ConceptsElement> elements = getAllConceptsElements();
         Map<Integer, List<ConceptsElement>> levelsOfConcept = getLevelsConcept(elements);
         Map<ConceptsElement, List<ConceptsElement>> connection = getConnectionForElement(levelsOfConcept);
 
         for (Integer i : levelsOfConcept.keySet()) {
-            System.out.print(i + ": ");
+            System.out.print("Уровень " + i + ": ");
             for (ConceptsElement element : levelsOfConcept.get(i)) {
                 System.out.print(element + " ");
                 if (connection.containsKey(element)) {
-                    System.out.print("connect with (");
+                    System.out.print("соединяется с (");
                     for (int j = 0; j < connection.get(element).size(); j++) {
                         if (j != connection.get(element).size() - 1) {
                             System.out.print(connection.get(element).get(j).toString() + "; ");
@@ -399,14 +390,14 @@ public class Equivalence {
         List<List<Integer>> allIntersections = new ArrayList<>();
         allIntersections.add(new ArrayList<Integer>());
         List<Integer> fullIntersection = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < n; i++) {
             fullIntersection.add(i);
         }
         allIntersections.add(fullIntersection);
-        for (int j = 0; j < size; j++) {
+        for (int j = 0; j < n; j++) {
             List<Integer> tmpList = new ArrayList<>();
-            for (int i = 0; i < size; i++) {
-                if (relation[i][j] == 1)
+            for (int i = 0; i < n; i++) {
+                if (m[i][j] == 1)
                     tmpList.add(i);
             }
             boolean isNewIntersection = true;
@@ -460,10 +451,10 @@ public class Equivalence {
 
     private List<String> getMInterpretation(List<Integer> g) {
         List<String> m = new ArrayList<>();
-        for (int j = 0; j < size; j++) {
+        for (int j = 0; j < n; j++) {
             int cnt = 0;
             for (Integer i : g) {
-                cnt += relation[i][j];
+                cnt += this.m[i][j];
             }
             if (cnt == g.size()) {
                 m.add(String.valueOf((char) ('a' + j)));
