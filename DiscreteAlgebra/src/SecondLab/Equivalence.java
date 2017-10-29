@@ -271,7 +271,7 @@ public class Equivalence {
 
         System.out.println("Диаграмма Хаccе:");
 
-        int id = 1;
+        int id = 0;
         for (int i = 0; i < levels.size(); i++) {
             System.out.print("Уровень " + id + ": ");
             for (Integer el : levels.get(i)) {
@@ -318,7 +318,7 @@ public class Equivalence {
                             System.out.print(connection.get(element).get(j).toString());
                         }
                     }
-                    System.out.print(");   ");
+                    System.out.print("); ");
                 }
             }
             System.out.println();
