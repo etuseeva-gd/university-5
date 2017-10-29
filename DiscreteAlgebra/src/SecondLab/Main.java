@@ -21,7 +21,7 @@ public class Main {
 
         System.out.println("Что хотите сделать?:");
         System.out.println("1 - Проверить эквивалентность");
-        System.out.println("2 - Определить порядок, диаграмму Хаасе");
+        System.out.println("2 - Определить порядок, построить диаграмму Хаасе");
         System.out.println("3 - Построить решетку концептов");
 
         String action = scanner.nextLine();

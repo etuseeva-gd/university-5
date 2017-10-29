@@ -15,30 +15,26 @@ public class Equivalence {
         System.out.println(s);
     }
 
-    //--------------------------------------
-
     void getEquivalences() {
-        getEquivalenceClosing();
-
         if (!(isReflection() && isSymmetry() && isTransitivity())) {
-            print("Введенное отношение не эквивалентно!");
-        } else {
-            getEquivalenceClasses();
+            print("Введенное отношение не является отношением эквивалентности!");
         }
+
+        int[][] eqv = getEquivalenceClosing();
+        getEquivalenceClasses(eqv);
     }
 
-    //Вычислить эквивалентное отношение
-    private void getEquivalenceClosing() {
+    private int[][] getEquivalenceClosing() {
         int[][] result = reflectionClosing(m);
         result = symmetryClosing(result);
         result = transitivityClosing(result);
 
         print("Эквивалентное замыкание:");
         printMass(result);
+        return result;
     }
 
-    //Вычислить классы эквивалентности и представителей
-    private void getEquivalenceClasses() {
+    private void getEquivalenceClasses(int[][] m) {
         Map<String, List<Integer>> map = new HashMap<String, List<Integer>>();
         for (int i = 0; i < n; i++) {
             StringBuilder s = new StringBuilder();
@@ -185,9 +181,6 @@ public class Equivalence {
         }
     }
 
-    //--------------------------------------
-
-    //Поиск максимальных, минимальных, наименьших, наибольших элементов
     void workWithOrder() {
         if (!(isReflection() && isAntiSymmetric() && isTransitivity())) {
             print("Введенное отношение не является порядком!");
@@ -230,7 +223,6 @@ public class Equivalence {
         }
     }
 
-    //Вычислить мин/макс элементы
     private List<Integer> getMinMaxElements(int[][] m, boolean isMax) {
         List<Integer> list = new ArrayList<Integer>();
         for (int i = 0; i < n; i++) {
@@ -253,7 +245,6 @@ public class Equivalence {
         return list;
     }
 
-    //Диаграмма Хаcсе
     private void createHaasDiagram() {
         int[][] tmp = cloneMass(m);
         List<Integer> list = getMinMaxElements(tmp, false);
@@ -297,17 +288,15 @@ public class Equivalence {
         }
     }
 
-    //--------------------------------------
-
     void getConcept() {
         System.out.println("Решетка концептов:");
-        List<ConceptsElement> elements = getAllConceptsElements();
-        Map<Integer, List<ConceptsElement>> levelsOfConcept = getLevelsConcept(elements);
-        Map<ConceptsElement, List<ConceptsElement>> connection = getConnectionForElement(levelsOfConcept);
+        List<ConceptNode> elements = getAllConceptsElements();
+        Map<Integer, List<ConceptNode>> levelsOfConcept = getLevelsConcept(elements);
+        Map<ConceptNode, List<ConceptNode>> connection = getConnectionForElement(levelsOfConcept);
 
         for (Integer i : levelsOfConcept.keySet()) {
             System.out.print("Уровень " + i + ": ");
-            for (ConceptsElement element : levelsOfConcept.get(i)) {
+            for (ConceptNode element : levelsOfConcept.get(i)) {
                 System.out.print(element + " ");
                 if (connection.containsKey(element)) {
                     System.out.print("соединяется с (");
@@ -325,53 +314,51 @@ public class Equivalence {
         }
     }
 
-    private Map<ConceptsElement, List<ConceptsElement>> getConnectionForElement(Map<Integer, List<ConceptsElement>> levelsOfConcept) {
-        Map<ConceptsElement, List<ConceptsElement>> connection = new HashMap<>();
-        Map<ConceptsElement, Integer> nonConnectElements = new HashMap<>();
-        for (Integer i : levelsOfConcept.keySet()) {
-            for (ConceptsElement element : levelsOfConcept.get(i)) {
-                for (ConceptsElement pretender : nonConnectElements.keySet()) {
-                    if (nonConnectElements.get(pretender) != 2 && pretender.inclusion(element)) {
-                        if (!connection.containsKey(element)) {
-                            connection.put(element, new ArrayList<ConceptsElement>());
+    private Map<ConceptNode, List<ConceptNode>> getConnectionForElement(Map<Integer, List<ConceptNode>> levels) {
+        Map<ConceptNode, List<ConceptNode>> connection = new HashMap<>();
+        Map<ConceptNode, Integer> nonConnectElements = new HashMap<>();
+        for (Integer i : levels.keySet()) {
+            for (ConceptNode node : levels.get(i)) {
+                for (ConceptNode pretender : nonConnectElements.keySet()) {
+                    if (nonConnectElements.get(pretender) != 2 && pretender.inclusion(node)) {
+                        if (!connection.containsKey(node)) {
+                            connection.put(node, new ArrayList<ConceptNode>());
                         }
-                        connection.get(element).add(pretender);
+                        connection.get(node).add(pretender);
                         nonConnectElements.put(pretender, 1);
                     }
                 }
             }
-            for (ConceptsElement element : nonConnectElements.keySet()) {
-                if (nonConnectElements.get(element) == 1)
-                    nonConnectElements.put(element, 2);
+            for (ConceptNode node : nonConnectElements.keySet()) {
+                if (nonConnectElements.get(node) == 1)
+                    nonConnectElements.put(node, 2);
             }
-            for (ConceptsElement element : levelsOfConcept.get(i)) {
+            for (ConceptNode element : levels.get(i)) {
                 nonConnectElements.put(element, 0);
             }
         }
         return connection;
     }
 
-    private Map<Integer, List<ConceptsElement>> getLevelsConcept(List<ConceptsElement> elements) {
-        Map<Integer, List<ConceptsElement>> result = new HashMap<>();
+    private Map<Integer, List<ConceptNode>> getLevelsConcept(List<ConceptNode> nodes) {
+        Map<Integer, List<ConceptNode>> result = new HashMap<>();
         int maxLevel = 0;
-        while (elements.size() > 0) {
-
-            ConceptsElement minElement = elements.get(0);
-            for (ConceptsElement element : elements) {
-                if (element.getG().size() < minElement.getG().size()) {
-                    minElement = element;
+        while (nodes.size() > 0) {
+            ConceptNode minElement = nodes.get(0);
+            for (ConceptNode node : nodes) {
+                if (node.getG().size() < minElement.getG().size()) {
+                    minElement = node;
                 }
             }
             boolean isAddElement = false;
             for (Integer i : result.keySet()) {
                 boolean isCorrectLevel = true;
-                for (ConceptsElement element : result.get(i)) {
+                for (ConceptNode element : result.get(i)) {
                     if (element.inclusion(minElement)) {
                         isCorrectLevel = false;
                         break;
                     }
                 }
-
                 if (isCorrectLevel) {
                     result.get(i).add(minElement);
                     isAddElement = true;
@@ -380,27 +367,29 @@ public class Equivalence {
             }
             if (!isAddElement) {
                 if (!result.containsKey(maxLevel)) {
-                    result.put(maxLevel, new ArrayList<ConceptsElement>());
+                    result.put(maxLevel, new ArrayList<ConceptNode>());
                 }
                 result.get(maxLevel).add(minElement);
                 maxLevel++;
             }
 
-            elements.remove(minElement);
+            nodes.remove(minElement);
         }
 
         return result;
     }
 
-    private List<ConceptsElement> getAllConceptsElements() {
-        List<ConceptsElement> result = new ArrayList<>();
-        List<List<Integer>> allIntersections = new ArrayList<>();
-        allIntersections.add(new ArrayList<Integer>());
+    private List<ConceptNode> getAllConceptsElements() {
+        List<ConceptNode> result = new ArrayList<>();
+
+        List<List<Integer>> intersections = new ArrayList<>();
+        intersections.add(new ArrayList<Integer>());
         List<Integer> fullIntersection = new ArrayList<>();
         for (int i = 0; i < n; i++) {
             fullIntersection.add(i);
         }
-        allIntersections.add(fullIntersection);
+        intersections.add(fullIntersection);
+
         for (int j = 0; j < n; j++) {
             List<Integer> tmpList = new ArrayList<>();
             for (int i = 0; i < n; i++) {
@@ -408,47 +397,45 @@ public class Equivalence {
                     tmpList.add(i);
             }
             boolean isNewIntersection = true;
-            for (int k = 0; k < allIntersections.size(); k++) {
-                if (tmpList.equals(allIntersections.get(k))) {
+            for (int k = 0; k < intersections.size(); k++) {
+                if (tmpList.equals(intersections.get(k))) {
                     isNewIntersection = false;
                     break;
                 }
             }
             if (isNewIntersection)
-                allIntersections.add(tmpList);
+                intersections.add(tmpList);
         }
+
         boolean isFindNewIntersection = true;
         while (isFindNewIntersection) {
             isFindNewIntersection = false;
-
-            for (int i = 0; i < allIntersections.size(); i++) {
-                for (int j = i + 1; j < allIntersections.size(); j++) {
-                    List<Integer> probableIntersection = getIntersection(allIntersections.get(i), allIntersections.get(j));
+            for (int i = 0; i < intersections.size(); i++) {
+                for (int j = i + 1; j < intersections.size(); j++) {
+                    List<Integer> probableIntersection = getIntersection(intersections.get(i), intersections.get(j));
                     boolean isNewIntersection = true;
-                    for (int k = 0; k < allIntersections.size(); k++) {
-                        if (probableIntersection.equals(allIntersections.get(k))) {
+                    for (List<Integer> intersection : intersections) {
+                        if (probableIntersection.equals(intersection)) {
                             isNewIntersection = false;
                             break;
                         }
                     }
                     if (isNewIntersection) {
                         isFindNewIntersection = true;
-                        allIntersections.add(probableIntersection);
+                        intersections.add(probableIntersection);
                     }
                 }
             }
         }
 
-        for (List<Integer> intersection : allIntersections) {
-            result.add(new ConceptsElement(intersection, getMInterpretation(intersection)));
+        for (List<Integer> intersection : intersections) {
+            result.add(new ConceptNode(intersection, getMInterpretation(intersection)));
         }
-
         return result;
     }
 
     private List<Integer> getIntersection(List<Integer> a, List<Integer> b) {
         List<Integer> result = new ArrayList<>();
-
         for (Integer el : a) {
             if (b.contains(el))
                 result.add(el);
