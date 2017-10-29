@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Main {
-
     public static int[][] readMatrix() {
         List<String> lines = new ArrayList<>();
         try (Stream<String> stream = Files.lines(Paths.get("input.txt"))) {
