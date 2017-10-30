@@ -2,6 +2,8 @@ package SecondLab;
 
 import java.util.*;
 
+import static FirstLab.Main.*;
+
 public class Equivalence {
     private int n;
     private int[][] m;
@@ -25,13 +27,12 @@ public class Equivalence {
     }
 
     private int[][] getEquivalenceClosing() {
-        int[][] result = reflectionClosing(m);
-        result = symmetryClosing(result);
-        result = transitivityClosing(result);
-
+        int[][] closure = reflexiveСlosure(m);
+        closure = symmetricСlosure(closure);
+        closure = transitiveСlosure(closure);
         print("Эквивалентное замыкание:");
-        printMass(result);
-        return result;
+        printMass(closure);
+        return closure;
     }
 
     private void getEquivalenceClasses(int[][] m) {
@@ -182,9 +183,9 @@ public class Equivalence {
     }
 
     void workWithOrder() {
-        if (!(isReflection() && isAntiSymmetric() && isTransitivity())) {
-            print("Введенное отношение не является порядком!");
-        } else {
+//        if (!(isReflection() && isAntiSymmetric() && isTransitivity())) {
+//            print("Введенное отношение не является порядком!");
+//        } else {
             List<Integer> list = getMinMaxElements(m, true);
             if (list.size() > 0) {
                 print("Максимальные элементы:");
@@ -220,7 +221,7 @@ public class Equivalence {
             }
 
             createHaasDiagram();
-        }
+//        }
     }
 
     private List<Integer> getMinMaxElements(int[][] m, boolean isMax) {
