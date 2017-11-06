@@ -13,7 +13,7 @@ public class Main {
 
     void run() throws NoSuchAlgorithmException, IOException {
         System.out.println("Выберите операцию:");
-        System.out.println("1 - сгенерировать простые числа");
+        System.out.println("1 - Генерация простых чисел p, q, g");
         System.out.println("2 - Алиса: генерация открытого, закрытого ключей");
         System.out.println("2 - Алиса: генерация r");
         System.out.println("2 - Боб: генерация e");
@@ -22,43 +22,53 @@ public class Main {
 
         Scanner scanner = new Scanner(System.in);
         String op = scanner.nextLine();
-        switch (op) {
-            case "1": {
-                first();
-                break;
-            }
-            case "2": {
-                second();
-                break;
-            }
-            case "3": {
-                third();
-                break;
-            }
-            case "4": {
-                fourth();
-                break;
-            }
-            case "5": {
-                fifth();
-                break;
-            }
-            case "6": {
-                sixth();
-                break;
-            }
-            default: {
-                System.out.println("Некорректная операция!");
-            }
-        }
+//        switch (op) {
+//            case "1": {
+//                first();
+//                break;
+//            }
+//            case "2": {
+//                second();
+//                break;
+//            }
+//            case "3": {
+//                third();
+//                break;
+//            }
+//            case "4": {
+//                fourth();
+//                break;
+//            }
+//            case "5": {
+//                fifth();
+//                break;
+//            }
+//            case "6": {
+//                sixth();
+//                break;
+//            }
+//            default: {
+//                System.out.println("Некорректная операция!");
+//            }
+//        }
     }
 
+    // Генерация простых чисел
     private void first() throws FileNotFoundException, NoSuchAlgorithmException {
         PrimeNumbers primeNumbers = new PrimeNumbers();
-        primeNumbers.generatePrimes("primes.txt");
+        BigInteger[] pr = primeNumbers.generatePrimes();
+
+        String fileName = "primes.txt";
+        try (PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(fileName)))) {
+            for (BigInteger aPr : pr) {
+                out.println(aPr);
+            }
+        }
+
         System.out.println("Простые числа сгенерированы - primes.txt");
     }
 
+    // Алиса генерация открытого, закрытого ключей
     private void second() throws IOException {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream("primes.txt")));
              PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream("value_x.txt")));
