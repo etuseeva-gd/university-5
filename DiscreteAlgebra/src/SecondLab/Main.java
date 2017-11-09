@@ -21,7 +21,7 @@ public class Main {
 
         System.out.println("Что хотите сделать?:");
         System.out.println("1 - Проверить эквивалентность");
-        System.out.println("2 - Определить порядок, диаграмму Хаасе");
+        System.out.println("2 - Определить порядок, построить диаграмму Хаcсе");
         System.out.println("3 - Построить решетку концептов");
 
         String action = scanner.nextLine();
@@ -29,6 +29,7 @@ public class Main {
         switch (action) {
             case "1": {
                 rel.getEquivalences();
+
                 break;
             }
             case "2": {
