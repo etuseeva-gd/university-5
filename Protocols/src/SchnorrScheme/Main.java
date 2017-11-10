@@ -111,8 +111,6 @@ public class Main {
 
     private void fourth() throws IOException {
         try (PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(numE)))) {
-            Random random = new Random();
-
             System.out.println("Введите параметр устойчивости (t):");
             Scanner sc = new Scanner(System.in);
             int t = Integer.parseInt(sc.nextLine());
