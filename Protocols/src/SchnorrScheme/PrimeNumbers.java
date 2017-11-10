@@ -4,13 +4,14 @@ import java.math.BigInteger;
 import java.security.InvalidParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Random;
 
 public class PrimeNumbers {
-    BigInteger[] generatePrimes() throws NoSuchAlgorithmException {
-        BigInteger q = generateQ(160);
-        BigInteger p = generateP(q, 1024);
-        BigInteger g = generateG(p, q);
-
+    BigInteger[] generatePrimes(int qLen, int pLen) throws NoSuchAlgorithmException {
+        BigInteger q = generateQ(qLen);
+//        BigInteger q = new BigInteger("13");
+        BigInteger p = generateP(q, pLen);
+        BigInteger g = generateG(p, q, pLen);
         return new BigInteger[]{p, q, g};
     }
 
@@ -19,26 +20,28 @@ public class PrimeNumbers {
     }
 
     private BigInteger generateP(BigInteger q, int length) throws NoSuchAlgorithmException {
-        if (length % 64 != 0) {
-            throw new InvalidParameterException("Длина должна делиться на 64");
-        }
-        BigInteger p = genPrimeNum(512);
-        BigInteger remainder = p.mod(q);
-        p = p.subtract(remainder).add(BigInteger.ONE);
+        int k = 1;
+        BigInteger p = BigInteger.ONE;
         while (!p.isProbablePrime(100)) {
-            p = p.add(q);
+//            System.out.println(new BigInteger("2").pow(k));
+
+            p = q.multiply(new BigInteger("2").pow(k)).add(BigInteger.ONE);
+            System.out.println(p);
+            k++;
         }
-        if (p.bitCount() > length) {
-            return generateP(q, length);
-        }
+        System.out.println("test");
         return p;
     }
 
-    private BigInteger generateG(BigInteger p, BigInteger q) throws NoSuchAlgorithmException {
+    private BigInteger generateG(BigInteger p, BigInteger q, int pLen) throws NoSuchAlgorithmException {
         while (true) {
-            BigInteger a = getRandBigInteger(1024).mod(p);
+            BigInteger a = getRandBigInteger(pLen).mod(p);
             BigInteger g = a.modPow(p.subtract(BigInteger.ONE).divide(q), p);
-            if (!g.equals(BigInteger.ONE)) {
+            if (g.equals(BigInteger.ZERO)) {
+                g = g.add(BigInteger.ONE);
+            }
+            BigInteger g1 = a.modPow(p.subtract(BigInteger.ONE).divide(new BigInteger("2")), p); //???
+            if (!g.equals(BigInteger.ONE) && !g1.equals(BigInteger.ONE)) {
                 return g;
             }
         }

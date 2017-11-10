@@ -3,7 +3,7 @@ package SchnorrScheme;
 import java.io.*;
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
-import java.util.Random;
+import java.security.SecureRandom;
 import java.util.Scanner;
 
 public class Main {
@@ -64,8 +64,16 @@ public class Main {
 
     private void first() throws FileNotFoundException, NoSuchAlgorithmException {
         PrimeNumbers primeNumbers = new PrimeNumbers();
-        BigInteger[] pr = primeNumbers.generatePrimes();
 
+        System.out.println("Введите длину p:");
+        Scanner sc = new Scanner(System.in);
+        int pLen = Integer.parseInt(sc.nextLine());
+        System.out.println("Введите длину q:");
+        int qLen = Integer.parseInt(sc.nextLine());
+
+        System.out.println(pLen + " " + qLen);
+
+        BigInteger[] pr = primeNumbers.generatePrimes(pLen, qLen);
         try (PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(primes)))) {
             for (BigInteger aPr : pr) {
                 out.println(aPr);
@@ -73,6 +81,7 @@ public class Main {
         }
 
         System.out.println("Простые числа сгенерированы: primes.txt");
+        sc.close();
     }
 
     private void second() throws IOException {
@@ -89,6 +98,8 @@ public class Main {
             out2.println(y);
 
             System.out.println("Алиса: открытый ключ - open_key_y.txt, закрытый ключ - close_key_x.txt");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
         }
     }
 
@@ -99,13 +110,15 @@ public class Main {
             BigInteger p = new BigInteger(in.readLine());
             BigInteger q = new BigInteger(in.readLine());
             BigInteger g = new BigInteger(in.readLine());
-            BigInteger k = getRandomNumber(q);
+            BigInteger k = getRandomNumber(q).add(BigInteger.ONE);
 
             BigInteger r = g.modPow(k, p);
             out.println(r);
             out2.println(k);
 
             System.out.println("Алиса: k - number_k.txt, r - number_r.txt");
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
         }
     }
 
@@ -120,6 +133,9 @@ public class Main {
             out.println(e);
 
             System.out.println("Боб: e - number_e.txt");
+            sc.close();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
         }
     }
 
@@ -171,13 +187,9 @@ public class Main {
         }
     }
 
-    private BigInteger getRandomNumber(BigInteger q) {
-        Random random = new Random();
-        int maxLength = q.bitLength();
-        BigInteger result;
-        do {
-            result = new BigInteger(maxLength, random);
-        } while (result.compareTo(q) >= 0);
-        return result;
+    private BigInteger getRandomNumber(BigInteger limit) throws NoSuchAlgorithmException {
+        return new BigInteger(limit.bitLength(), SecureRandom.getInstance("SHA1PRNG")).mod(limit).add(BigInteger.ONE);
     }
 }
+
+//3.5 Схема подписи DSA
