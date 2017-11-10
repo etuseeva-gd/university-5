@@ -1,3 +1,4 @@
+const js2xmlparser = require("js2xmlparser");
 const fs = require('fs');
 
 function readFile(fileName) {
@@ -16,6 +17,11 @@ function writeFile(fileName, text) {
         }
     });
 }
+
+// function objToXML(name, obj) {
+//     const xml = js2xmlparser.parse(name, obj);
+//     writeFile(`xml_${name}.txt`, xml);
+// }
 
 function first() {
     let data = readFile('input.txt');
@@ -58,8 +64,34 @@ function first() {
     }
 
     writeFile('output.txt', answer);
+    // objToXML('graph', bnf);
 
     //Todo: проверка файла
 }
 
+function readGraph(fileName) {
+    let data = readFile(fileName);
+    data = data.split('\r').join('').split(' ').join('');
+
+    const graph = {};
+
+    const lines = data.split('\n');
+    lines.forEach(line => {
+        const [vertex, vertexesStr] = line.split(':');
+        graph[vertex] = vertexesStr.split(',').filter(v => v !== '');
+    });
+
+    return graph;
+}
+
+
+
+function second(){
+    const graph = readGraph('input.txt');
+    console.log(graph);
+
+    //Todo: проверки валидности
+}
+
 first();
+second();
