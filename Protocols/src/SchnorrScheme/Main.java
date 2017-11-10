@@ -7,72 +7,78 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
+    private String primes = "primes.txt",
+            openKeyY = "open_key_y.txt",
+            closeKeyX = "close_key_x.txt",
+            numR = "number_r.txt",
+            numK = "number_k.txt",
+            numE = "number_e.txt",
+            numS = "number_s.txt",
+            result = "result.txt";
+
     public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
         new Main().run();
     }
 
     void run() throws NoSuchAlgorithmException, IOException {
         System.out.println("Выберите операцию:");
-        System.out.println("1 - Генерация простых чисел p, q, g");
-        System.out.println("2 - Алиса: генерация открытого, закрытого ключей");
-        System.out.println("2 - Алиса: генерация r");
-        System.out.println("2 - Боб: генерация e");
-        System.out.println("2 - Алиса: подсчет s");
-        System.out.println("2 - Боб: проверка r");
+        System.out.println("1 - Генерация общих параметров (p, q, g)");
+        System.out.println("2 - Алиса: генерация открытого (y), закрытого (x) ключей");
+        System.out.println("3 - Алиса: генерация k и вычисление r");
+        System.out.println("4 - Боб: генерация e");
+        System.out.println("5 - Алиса: вычисление s");
+        System.out.println("6 - Боб: вычисление и проверка r");
 
         Scanner scanner = new Scanner(System.in);
         String op = scanner.nextLine();
-//        switch (op) {
-//            case "1": {
-//                first();
-//                break;
-//            }
-//            case "2": {
-//                second();
-//                break;
-//            }
-//            case "3": {
-//                third();
-//                break;
-//            }
-//            case "4": {
-//                fourth();
-//                break;
-//            }
-//            case "5": {
-//                fifth();
-//                break;
-//            }
-//            case "6": {
-//                sixth();
-//                break;
-//            }
-//            default: {
-//                System.out.println("Некорректная операция!");
-//            }
-//        }
+        switch (op) {
+            case "1": {
+                first();
+                break;
+            }
+            case "2": {
+                second();
+                break;
+            }
+            case "3": {
+                third();
+                break;
+            }
+            case "4": {
+                fourth();
+                break;
+            }
+            case "5": {
+                fifth();
+                break;
+            }
+            case "6": {
+                sixth();
+                break;
+            }
+            default: {
+                System.out.println("Некорректная операция!");
+            }
+        }
     }
 
-    // Генерация простых чисел
     private void first() throws FileNotFoundException, NoSuchAlgorithmException {
         PrimeNumbers primeNumbers = new PrimeNumbers();
         BigInteger[] pr = primeNumbers.generatePrimes();
 
-        String fileName = "primes.txt";
-        try (PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(fileName)))) {
+        try (PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(primes)))) {
             for (BigInteger aPr : pr) {
                 out.println(aPr);
             }
         }
 
-        System.out.println("Простые числа сгенерированы - primes.txt");
+        System.out.println("Простые числа сгенерированы: primes.txt");
     }
 
-    // Алиса генерация открытого, закрытого ключей
     private void second() throws IOException {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream("primes.txt")));
-             PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream("value_x.txt")));
-             PrintWriter out2 = new PrintWriter(new BufferedOutputStream(new FileOutputStream("value_y.txt")))) {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(primes)));
+             PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(closeKeyX)));
+             PrintWriter out2 = new PrintWriter(new BufferedOutputStream(new FileOutputStream(openKeyY)))) {
             BigInteger p = new BigInteger(in.readLine());
             BigInteger q = new BigInteger(in.readLine());
             BigInteger g = new BigInteger(in.readLine());
@@ -82,14 +88,14 @@ public class Main {
             BigInteger y = g.modInverse(p).modPow(x, p);
             out2.println(y);
 
-            System.out.println("Алиса записала закрытый ключ в value_x.txt, открытый ключ в value_y.txt");
+            System.out.println("Алиса: открытый ключ - open_key_y.txt, закрытый ключ - close_key_x.txt");
         }
     }
 
     private void third() throws IOException {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream("primes.txt")));
-             PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream("value_r.txt")));
-             PrintWriter out2 = new PrintWriter(new BufferedOutputStream(new FileOutputStream("value_k.txt")))) {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(primes)));
+             PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(numR)));
+             PrintWriter out2 = new PrintWriter(new BufferedOutputStream(new FileOutputStream(numK)))) {
             BigInteger p = new BigInteger(in.readLine());
             BigInteger q = new BigInteger(in.readLine());
             BigInteger g = new BigInteger(in.readLine());
@@ -99,27 +105,30 @@ public class Main {
             out.println(r);
             out2.println(k);
 
-            System.out.println("Алиса вычислила k и записала в value_k.txt, вычислила r и записала в value_r.txt");
+            System.out.println("Алиса: k - number_k.txt, r - number_r.txt");
         }
     }
 
     private void fourth() throws IOException {
-        try (PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream("value_e.txt")))) {
-            Random random = new Random();
-            int t = Math.abs(random.nextInt()) % (1 << 16);
+        try (PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(numE)))) {
+            System.out.println("Введите параметр устойчивости (t):");
+            Scanner sc = new Scanner(System.in);
+            int t = Integer.parseInt(sc.nextLine());
+
             BigInteger limit = new BigInteger("2").pow(t).subtract(BigInteger.ONE);
             BigInteger e = getRandomNumber(limit);
             out.println(e);
-            System.out.println("Боб сгенерировал e и записал в value_e.txt");
+
+            System.out.println("Боб: e - number_e.txt");
         }
     }
 
     private void fifth() throws IOException {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream("primes.txt")));
-             BufferedReader in2 = new BufferedReader(new InputStreamReader(new FileInputStream("value_e.txt")));
-             BufferedReader in3 = new BufferedReader(new InputStreamReader(new FileInputStream("value_k.txt")));
-             BufferedReader in4 = new BufferedReader(new InputStreamReader(new FileInputStream("value_x.txt")));
-             PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream("value_s.txt")))) {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(primes)));
+             BufferedReader in2 = new BufferedReader(new InputStreamReader(new FileInputStream(numE)));
+             BufferedReader in3 = new BufferedReader(new InputStreamReader(new FileInputStream(numK)));
+             BufferedReader in4 = new BufferedReader(new InputStreamReader(new FileInputStream(closeKeyX)));
+             PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(numS)))) {
             BigInteger p = new BigInteger(in.readLine());
             BigInteger q = new BigInteger(in.readLine());
             BigInteger g = new BigInteger(in.readLine());
@@ -130,17 +139,17 @@ public class Main {
             BigInteger s = k.add(e.multiply(x)).mod(q);
             out.println(s);
 
-            System.out.println("Алиса вычислила s и записала в value_s.txt");
+            System.out.println("Алиса: s - number_s.txt");
         }
     }
 
     private void sixth() throws IOException {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream("primes.txt")));
-             BufferedReader in2 = new BufferedReader(new InputStreamReader(new FileInputStream("value_e.txt")));
-             BufferedReader in3 = new BufferedReader(new InputStreamReader(new FileInputStream("value_s.txt")));
-             BufferedReader in4 = new BufferedReader(new InputStreamReader(new FileInputStream("value_y.txt")));
-             BufferedReader in5 = new BufferedReader(new InputStreamReader(new FileInputStream("value_r.txt")));
-             PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream("result.txt")))) {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(primes)));
+             BufferedReader in2 = new BufferedReader(new InputStreamReader(new FileInputStream(numE)));
+             BufferedReader in3 = new BufferedReader(new InputStreamReader(new FileInputStream(numS)));
+             BufferedReader in4 = new BufferedReader(new InputStreamReader(new FileInputStream(openKeyY)));
+             BufferedReader in5 = new BufferedReader(new InputStreamReader(new FileInputStream(numR)));
+             PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(result)))) {
             BigInteger p = new BigInteger(in.readLine());
             BigInteger q = new BigInteger(in.readLine());
             BigInteger g = new BigInteger(in.readLine());
@@ -152,7 +161,8 @@ public class Main {
             BigInteger r1 = g.modPow(s, p).multiply(y.modPow(e, p)).mod(p);
             out.println(r);
 
-            System.out.println("Боб вычислил r, записал в result.txt и проверил его");
+            System.out.println("Боб: вычислил r - result.txt, проверил его корректность");
+            System.out.println("Результат:");
             if (r.equals(r1)) {
                 System.out.println("r - верное!");
             } else {
@@ -170,5 +180,4 @@ public class Main {
         } while (result.compareTo(q) >= 0);
         return result;
     }
-
 }
