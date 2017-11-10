@@ -23,11 +23,11 @@ public class Main {
     void run() throws NoSuchAlgorithmException, IOException {
         System.out.println("Выберите операцию:");
         System.out.println("1 - Генерация общих параметров (p, q, g)");
-        System.out.println("2 - Алиса: генерация открытого (y), закрытого ключей (x)");
-        System.out.println("3 - Алиса: генерация r");
+        System.out.println("2 - Алиса: генерация открытого (y), закрытого (x) ключей");
+        System.out.println("3 - Алиса: генерация k и вычисление r");
         System.out.println("4 - Боб: генерация e");
         System.out.println("5 - Алиса: вычисление s");
-        System.out.println("6 - Боб: проверка r");
+        System.out.println("6 - Боб: вычисление и проверка r");
 
         Scanner scanner = new Scanner(System.in);
         String op = scanner.nextLine();
@@ -162,6 +162,7 @@ public class Main {
             out.println(r);
 
             System.out.println("Боб: вычислил r - result.txt, проверил его корректность");
+            System.out.println("Результат:");
             if (r.equals(r1)) {
                 System.out.println("r - верное!");
             } else {
