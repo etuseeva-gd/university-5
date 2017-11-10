@@ -7,7 +7,7 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
-    String primes = "primes.txt",
+    private String primes = "primes.txt",
             openKeyY = "open_key_y.txt",
             closeKeyX = "close_key_x.txt",
             numR = "number_r.txt",
@@ -62,7 +62,6 @@ public class Main {
         }
     }
 
-    // Генерация простых чисел
     private void first() throws FileNotFoundException, NoSuchAlgorithmException {
         PrimeNumbers primeNumbers = new PrimeNumbers();
         BigInteger[] pr = primeNumbers.generatePrimes();
@@ -73,10 +72,9 @@ public class Main {
             }
         }
 
-        System.out.println("Простые числа сгенерированы - primes.txt");
+        System.out.println("Простые числа сгенерированы: primes.txt");
     }
 
-    // Алиса генерация открытого, закрытого ключей
     private void second() throws IOException {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(primes)));
              PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(closeKeyX)));
@@ -90,7 +88,7 @@ public class Main {
             BigInteger y = g.modInverse(p).modPow(x, p);
             out2.println(y);
 
-            System.out.println("Алиса записала закрытый ключ в value_x.txt, открытый ключ в value_y.txt");
+            System.out.println("Алиса: открытый ключ - open_key_y.txt, закрытый ключ - close_key_x.txt");
         }
     }
 
@@ -107,18 +105,23 @@ public class Main {
             out.println(r);
             out2.println(k);
 
-//            System.out.println("Алиса вычислила k и записала в value_k.txt, вычислила r и записала в value_r.txt");
+            System.out.println("Алиса: k - number_k.txt, r - number_r.txt");
         }
     }
 
     private void fourth() throws IOException {
         try (PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(numE)))) {
             Random random = new Random();
-            int t = Math.abs(random.nextInt()) % (1 << 16);
+
+            System.out.println("Введите параметр устойчивости (t):");
+            Scanner sc = new Scanner(System.in);
+            int t = Integer.parseInt(sc.nextLine());
+
             BigInteger limit = new BigInteger("2").pow(t).subtract(BigInteger.ONE);
             BigInteger e = getRandomNumber(limit);
             out.println(e);
-//            System.out.println("Боб сгенерировал e и записал в value_e.txt");
+
+            System.out.println("Боб: e - number_e.txt");
         }
     }
 
@@ -138,7 +141,7 @@ public class Main {
             BigInteger s = k.add(e.multiply(x)).mod(q);
             out.println(s);
 
-//            System.out.println("Алиса вычислила s и записала в value_s.txt");
+            System.out.println("Алиса: s - number_s.txt");
         }
     }
 
@@ -160,7 +163,7 @@ public class Main {
             BigInteger r1 = g.modPow(s, p).multiply(y.modPow(e, p)).mod(p);
             out.println(r);
 
-//            System.out.println("Боб вычислил r, записал в result.txt и проверил его");
+            System.out.println("Боб: вычислил r - result.txt, проверил его корректность");
             if (r.equals(r1)) {
                 System.out.println("r - верное!");
             } else {
@@ -178,5 +181,4 @@ public class Main {
         } while (result.compareTo(q) >= 0);
         return result;
     }
-
 }
