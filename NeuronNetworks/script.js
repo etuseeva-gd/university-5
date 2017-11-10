@@ -11,7 +11,7 @@ function readFile(fileName) {
 }
 
 function writeFile(fileName, text) {
-    fs.writeFile(fileName, text, function (err) {
+    fs.writeFileSync(fileName, text, function (err) {
         if (err) {
             throw err;
         }
@@ -24,6 +24,8 @@ function writeFile(fileName, text) {
 // }
 
 function first() {
+    //Todo: проверки валидности
+
     let data = readFile('input.txt');
     data = data.split('\r').join('').split(' ').join('');
 
@@ -65,8 +67,6 @@ function first() {
 
     writeFile('output.txt', answer);
     // objToXML('graph', bnf);
-
-    //Todo: проверка файла
 }
 
 function readGraph(fileName) {
@@ -84,13 +84,58 @@ function readGraph(fileName) {
     return graph;
 }
 
-
-
-function second(){
-    const graph = readGraph('input.txt');
-    console.log(graph);
-
+function second() {
     //Todo: проверки валидности
+
+    let data = readFile('input1.txt');
+    data = data.split('\r').join('').split(' ').join('');
+
+    const graphEdges = [];
+    const sinks = [];
+
+    const lines = data.split('\n');
+    lines.forEach(line => {
+        if (line !== '') {
+            const [vertex, vertexesStr] = line.split(':');
+            const vertexes = vertexesStr.split(',');
+            vertexes.forEach(v => {
+                if (v === '_') {
+                    sinks.push(vertex);
+                } else {
+                    graphEdges.push([vertex, v.split('-')[1]]);
+                }
+            });
+        }
+    });
+
+    let answer = {};
+    sinks.forEach(s => {
+        answer[s] = getVertexesForSink(s, graphEdges);
+    });
+
+    answer = JSON.stringify(answer);
+
+    const signs = ['"', ':', '{', '}'],
+        newSigns = ['', '', '(', ')'];
+
+    signs.forEach((s, i) => {
+        answer = answer.split(s).join(newSigns[i]);
+    });
+
+    writeFile('output.txt', `Graph${answer}`);
+    console.log(answer);
+}
+
+function getVertexesForSink(sink, graphEdges) {
+    const answer = {};
+    for (let i = 0; i < graphEdges.length; i++) {
+        if (graphEdges[i][1] === sink) {
+            let vertex = graphEdges[i][0];
+            graphEdges.splice(i--, 1);
+            answer[vertex] = getVertexesForSink(vertex, graphEdges);
+        }
+    }
+    return answer;
 }
 
 first();
