@@ -191,6 +191,17 @@ function fourth() {
     const listEdges = {};
     fromFuncToGraph(funcObj, listEdges);
     console.log(listEdges);
+
+    const objGraph = [];
+    for (const v in listEdges) {
+        if (listEdges[v].length === 0) {
+            listEdges[v].push('');
+        }
+        objGraph.push([v, listEdges[v]]);
+    }
+    const bnf = fromObjToBNF(objGraph);
+
+    writeFile('output.txt', bnf);
 }
 
 function fromFuncToGraph(funcObj, answer) {
@@ -215,10 +226,10 @@ function fromFuncToGraph(funcObj, answer) {
     }
 }
 
-first();
+// first();
 // second();
 // third();
-// fourth();
+fourth();
 
 // const stdin = process.openStdin();
 // stdin.addListener("data", function(d) {
