@@ -23,9 +23,7 @@ function writeFile(fileName, text) {
 //     writeFile(`xml_${name}.txt`, xml);
 // }
 
-//Входные данные - список списков, выход - БНФ графа
-function first(data) {
-    //Todo: проверки валидности
+function parseGraphList(data) {
     data = data.split('\r').join('').split(' ').join('');
 
     const lines = data.split('\n');
@@ -37,7 +35,57 @@ function first(data) {
         objGraph.push([vertex, vertexes]);
     });
 
-    return fromObjToBNF(objGraph);
+    return objGraph;
+}
+
+function parseBnfGraphToEdges(data) {
+    data = data.split('\r').join('').split(' ').join('');
+
+    const graphEdges = [];
+    const sinks = [];
+
+    const lines = data.split('\n');
+    lines.forEach(line => {
+        if (line !== '') {
+            const [vertex, vertexesStr] = line.split(':');
+            const vertexes = vertexesStr.split(',');
+            vertexes.forEach(v => {
+                if (v === '_') {
+                    sinks.push(vertex);
+                } else {
+                    graphEdges.push([vertex, v.split('-')[1]]);
+                }
+            });
+        }
+    });
+
+    return {sinks, edges: graphEdges};
+}
+
+function getFunctionFromBNF(sinks, edges) {
+    const result = {};
+    sinks.forEach(s => {
+        result[s] = getVertexesForSink(s, edges);
+    });
+    return result;
+}
+
+function getVertexesForSink(sink, edges) {
+    const result = {};
+    for (let i = 0; i < edges.length; i++) {
+        if (edges[i][1] === sink) {
+            let vertex = edges[i][0];
+            edges.splice(i--, 1);
+            result[vertex] = getVertexesForSink(vertex, edges);
+        }
+    }
+    return result;
+}
+
+//Входные данные - список списков, выход - БНФ графа
+function first(data) {
+    //Todo: проверки валидности
+    return fromObjToBNF(parseGraphList(data));
 }
 
 function fromObjToBNF(objGraph) {
@@ -78,52 +126,13 @@ function fromObjToBNF(objGraph) {
     return answer;
 }
 
-function readGraph(fileName) {
-    let data = readFile(fileName);
-    data = data.split('\r').join('').split(' ').join('');
-
-    const graph = {};
-
-    const lines = data.split('\n');
-    lines.forEach(line => {
-        const [vertex, vertexesStr] = line.split(':');
-        graph[vertex] = vertexesStr.split(',').filter(v => v !== '');
-    });
-
-    return graph;
-}
-
 //Входные данные - БНФ графа, Выход - функция
 function second(data) {
     //Todo: проверки валидности
     //Todo: проверка на циклы
 
-    data = data.split('\r').join('').split(' ').join('');
-
-    const graphEdges = [];
-    const sinks = [];
-
-    const lines = data.split('\n');
-    lines.forEach(line => {
-        if (line !== '') {
-            const [vertex, vertexesStr] = line.split(':');
-            const vertexes = vertexesStr.split(',');
-            vertexes.forEach(v => {
-                if (v === '_') {
-                    sinks.push(vertex);
-                } else {
-                    graphEdges.push([vertex, v.split('-')[1]]);
-                }
-            });
-        }
-    });
-
-    let answer = {};
-    sinks.forEach(s => {
-        answer[s] = getVertexesForSink(s, graphEdges);
-    });
-
-    console.log(JSON.stringify(answer));
+    const parseBnf = parseBnfGraphToEdges(data);
+    let answer = getFunctionFromBNF(parseBnf.sinks, parseBnf.edges);
 
     answer = JSON.stringify(answer);
 
@@ -134,18 +143,6 @@ function second(data) {
         answer = answer.split(s).join(newSigns[i]);
     });
 
-    return answer;
-}
-
-function getVertexesForSink(sink, graphEdges) {
-    const answer = {};
-    for (let i = 0; i < graphEdges.length; i++) {
-        if (graphEdges[i][1] === sink) {
-            let vertex = graphEdges[i][0];
-            graphEdges.splice(i--, 1);
-            answer[vertex] = getVertexesForSink(vertex, graphEdges);
-        }
-    }
     return answer;
 }
 
