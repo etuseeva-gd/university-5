@@ -123,6 +123,8 @@ function second(data) {
         answer[s] = getVertexesForSink(s, graphEdges);
     });
 
+    console.log(JSON.stringify(answer));
+
     answer = JSON.stringify(answer);
 
     const signs = ['"', ':', '{', '}'],
@@ -149,9 +151,48 @@ function getVertexesForSink(sink, graphEdges) {
 
 function third() {
     const dataGraph = readFile('input1.txt');
+    const bnf = first(dataGraph);
+    let funcGraph = second(bnf);
+    console.log(funcGraph);
 
+    let dataOperations = readFile('input2.txt');
+    dataOperations = dataOperations.split('\r').join('').split(' ').join('');
 
-    const dataOperations = readFile('input2.txt');
+    const operations = {};
+
+    // const constOperations = {
+    //     '+': '+',
+    //     '*': '*',
+    //     '&': '&',
+    //     '|': '',
+    //     '^': '',
+    //     '>>': '',
+    //     '<<': '',
+    //     '!': '',
+    // };
+
+    const lines = dataOperations.split('\n');
+    lines.forEach(line => {
+        const parse = line.split(':');
+        if (parse[1] !== '') {
+            operations[parse[0]] = parse[1];
+        }
+    });
+    console.log(operations);
+
+    for (let i = 0; i < funcGraph.length; i++) {
+        if (funcGraph[i] >= '0' && funcGraph[i] <= '9') {
+            let j = i + 1;
+            while (funcGraph[j] >= '0' && funcGraph[j] <= '9') {
+                j++;
+            }
+
+            funcGraph = `${funcGraph.slice(0, j)}${funcGraph.slice(j + 2)}`;
+            i = j - 1;
+        }
+    }
+
+    console.log(funcGraph);
 }
 
 //Выходные данные - функция графа, Выход - БНФ графа
@@ -234,6 +275,8 @@ function main() {
 
     third();
 }
+
+main();
 
 
 // const stdin = process.openStdin();
