@@ -29,15 +29,28 @@ function first() {
     let data = readFile('input.txt');
     data = data.split('\r').join('').split(' ').join('');
 
+    const lines = data.split('\n');
+
+    const objGraph = [];
+    lines.forEach(line => {
+        const [vertex, vertexesStr] = line.split(':');
+        const vertexes = vertexesStr.split(',');
+        objGraph.push([vertex, vertexes]);
+    });
+
+    const bnf = fromObjToBNF(objGraph);
+
+    writeFile('output.txt', bnf);
+    // objToXML('graph', bnf);
+}
+
+function fromObjToBNF(objGraph) {
     const bnf = {};
     const usedVertexes = [];
 
-    const lines = data.split('\n');
-    lines.forEach(line => {
-        const [vertex, vertexesStr] = line.split(':');
+    objGraph.forEach(obj => {
+        const [vertex, vertexes] = obj;
         bnf[vertex] = [];
-        const vertexes = vertexesStr.split(',');
-        
         vertexes.forEach(v => {
             if (v !== '') {
                 let num;
@@ -66,12 +79,7 @@ function first() {
         answer += '\n';
     }
 
-    writeFile('output.txt', answer);
-    // objToXML('graph', bnf);
-}
-
-function fromObjToBNF(objGraph) {
-    
+    return answer;
 }
 
 function readGraph(fileName) {
