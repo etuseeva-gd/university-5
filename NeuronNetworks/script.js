@@ -37,6 +37,7 @@ function first() {
         const [vertex, vertexesStr] = line.split(':');
         bnf[vertex] = [];
         const vertexes = vertexesStr.split(',');
+        
         vertexes.forEach(v => {
             if (v !== '') {
                 let num;
@@ -69,6 +70,10 @@ function first() {
     // objToXML('graph', bnf);
 }
 
+function fromObjToBNF(objGraph) {
+    
+}
+
 function readGraph(fileName) {
     let data = readFile(fileName);
     data = data.split('\r').join('').split(' ').join('');
@@ -86,8 +91,9 @@ function readGraph(fileName) {
 
 function second() {
     //Todo: проверки валидности
+    //Todo: проверка на циклы
 
-    let data = readFile('input1.txt');
+    let data = readFile('input.txt');
     data = data.split('\r').join('').split(' ').join('');
 
     const graphEdges = [];
@@ -122,8 +128,7 @@ function second() {
         answer = answer.split(s).join(newSigns[i]);
     });
 
-    writeFile('output.txt', `Graph${answer}`);
-    console.log(answer);
+    writeFile('output.txt', `answer`);
 }
 
 function getVertexesForSink(sink, graphEdges) {
@@ -138,5 +143,77 @@ function getVertexesForSink(sink, graphEdges) {
     return answer;
 }
 
+function third() {
+
+}
+
+function fourth() {
+    let data = readFile('input.txt');
+    let signs = ['(', '(', ')'],
+        newSigns = [':(', '{', '}'];
+
+    signs.forEach((s, i) => {
+        data = data.split(s).join(newSigns[i]);
+    });
+    data = data.substr(1);
+
+    signs = ['{', '}', ':', ','];
+
+    let dataCopy = '';
+    for (let i = 0; i < data.length; i++) {
+        if (signs.find(s => s === data[i])) {
+            dataCopy += data[i];
+        } else {
+            let j = i + 1;
+            while (!signs.find(s => s === data[j])) {
+                j++;
+            }
+            dataCopy += `"${data.substring(i, j)}"`;
+            i = j - 1;
+        }
+    }
+
+    // console.log(data);
+    // console.log(dataCopy);
+
+    //Todo: проверка на корректность
+    const funcObj = JSON.parse(dataCopy);
+    console.log(funcObj);
+
+    const listEdges = {};
+    fromFuncToGraph(funcObj, listEdges);
+    console.log(listEdges);
+}
+
+function fromFuncToGraph(funcObj, answer) {
+    for (const vertex in funcObj) {
+        if (!answer[vertex]) {
+            answer[vertex] = [];
+        }
+
+        if (funcObj[vertex] !== {}) {
+            const parents = [];
+            for (const v in funcObj[vertex]) {
+                parents.push(v);
+            }
+            parents.forEach(p => {
+                if (!answer[p]) {
+                    answer[p] = [];
+                }
+                answer[p].push(vertex);
+            });
+        }
+        fromFuncToGraph(funcObj[vertex], answer);
+    }
+}
+
 first();
-second();
+// second();
+// third();
+// fourth();
+
+// const stdin = process.openStdin();
+// stdin.addListener("data", function(d) {
+//     console.log("you entered: [" +
+//         d.toString().trim() + "]");
+// });

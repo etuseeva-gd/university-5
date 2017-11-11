@@ -1,0 +1,11 @@
+a : c, d
+b : b, c
+c : d
+d :
+
+a : 1-c, 1-d
+b : 2-c
+c : 2-d
+d : _
+
+Graph(d(a(),c(a(),b())))
