@@ -23,10 +23,9 @@ function writeFile(fileName, text) {
 //     writeFile(`xml_${name}.txt`, xml);
 // }
 
-function first() {
+//Входные данные - список списков, выход - БНФ графа
+function first(data) {
     //Todo: проверки валидности
-
-    let data = readFile('input.txt');
     data = data.split('\r').join('').split(' ').join('');
 
     const lines = data.split('\n');
@@ -38,10 +37,7 @@ function first() {
         objGraph.push([vertex, vertexes]);
     });
 
-    const bnf = fromObjToBNF(objGraph);
-
-    writeFile('output.txt', bnf);
-    // objToXML('graph', bnf);
+    return fromObjToBNF(objGraph);
 }
 
 function fromObjToBNF(objGraph) {
@@ -97,11 +93,11 @@ function readGraph(fileName) {
     return graph;
 }
 
-function second() {
+//Входные данные - БНФ графа, Выход - функция
+function second(data) {
     //Todo: проверки валидности
     //Todo: проверка на циклы
 
-    let data = readFile('input.txt');
     data = data.split('\r').join('').split(' ').join('');
 
     const graphEdges = [];
@@ -136,7 +132,7 @@ function second() {
         answer = answer.split(s).join(newSigns[i]);
     });
 
-    writeFile('output.txt', `answer`);
+    return answer;
 }
 
 function getVertexesForSink(sink, graphEdges) {
@@ -152,11 +148,14 @@ function getVertexesForSink(sink, graphEdges) {
 }
 
 function third() {
+    const dataGraph = readFile('input1.txt');
 
+
+    const dataOperations = readFile('input2.txt');
 }
 
-function fourth() {
-    let data = readFile('input.txt');
+//Выходные данные - функция графа, Выход - БНФ графа
+function fourth(data) {
     let signs = ['(', '(', ')'],
         newSigns = [':(', '{', '}'];
 
@@ -199,9 +198,8 @@ function fourth() {
         }
         objGraph.push([v, listEdges[v]]);
     }
-    const bnf = fromObjToBNF(objGraph);
 
-    writeFile('output.txt', bnf);
+    return fromObjToBNF(objGraph);
 }
 
 function fromFuncToGraph(funcObj, answer) {
@@ -226,10 +224,17 @@ function fromFuncToGraph(funcObj, answer) {
     }
 }
 
-// first();
-// second();
-// third();
-fourth();
+function main() {
+    const fileInput = 'input.txt', fileOutput = 'output.txt';
+
+    // let data = readFile(fileInput);
+    // writeFile(fileOutput, first(data));
+    // writeFile(fileOutput, second(data));
+    // writeFile(fileOutput, fourth(data));
+
+    third();
+}
+
 
 // const stdin = process.openStdin();
 // stdin.addListener("data", function(d) {
