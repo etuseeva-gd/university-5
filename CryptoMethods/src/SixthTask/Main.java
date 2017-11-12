@@ -228,7 +228,7 @@ public class Main {
             if (table[i][i] == 0)
                 shuffleTable(table, b, i, n, m);
             if (table[i][i] == 0) {
-                return new StringBuilder[]{new StringBuilder("No Main")};
+                return new StringBuilder[]{new StringBuilder("Ошибка")};
             }
             int el = (int) firstOrderComparison(table[i][i], 1, p)[0];
             for (int j = 0; j < m; j++) {
