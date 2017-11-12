@@ -109,7 +109,7 @@ public class Main {
             }
         }
 
-        List<String> tElements = getCallyElements(elements, equality);
+        List<String> tElements = getCayleyElements(elements, equality);
 
         System.out.print("T = {");
         for (int i =0; i < tElements.size(); i++) {
@@ -122,16 +122,16 @@ public class Main {
         System.out.print("}");
         System.out.println();
 
-        String[][] tableCally = new String[tElements.size()][tElements.size()];
-        int nT = tableCally.length;
+        String[][] tableCayley = new String[tElements.size()][tElements.size()];
+        int nT = tableCayley.length;
         for (int i = 0; i < nT; i++) {
             for (int j = 0; j < nT; j++) {
                 String tmp = tElements.get(i).concat(tElements.get(j));
-                tableCally[i][j] = updateCallyElement(tmp, equality);
+                tableCayley[i][j] = updateCayleyElement(tmp, equality);
             }
         }
         System.out.println("Таблица Кэли:");
-        for (String[] aTable : tableCally) {
+        for (String[] aTable : tableCayley) {
             for (int j = 0; j < nT; j++) {
                 System.out.print(aTable[j] + "\t");
             }
@@ -140,7 +140,7 @@ public class Main {
         System.out.println();
     }
 
-    private List<String> getCallyElements(String[] elements, Map<String, String> equality) {
+    private List<String> getCayleyElements(String[] elements, Map<String, String> equality) {
         List<String> result = new ArrayList<>();
         for (String s : elements) {
             String tmp = s;
@@ -158,7 +158,7 @@ public class Main {
                 if (result.get(i).length() == len - 1) {
                     for (String s : elements) {
                         String tmp = result.get(i).concat(s);
-                        tmp = updateCallyElement(tmp, equality);
+                        tmp = updateCayleyElement(tmp, equality);
                         if (!result.contains(tmp)) {
                             result.add(tmp);
                             ok = true;
@@ -174,7 +174,7 @@ public class Main {
         return result;
     }
 
-    private String updateCallyElement(String str, Map<String, String> equality) {
+    private String updateCayleyElement(String str, Map<String, String> equality) {
         while (true) {
             boolean ok = false;
             for (String s : equality.keySet()) {
