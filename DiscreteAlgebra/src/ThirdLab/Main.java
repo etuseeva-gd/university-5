@@ -93,7 +93,10 @@ public class Main {
     }
 
     private void second(BufferedReader in) throws IOException {
-        String[] elem = in.readLine().split(" ");
+        //Элементы
+        String[] elements = in.readLine().split(" ");
+
+        //Определяющие соотношения
         Map<String, String> equality = new HashMap<>();
         int n = Integer.parseInt(in.readLine());
 
@@ -106,28 +109,85 @@ public class Main {
             }
         }
 
-        List<String> words = getWords(elem, equality);
-        System.out.println("Элементы:");
-        for (String word : words) {
-            System.out.print(word + " ");
+        List<String> tElements = getCallyElements(elements, equality);
+
+        System.out.print("T = {");
+        for (int i =0; i < tElements.size(); i++) {
+            if (i == tElements.size() - 1) {
+                System.out.print(tElements.get(i));
+            } else {
+                System.out.print(tElements.get(i) + ", ");
+            }
         }
+        System.out.print("}");
         System.out.println();
 
-        String[][] table = new String[words.size()][words.size()];
-        for (int i = 0; i < table.length; i++) {
-            for (int j = 0; j < table.length; j++) {
-                String tmp = words.get(i).concat(words.get(j));
-                table[i][j] = updateFunction(tmp, equality);
+        String[][] tableCally = new String[tElements.size()][tElements.size()];
+        int nT = tableCally.length;
+        for (int i = 0; i < nT; i++) {
+            for (int j = 0; j < nT; j++) {
+                String tmp = tElements.get(i).concat(tElements.get(j));
+                tableCally[i][j] = updateCallyElement(tmp, equality);
             }
         }
         System.out.println("Таблица Кэли:");
-        for (int i = 0; i < table.length; i++) {
-            for (int j = 0; j < table.length; j++) {
-                System.out.print(table[i][j] + "\t");
+        for (String[] aTable : tableCally) {
+            for (int j = 0; j < nT; j++) {
+                System.out.print(aTable[j] + "\t");
             }
             System.out.println();
         }
         System.out.println();
+    }
+
+    private List<String> getCallyElements(String[] elements, Map<String, String> equality) {
+        List<String> result = new ArrayList<>();
+        for (String s : elements) {
+            String tmp = s;
+            if (equality.containsKey(tmp)) {
+                tmp = equality.get(tmp);
+            }
+            if (!result.contains(tmp)) {
+                result.add(tmp);
+            }
+        }
+        int len = 2;
+        while (true) {
+            boolean ok = false;
+            for (int i = 0; i < result.size(); i++) {
+                if (result.get(i).length() == len - 1) {
+                    for (String s : elements) {
+                        String tmp = result.get(i).concat(s);
+                        tmp = updateCallyElement(tmp, equality);
+                        if (!result.contains(tmp)) {
+                            result.add(tmp);
+                            ok = true;
+                        }
+                    }
+                }
+            }
+            if (!ok) {
+                break;
+            }
+            len++;
+        }
+        return result;
+    }
+
+    private String updateCallyElement(String str, Map<String, String> equality) {
+        while (true) {
+            boolean ok = false;
+            for (String s : equality.keySet()) {
+                if (str.contains(s)) {
+                    str = str.replaceAll(s, equality.get(s));
+                    ok = true;
+                }
+            }
+            if (!ok) {
+                break;
+            }
+        }
+        return str;
     }
 
     private void third(BufferedReader in) throws IOException {
@@ -148,54 +208,6 @@ public class Main {
             semiGroupElements.add(toAdd);
         }
         buildSemiGroup(semiGroupElements);
-    }
-
-    private List<String> getWords(String[] elem, Map<String, String> equality) {
-        List<String> result = new ArrayList<>();
-
-        for (String s : elem) {
-            String tmp = s;
-            if (equality.containsKey(tmp)) {
-                tmp = equality.get(tmp);
-            }
-            if (!result.contains(tmp)) {
-                result.add(tmp);
-            }
-        }
-        int len = 2;
-        boolean flag = true;
-        while (flag) {
-            flag = false;
-            for (int i = 0; i < result.size(); i++) {
-                if (result.get(i).length() == len - 1) {
-                    for (String s : elem) {
-                        String tmp = result.get(i).concat(s);
-                        boolean update = true;
-                        tmp = updateFunction(tmp, equality);
-                        if (!result.contains(tmp)) {
-                            result.add(tmp);
-                            flag = true;
-                        }
-                    }
-                }
-            }
-            len++;
-        }
-        return result;
-    }
-
-    private String updateFunction(String tmp, Map<String, String> equality) {
-        boolean flag = true;
-        while (flag) {
-            flag = false;
-            for (String s : equality.keySet()) {
-                if (tmp.contains(s)) {
-                    flag = true;
-                    tmp = tmp.replaceAll(s, equality.get(s));
-                }
-            }
-        }
-        return tmp;
     }
 
     private static void buildSemiGroup(ArrayList<ArrayList<ArrayList<Integer>>> semiGroupElements) {

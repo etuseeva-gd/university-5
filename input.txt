@@ -1,5 +1,5 @@
-a b c d
-a a a a
-a b a b
-a a c c
-a b c d
+x y
+3
+xxx=xx
+yy=y
+xy=yx
