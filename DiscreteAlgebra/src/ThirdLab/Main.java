@@ -19,11 +19,11 @@ public class Main {
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream("input.txt")));
         switch (op) {
             case "1": {
-                first();
+                first(in);
                 break;
             }
             case "2": {
-                second();
+                second(in);
                 break;
             }
             case "3": {
@@ -38,8 +38,7 @@ public class Main {
         in.close();
     }
 
-    private void first() throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream("input.txt")));
+    private void first(BufferedReader in) throws IOException {
         String[] elem = in.readLine().split(" ");
         Map<String, Integer> elems = new HashMap<>();
         int idx = 0;
@@ -55,24 +54,49 @@ public class Main {
                 table[i][j] = tmpStr[j];
             }
         }
-        if (checkCommutative(table)) {
+        if (isCommutative(table)) {
             System.out.println("Операция коммутативна");
         } else {
             System.out.println("Операция некоммутативна");
         }
-        if (checkAssociative(table, elems)) {
+        if (isAssociative(table, elems)) {
             System.out.println("Операция ассоциативна");
         } else {
             System.out.println("Операция неассоциативна");
         }
     }
 
-    private void second() throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream("input.txt")));
+    private boolean isCommutative(String[][] m) {
+        int n = m.length;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (!m[i][j].equals(m[j][i])) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean isAssociative(String[][] m, Map<String, Integer> elems) {
+        int n = m.length;
+        for (String[] aM : m) {
+            for (int j = 0; j < n; j++) {
+                for (int k = 0; k < n; k++) {
+                    if (!m[elems.get(aM[j])][k].equals(aM[elems.get(m[j][k])])) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private void second(BufferedReader in) throws IOException {
         String[] elem = in.readLine().split(" ");
         Map<String, String> equality = new HashMap<>();
         int n = Integer.parseInt(in.readLine());
-        //все соотношения должны быть разные
+
         for (int i = 0; i < n; i++) {
             String[] s = in.readLine().split("=");
             if (s[0].length() > s[1].length())
@@ -89,7 +113,6 @@ public class Main {
         }
         System.out.println();
 
-
         String[][] table = new String[words.size()][words.size()];
         for (int i = 0; i < table.length; i++) {
             for (int j = 0; j < table.length; j++) {
@@ -105,8 +128,6 @@ public class Main {
             System.out.println();
         }
         System.out.println();
-
-
     }
 
     private void third(BufferedReader in) throws IOException {
@@ -175,35 +196,6 @@ public class Main {
             }
         }
         return tmp;
-    }
-
-    private boolean checkCommutative(String[][] table) {
-        boolean result = true;
-        for (int i = 0; i < table.length; i++) {
-            for (int j = 0; j < table.length; j++) {
-                if (!table[i][j].equals(table[j][i])) {
-                    result = false;
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    private boolean checkAssociative(String[][] table, Map<String, Integer> elems) {
-        boolean result = true;
-        for (String[] aTable : table) {
-            for (int j = 0; j < table.length; j++) {
-                for (int k = 0; k < table.length; k++) {
-                    if (!table[elems.get(aTable[j])][k].equals(aTable[elems.get(table[j][k])])) {
-                        result = false;
-                        break;
-                    }
-                }
-            }
-        }
-        return result;
     }
 
     private static void buildSemiGroup(ArrayList<ArrayList<ArrayList<Integer>>> semiGroupElements) {
