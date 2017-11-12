@@ -112,7 +112,7 @@ public class Main {
         List<String> tElements = getCayleyElements(elements, equality);
 
         System.out.print("T = {");
-        for (int i =0; i < tElements.size(); i++) {
+        for (int i = 0; i < tElements.size(); i++) {
             if (i == tElements.size() - 1) {
                 System.out.print(tElements.get(i));
             } else {
@@ -191,42 +191,63 @@ public class Main {
     }
 
     private void third(BufferedReader in) throws IOException {
-        int count = Integer.parseInt(in.readLine());
-        int n = Integer.parseInt(in.readLine());
-        ArrayList<ArrayList<ArrayList<Integer>>> semiGroupElements = new ArrayList<>();
+        //Количество элементов
+        String[] line = in.readLine().split(" ");
+        int count = Integer.parseInt(line[0]);
+        //Размерность матрицы отношения
+        int n = Integer.parseInt(line[1]);
+        in.readLine();
+
+        ArrayList<ArrayList<ArrayList<Integer>>> elements = new ArrayList<>();
         for (int k = 0; k < count; k++) {
-            ArrayList<ArrayList<Integer>> toAdd = new ArrayList<>();
+            ArrayList<ArrayList<Integer>> mm = new ArrayList<>();
             for (int i = 0; i < n; i++) {
-                ArrayList<Integer> toAdd1 = new ArrayList<>();
-                String s = in.readLine();
-                String[] split = s.split(" ");
-                for (String aSplit : split) {
-                    toAdd1.add(Integer.parseInt(aSplit));
+                ArrayList<Integer> m = new ArrayList<>();
+                String[] s = in.readLine().split(" ");
+                for (String aS : s) {
+                    m.add(Integer.parseInt(aS));
                 }
-                toAdd.add(toAdd1);
+                mm.add(m);
             }
-            semiGroupElements.add(toAdd);
+            elements.add(mm);
+            in.readLine();
         }
-        buildSemiGroup(semiGroupElements);
+
+        buildSemiGroup(elements);
     }
 
-    private static void buildSemiGroup(ArrayList<ArrayList<ArrayList<Integer>>> semiGroupElements) {
+    private static void buildSemiGroup(ArrayList<ArrayList<ArrayList<Integer>>> elem) {
         Map<Integer, ArrayList<ArrayList<Integer>>> elements = new HashMap<>();
-        for (int i = 0; i < semiGroupElements.size(); i++) {
-            elements.put(i, semiGroupElements.get(i));
+        for (int i = 0; i < elem.size(); i++) {
+            elements.put(i, elem.get(i));
         }
         ArrayList<ArrayList<Integer>> table;
         int count;
         do {
             count = elements.size();
-            table = createNewCaley(elements);
+            table = createCayley(elements);
         } while (count != elements.size());
+
+        System.out.println("Элементы:");
+        ArrayList<Integer> keys = new ArrayList<>(elements.keySet());
+        for (Integer key : keys) {
+            System.out.println((char) ('a' + key) + " ");
+            for (ArrayList<Integer> aElem : elements.get(key)) {
+                for (Integer a : aElem) {
+                    System.out.print(a + " ");
+                }
+                System.out.println();
+            }
+        }
+
+        System.out.println();
         System.out.println("Таблица Кэли:");
         System.out.print("  ");
         for (int i = 0; i < table.size(); i++) {
             System.out.print((char) ('a' + i) + " ");
         }
         System.out.println();
+
         for (int i = 0; i < table.size(); i++) {
             System.out.print((char) ('a' + i) + " ");
             for (int j = 0; j < table.get(i).size(); j++) {
@@ -235,36 +256,23 @@ public class Main {
             System.out.println();
         }
         System.out.println();
-        ArrayList<Integer> keys = new ArrayList<>(elements.keySet());
-        for (Integer key : keys) {
-            System.out.println((char) ('a' + key) + " ");
-            ArrayList<ArrayList<Integer>> temp = elements.get(key);
-            for (ArrayList<Integer> aTemp : temp) {
-                for (Integer anATemp : aTemp) {
-                    System.out.print(anATemp + " ");
-                }
-                System.out.println();
-            }
-        }
     }
 
-    private static ArrayList<ArrayList<Integer>> createNewCaley(Map<Integer, ArrayList<ArrayList<Integer>>> elements) {
-        int size = elements.size();
+    private static ArrayList<ArrayList<Integer>> createCayley(Map<Integer, ArrayList<ArrayList<Integer>>> elements) {
+        int n = elements.size();
         ArrayList<ArrayList<Integer>> result = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < n; i++) {
             result.add(new ArrayList<Integer>());
-            for (int j = 0; j < size; j++) {
+            for (int j = 0; j < n; j++) {
                 result.get(i).add(0);
             }
         }
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                ArrayList<ArrayList<Integer>> resultOfMultiply = multiplyMatrix(elements.get(i), elements.get(j));
-                boolean flag = true;
-                if (elements.containsValue(resultOfMultiply)) {
-                    flag = false;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                ArrayList<ArrayList<Integer>> multiplyMatrix = multiplyMatrix(elements.get(i), elements.get(j));
+                if (elements.containsValue(multiplyMatrix)) {
                     for (Map.Entry<Integer, ArrayList<ArrayList<Integer>>> entry : elements.entrySet()) {
-                        if (entry.getValue().equals(resultOfMultiply)) {
+                        if (entry.getValue().equals(multiplyMatrix)) {
                             if (j >= result.get(i).size()) {
                                 result.get(i).add(entry.getKey());
                             } else {
@@ -273,37 +281,36 @@ public class Main {
                             break;
                         }
                     }
-                }
-                if (flag) {
-                    elements.put(elements.size(), resultOfMultiply);
+                } else {
+                    elements.put(elements.size(), multiplyMatrix);
                     if (j >= result.get(i).size()) {
                         result.get(i).add(elements.size() - 1);
                     } else {
                         result.get(i).set(j, elements.size() - 1);
                     }
-
                 }
             }
         }
         return result;
     }
 
-    private static ArrayList<ArrayList<Integer>> multiplyMatrix(ArrayList<ArrayList<Integer>> first, ArrayList<ArrayList<Integer>> second) {
-        int[][] forResult = new int[first.size()][second.size()];
-        ArrayList<ArrayList<Integer>> result = new ArrayList<>();
-        for (int i = 0; i < first.size(); i++) {
-            for (int j = 0; j < second.get(0).size(); j++) {
-                for (int k = 0; k < first.get(0).size(); k++) {
-                    if (first.get(i).get(k) == 1 && second.get(k).get(j) == 1) {
-                        forResult[i][j] = 1;
+    private static ArrayList<ArrayList<Integer>> multiplyMatrix(ArrayList<ArrayList<Integer>> a, ArrayList<ArrayList<Integer>> b) {
+        int[][] ab = new int[a.size()][b.size()];
+        for (int i = 0; i < a.size(); i++) {
+            for (int j = 0; j < b.get(0).size(); j++) {
+                for (int k = 0; k < a.get(0).size(); k++) {
+                    if (a.get(i).get(k) == 1 && b.get(k).get(j) == 1) {
+                        ab[i][j] = 1;
                     }
                 }
             }
         }
-        for (int i = 0; i < forResult.length; i++) {
-            result.add(new ArrayList<Integer>());
-            for (int j = 0; j < forResult[i].length; j++) {
-                result.get(i).add(forResult[i][j]);
+
+        ArrayList<ArrayList<Integer>> result = new ArrayList<>();
+        for (int i = 0; i < ab.length; i++) {
+            result.add(new ArrayList<>());
+            for (int j = 0; j < ab[i].length; j++) {
+                result.get(i).add(ab[i][j]);
             }
         }
         return result;
