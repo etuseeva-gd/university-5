@@ -9,14 +9,15 @@ public class Main {
     }
 
     private void run() throws IOException {
-        System.out.println("Что вы хотите сделать?:");
-        System.out.println("1: Проверка свойств операций");
-        System.out.println("2: Постороить полугруппу по порождающему множеству");
-        System.out.println("3: Построить полугруппу бинарных отношений");
+        System.out.println("Что вы хотите сделать?");
+        System.out.println("1: Проверить свойства алгебраических операций");
+        System.out.println("2: Построить полугруппы по порождающему множеству и определяющему соотношению");
+        System.out.println("3: Построить полугруппы бинарных отношений по заданному порождающему множетсву");
 
         Scanner scanner = new Scanner(System.in);
-        String action = scanner.nextLine();
-        switch (action) {
+        String op = scanner.nextLine();
+        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream("input.txt")));
+        switch (op) {
             case "1": {
                 first();
                 break;
@@ -26,20 +27,19 @@ public class Main {
                 break;
             }
             case "3": {
-                third();
+                third(in);
                 break;
             }
             default: {
-                System.out.println("Enter Correct Number!");
+                System.out.println("Не коррекная операция!");
                 break;
             }
         }
-
+        in.close();
     }
 
     private void first() throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream("input.txt")));
-        PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream("output.txt")));
         String[] elem = in.readLine().split(" ");
         Map<String, Integer> elems = new HashMap<>();
         int idx = 0;
@@ -55,32 +55,24 @@ public class Main {
                 table[i][j] = tmpStr[j];
             }
         }
-        out.println("Таблица Кэли: ");
-        for (String[] strings : table) {
-            for (String string : strings) {
-                out.print(string + " ");
-            }
-            out.println();
-        }
         if (checkCommutative(table)) {
-            out.println("Операция коммутативна");
+            System.out.println("Операция коммутативна");
         } else {
-            out.println("Операция некоммутативна");
+            System.out.println("Операция некоммутативна");
         }
         if (checkAssociative(table, elems)) {
-            out.println("Операция ассоциативна");
+            System.out.println("Операция ассоциативна");
         } else {
-            out.println("Операция неассоциативна");
+            System.out.println("Операция неассоциативна");
         }
-        out.close();
     }
 
     private void second() throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream("input.txt")));
-        PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream("output.txt")));
         String[] elem = in.readLine().split(" ");
         Map<String, String> equality = new HashMap<>();
         int n = Integer.parseInt(in.readLine());
+        //все соотношения должны быть разные
         for (int i = 0; i < n; i++) {
             String[] s = in.readLine().split("=");
             if (s[0].length() > s[1].length())
@@ -89,12 +81,15 @@ public class Main {
                 equality.put(s[1], s[0]);
             }
         }
+
         List<String> words = getWords(elem, equality);
-        out.println("Элементы:");
+        System.out.println("Элементы:");
         for (String word : words) {
-            out.print(word + " ");
+            System.out.print(word + " ");
         }
-        out.println();
+        System.out.println();
+
+
         String[][] table = new String[words.size()][words.size()];
         for (int i = 0; i < table.length; i++) {
             for (int j = 0; j < table.length; j++) {
@@ -102,19 +97,19 @@ public class Main {
                 table[i][j] = updateFunction(tmp, equality);
             }
         }
-        out.println("Таблица Кэли:");
+        System.out.println("Таблица Кэли:");
         for (int i = 0; i < table.length; i++) {
             for (int j = 0; j < table.length; j++) {
-                out.print(table[i][j] + "\t");
+                System.out.print(table[i][j] + "\t");
             }
-            out.println();
+            System.out.println();
         }
-        out.println();
-        out.close();
+        System.out.println();
+
+
     }
 
-    private void third() throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream("input.txt")));
+    private void third(BufferedReader in) throws IOException {
         int count = Integer.parseInt(in.readLine());
         int n = Integer.parseInt(in.readLine());
         ArrayList<ArrayList<ArrayList<Integer>>> semiGroupElements = new ArrayList<>();
@@ -132,11 +127,11 @@ public class Main {
             semiGroupElements.add(toAdd);
         }
         buildSemiGroup(semiGroupElements);
-        in.close();
     }
 
     private List<String> getWords(String[] elem, Map<String, String> equality) {
         List<String> result = new ArrayList<>();
+
         for (String s : elem) {
             String tmp = s;
             if (equality.containsKey(tmp)) {
@@ -192,6 +187,7 @@ public class Main {
                 }
             }
         }
+
         return result;
     }
 
@@ -210,8 +206,7 @@ public class Main {
         return result;
     }
 
-    private void buildSemiGroup(ArrayList<ArrayList<ArrayList<Integer>>> semiGroupElements) throws FileNotFoundException {
-        PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream("output.txt")));
+    private static void buildSemiGroup(ArrayList<ArrayList<ArrayList<Integer>>> semiGroupElements) {
         Map<Integer, ArrayList<ArrayList<Integer>>> elements = new HashMap<>();
         for (int i = 0; i < semiGroupElements.size(); i++) {
             elements.put(i, semiGroupElements.get(i));
@@ -222,35 +217,34 @@ public class Main {
             count = elements.size();
             table = createNewCaley(elements);
         } while (count != elements.size());
-        out.println("Таблица Кэли:");
-        out.print("  ");
+        System.out.println("Таблица Кэли:");
+        System.out.print("  ");
         for (int i = 0; i < table.size(); i++) {
-            out.print((char) ('a' + i) + " ");
+            System.out.print((char) ('a' + i) + " ");
         }
-        out.println();
+        System.out.println();
         for (int i = 0; i < table.size(); i++) {
-            out.print((char) ('a' + i) + " ");
+            System.out.print((char) ('a' + i) + " ");
             for (int j = 0; j < table.get(i).size(); j++) {
-                out.print((char) ('a' + table.get(i).get(j)) + " ");
+                System.out.print((char) ('a' + table.get(i).get(j)) + " ");
             }
-            out.println();
+            System.out.println();
         }
-        out.println();
+        System.out.println();
         ArrayList<Integer> keys = new ArrayList<>(elements.keySet());
         for (Integer key : keys) {
-            out.println((char) ('a' + key) + " ");
+            System.out.println((char) ('a' + key) + " ");
             ArrayList<ArrayList<Integer>> temp = elements.get(key);
             for (ArrayList<Integer> aTemp : temp) {
                 for (Integer anATemp : aTemp) {
-                    out.print(anATemp + " ");
+                    System.out.print(anATemp + " ");
                 }
-                out.println();
+                System.out.println();
             }
         }
-        out.close();
     }
 
-    private ArrayList<ArrayList<Integer>> createNewCaley(Map<Integer, ArrayList<ArrayList<Integer>>> elements) {
+    private static ArrayList<ArrayList<Integer>> createNewCaley(Map<Integer, ArrayList<ArrayList<Integer>>> elements) {
         int size = elements.size();
         ArrayList<ArrayList<Integer>> result = new ArrayList<>();
         for (int i = 0; i < size; i++) {
@@ -283,13 +277,14 @@ public class Main {
                     } else {
                         result.get(i).set(j, elements.size() - 1);
                     }
+
                 }
             }
         }
         return result;
     }
 
-    private ArrayList<ArrayList<Integer>> multiplyMatrix(ArrayList<ArrayList<Integer>> first, ArrayList<ArrayList<Integer>> second) {
+    private static ArrayList<ArrayList<Integer>> multiplyMatrix(ArrayList<ArrayList<Integer>> first, ArrayList<ArrayList<Integer>> second) {
         int[][] forResult = new int[first.size()][second.size()];
         ArrayList<ArrayList<Integer>> result = new ArrayList<>();
         for (int i = 0; i < first.size(); i++) {
@@ -310,3 +305,4 @@ public class Main {
         return result;
     }
 }
+
