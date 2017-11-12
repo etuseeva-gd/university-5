@@ -148,26 +148,17 @@ function second(data) {
 
 function third() {
     const dataGraph = readFile('input1.txt');
+
     const bnf = first(dataGraph);
-    let funcGraph = second(bnf);
-    console.log(funcGraph);
+    const parseBnf = parseBnfGraphToEdges(bnf);
+    const funcObj = getFunctionFromBNF(parseBnf.sinks, parseBnf.edges);
+
+    console.log(JSON.stringify(funcObj));
 
     let dataOperations = readFile('input2.txt');
     dataOperations = dataOperations.split('\r').join('').split(' ').join('');
 
     const operations = {};
-
-    // const constOperations = {
-    //     '+': '+',
-    //     '*': '*',
-    //     '&': '&',
-    //     '|': '',
-    //     '^': '',
-    //     '>>': '',
-    //     '<<': '',
-    //     '!': '',
-    // };
-
     const lines = dataOperations.split('\n');
     lines.forEach(line => {
         const parse = line.split(':');
@@ -177,19 +168,64 @@ function third() {
     });
     console.log(operations);
 
-    for (let i = 0; i < funcGraph.length; i++) {
-        if (funcGraph[i] >= '0' && funcGraph[i] <= '9') {
-            let j = i + 1;
-            while (funcGraph[j] >= '0' && funcGraph[j] <= '9') {
-                j++;
-            }
+    const result = calcResultForFunction(funcObj, operations);
 
-            funcGraph = `${funcGraph.slice(0, j)}${funcGraph.slice(j + 2)}`;
-            i = j - 1;
+    let answer = '';
+    result.forEach(r => {
+        answer += `Для ${r.vertex} = ${r.value}\n`;
+    });
+
+    writeFile('output.txt', answer);
+}
+
+function calcResultForFunction(obj, operations) {
+    const result = [];
+    for (let o in obj) {
+        const numbers = calcNumbersForVertexes(obj[o], operations);
+        const res = calcResultByOperation(operations[o], numbers);
+        result.push({vertex: o, value: res});
+    }
+    return result;
+}
+
+function calcResultByOperation(operation, numbers) {
+    switch (operation) {
+        case '+': {
+            return numbers[0] + numbers[1];
+        }
+        case '*': {
+            return numbers[0] * numbers[1];
+        }
+        case '&': {
+            return numbers[0] & numbers[1];
+        }
+        case '|': {
+            return numbers[0] | numbers[1];
+        }
+        case '>>': {
+            return numbers[0] >> numbers[1];
+        }
+        case '<<': {
+            return numbers[0] << numbers[1];
+        }
+        case '!': {
+            return ~numbers[0];
         }
     }
+}
 
-    console.log(funcGraph);
+function calcNumbersForVertexes(obj, operations) {
+    let result = [];
+    for (let o in obj) {
+        if (o >= '0' && o <= '9') {
+            result.push(+o);
+        } else {
+            const numbers = calcNumbersForVertexes(obj[o], operations);
+            const res = calcResultByOperation(operations[o], numbers);
+            result.push(res);
+        }
+    }
+    return result;
 }
 
 //Выходные данные - функция графа, Выход - БНФ графа
@@ -274,7 +310,6 @@ function main() {
 }
 
 main();
-
 
 // const stdin = process.openStdin();
 // stdin.addListener("data", function(d) {
