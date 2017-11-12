@@ -65,7 +65,8 @@ function parseBnfGraphToEdges(data) {
 function getFunctionFromBNF(sinks, edges) {
     const result = {};
     sinks.forEach(s => {
-        result[s] = getVertexesForSink(s, edges);
+        const tmpEdges = edges.slice(0);
+        result[s] = getVertexesForSink(s, tmpEdges);
     });
     return result;
 }
@@ -182,7 +183,9 @@ function calcResultForFunction(obj, operations) {
     const result = [];
     for (let o in obj) {
         const numbers = calcNumbersForVertexes(obj[o], operations);
+        console.log(numbers);
         const res = calcResultByOperation(operations[o], numbers);
+        console.log(res);
         result.push({vertex: o, value: res});
     }
     return result;
