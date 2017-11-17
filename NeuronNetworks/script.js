@@ -1,4 +1,4 @@
-const js2xmlparser = require("js2xmlparser");
+// const js2xmlparser = require("js2xmlparser");
 const fs = require('fs');
 
 function readFile(fileName) {
@@ -304,12 +304,12 @@ function fromFuncToGraph(funcObj, answer) {
 function main() {
     const fileInput = 'input.txt', fileOutput = 'output.txt';
 
-    // let data = readFile(fileInput);
+    let data = readFile(fileInput);
     // writeFile(fileOutput, first(data));
-    // writeFile(fileOutput, second(data));
+    writeFile(fileOutput, second(data));
     // writeFile(fileOutput, fourth(data));
 
-    third();
+    // third();
 }
 
 main();
