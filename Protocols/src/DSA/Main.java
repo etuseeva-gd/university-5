@@ -56,7 +56,18 @@ public class Main {
     void first() throws NoSuchAlgorithmException, FileNotFoundException {
         PrimeNumbers primeNumbers = new PrimeNumbers();
 
-        BigInteger[] pr = primeNumbers.generatePrimes(1024, 256);
+        System.out.println("Введите длину p:");
+        Scanner sc = new Scanner(System.in);
+        int pLen = Integer.parseInt(sc.nextLine());
+        System.out.println("Введите длину q:");
+        int qLen = Integer.parseInt(sc.nextLine());
+
+        System.out.println(pLen + " " + qLen);
+
+        BigInteger[] pr = primeNumbers.generatePrimes(pLen, qLen);
+
+//        BigInteger[] pr = primeNumbers.generatePrimes(1024, 256);
+
         try (PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(primes)))) {
             for (BigInteger aPr : pr) {
                 out.println(aPr);
@@ -104,17 +115,14 @@ public class Main {
                     k = getRandomNumber(q);
                     r = g.modPow(k, p).mod(q);
                 } while (r.equals(BigInteger.ZERO));
-
                 BigInteger tmp = h(m).add(x.multiply(r));
-                System.out.println(sha1(m));
-                System.out.println(h(m));
                 s = k.modInverse(q).multiply(tmp).mod(q);
             } while (s.equals(BigInteger.ZERO));
 
             out.println(r);
             out.println(s);
 
-            System.out.println("Алиса, подпись сообщения. Подписанное сообщение - message_with_signature.txt");
+            System.out.println("Алиса, подпись сообщения. Подпись - message_with_signature.txt");
         }
     }
 
@@ -131,15 +139,16 @@ public class Main {
 
             BigInteger y = new BigInteger(in2.readLine());
 
-            String m = in4.readLine();
-
             BigInteger r = new BigInteger(in3.readLine());
             BigInteger s = new BigInteger(in3.readLine());
 
+            String m = in4.readLine();
+
             BigInteger w = s.modInverse(q);
             BigInteger u1 = h(m).multiply(w).mod(q);
+
             BigInteger u2 = r.multiply(w).mod(q);
-            BigInteger v = g.modPow(u1, p).multiply(y.modPow(u2, p)).mod(q); //???
+            BigInteger v = g.modPow(u1, p).multiply(y.modPow(u2, p)).mod(p).mod(q); //???
 
             out.println(v);
 
@@ -156,7 +165,7 @@ public class Main {
     BigInteger h(String val) throws Exception {
         String s = sha1(val);
         byte[] byteS = s.getBytes();
-        return new BigInteger(byteS).mod(new BigInteger("1000000000000"));
+        return new BigInteger(byteS);
     }
 
     private BigInteger getRandomNumber(BigInteger limit) throws NoSuchAlgorithmException {
