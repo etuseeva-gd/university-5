@@ -6,8 +6,7 @@ import java.security.SecureRandom;
 
 public class PrimeNumbers {
     BigInteger[] generatePrimes(int qLen, int pLen) throws NoSuchAlgorithmException {
-//        BigInteger q = generateQ(qLen);
-        BigInteger q = new BigInteger("11");
+        BigInteger q = generateQ(qLen);
         BigInteger p = generateP(q, pLen);
         BigInteger g = generateG(p, q, pLen);
         return new BigInteger[]{p, q, g};

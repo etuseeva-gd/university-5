@@ -1,7 +1,9 @@
 package DSA;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.*;
 import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Scanner;
@@ -14,11 +16,11 @@ public class Main {
             message_with_signature = "message_with_signature.txt",
             result_checking = "result_checking.txt";
 
-    public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
+    public static void main(String[] args) throws Exception {
         new Main().run();
     }
 
-    void run() throws IOException, NoSuchAlgorithmException {
+    void run() throws Exception {
         System.out.println("Выберите действие:");
         System.out.println("1. Генерация общих параметров (p, q, g)");
         System.out.println("2. Алиса: Генерация открытого (y), закрытого (x) ключей");
@@ -54,15 +56,7 @@ public class Main {
     void first() throws NoSuchAlgorithmException, FileNotFoundException {
         PrimeNumbers primeNumbers = new PrimeNumbers();
 
-        System.out.println("Введите длину p:");
-        Scanner sc = new Scanner(System.in);
-        int pLen = Integer.parseInt(sc.nextLine());
-        System.out.println("Введите длину q:");
-        int qLen = Integer.parseInt(sc.nextLine());
-
-        System.out.println(pLen + " " + qLen);
-
-        BigInteger[] pr = primeNumbers.generatePrimes(pLen, qLen);
+        BigInteger[] pr = primeNumbers.generatePrimes(1024, 256);
         try (PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(primes)))) {
             for (BigInteger aPr : pr) {
                 out.println(aPr);
@@ -70,7 +64,6 @@ public class Main {
         }
 
         System.out.println("Простые числа сгенерированы: primes.txt");
-        sc.close();
     }
 
     void second() throws IOException, NoSuchAlgorithmException {
@@ -91,10 +84,10 @@ public class Main {
         }
     }
 
-    void third() throws NoSuchAlgorithmException, IOException {
+    void third() throws Exception {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(primes)));
              BufferedReader in2 = new BufferedReader(new InputStreamReader(new FileInputStream(closeKeyX)));
-             BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(message)));
+             BufferedReader in3 = new BufferedReader(new InputStreamReader(new FileInputStream(message)));
              PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(message_with_signature)))) {
 
             BigInteger p = new BigInteger(in.readLine());
@@ -103,7 +96,7 @@ public class Main {
 
             BigInteger x = new BigInteger(in2.readLine());
 
-            BigInteger m = getMessage();
+            String m = in3.readLine();
 
             BigInteger k, r, s;
             do {
@@ -113,7 +106,9 @@ public class Main {
                 } while (r.equals(BigInteger.ZERO));
 
                 BigInteger tmp = h(m).add(x.multiply(r));
-                s = k.pow(-1).multiply(tmp).mod(q);
+                System.out.println(sha1(m));
+                System.out.println(h(m));
+                s = k.modInverse(q).multiply(tmp).mod(q);
             } while (s.equals(BigInteger.ZERO));
 
             out.println(r);
@@ -123,10 +118,11 @@ public class Main {
         }
     }
 
-    void fourth() throws IOException, NoSuchAlgorithmException {
+    void fourth() throws Exception {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(primes)));
              BufferedReader in2 = new BufferedReader(new InputStreamReader(new FileInputStream(openKeyY)));
              BufferedReader in3 = new BufferedReader(new InputStreamReader(new FileInputStream(message_with_signature)));
+             BufferedReader in4 = new BufferedReader(new InputStreamReader(new FileInputStream(message)));
              PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(result_checking)))) {
 
             BigInteger p = new BigInteger(in.readLine());
@@ -135,17 +131,18 @@ public class Main {
 
             BigInteger y = new BigInteger(in2.readLine());
 
-            BigInteger m = getMessage();
+            String m = in4.readLine();
 
             BigInteger r = new BigInteger(in3.readLine());
             BigInteger s = new BigInteger(in3.readLine());
 
-            BigInteger w = s.pow(-1).mod(q);
+            BigInteger w = s.modInverse(q);
             BigInteger u1 = h(m).multiply(w).mod(q);
             BigInteger u2 = r.multiply(w).mod(q);
             BigInteger v = g.modPow(u1, p).multiply(y.modPow(u2, p)).mod(q); //???
 
             out.println(v);
+
             System.out.println("Боб, проверяет подпись. Полученный им результат - result_checking.txt");
 
             if (v.equals(r)) {
@@ -156,19 +153,19 @@ public class Main {
         }
     }
 
-    BigInteger getMessage() throws IOException {
-        try () {
-            String mess = in.readLine();
-            byte[] byteMessage = mess.getBytes();
-            return new BigInteger(byteMessage);
-        }
-    }
-
-    BigInteger h(BigInteger val) {
-        return val;
+    BigInteger h(String val) throws Exception {
+        String s = sha1(val);
+        byte[] byteS = s.getBytes();
+        return new BigInteger(byteS).mod(new BigInteger("1000000000000"));
     }
 
     private BigInteger getRandomNumber(BigInteger limit) throws NoSuchAlgorithmException {
         return new BigInteger(limit.bitLength(), SecureRandom.getInstance("SHA1PRNG")).mod(limit).add(BigInteger.ONE);
+    }
+
+    public String sha1(String input) throws Exception {
+        MessageDigest msdDigest = MessageDigest.getInstance("SHA-1");
+        msdDigest.update(input.getBytes("UTF-8"), 0, input.length());
+        return DatatypeConverter.printHexBinary(msdDigest.digest());
     }
 }
