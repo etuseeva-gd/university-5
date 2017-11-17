@@ -178,3 +178,6 @@ public class Main {
         return DatatypeConverter.printHexBinary(msdDigest.digest());
     }
 }
+
+//Пункт
+//6.2 - скрытый канал, на основе подписи (подпись выбрать самой)
