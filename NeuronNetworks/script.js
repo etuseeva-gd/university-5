@@ -77,7 +77,7 @@ function getVertexesForSink(sink, edges) {
         if (edges[i][1] === sink) {
             let vertex = edges[i][0];
             edges.splice(i--, 1);
-            result[vertex] = getVertexesForSink(vertex, edges);
+            result[vertex] = getVertexesForSink(vertex, edges.slice(0));
         }
     }
     return result;
