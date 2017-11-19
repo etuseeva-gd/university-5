@@ -50,7 +50,6 @@ public class Main {
         BigInteger p;
         Trio w, check, coeffs;
         boolean flag;
-        Trio point;
 
         BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("output.txt"));
         do {
@@ -62,30 +61,40 @@ public class Main {
             coeffs = getCoeffs(w, p, 1, false); //2nd - b
 
             //3 шаг
-            check = checkCoeffs(coeffs, p); //3rd
+            check = checkCoeffs(coeffs, p); //3rd -> p, N, r
 
             //4 шаг
             flag = checkTrio(check); //4th
         } while (!flag);
 
-        bufferedWriter.write("P: " + p.toString() + "\n");
-        bufferedWriter.write("c: " + w.getA() + " d: " + w.getB() + "\n");
-        Trio startPoint;
+        bufferedWriter.write("p: " + p.toString() + "\n");
+//        bufferedWriter.write("c: " + w.getA() + " d: " + w.getB() + "\n");
 
+        //Начало шага 5
+        Trio startPoint, point;
         do {
             point = generateAndCheckB(check); //5th
             startPoint = point;
         } while (checkPoint(point, check.getB(), check.getA()));
 
+        //Вывод координат X, Y в файл
         writePoints(startPoint, check.getB(), check.getA());
+
+        //Вывод точки в файл
         bufferedWriter.write("x0: " + point.getA() + " y0: " + point.getB() + " А: " + point.getC() + "\n");
+
         Trio q = point;
-        BigInteger n = check.getB().divide(check.getC());
-        bufferedWriter.write("N: " + n.intValue() + "\n");
-        for (int i = 0; i < n.intValue() - 1; i++) {
+        BigInteger nDivR = check.getB().divide(check.getC());
+
+//        bufferedWriter.write("N: " + nDivR.intValue() + "\n");
+
+        for (int i = 0; i < nDivR.intValue() - 1; i++) {
             q = sumPoints(q, point, check.getA());
         }
+
         bufferedWriter.write("Q = (" + q.getA().toString() + ", " + q.getB().toString() + ")");
+        bufferedWriter.write("r = " + check.getC());
+
         bufferedWriter.close();
     }
 
@@ -210,45 +219,55 @@ public class Main {
             valuesForM.add(p);
 
             do {
-                BigInteger temp = valuesForU.get(index).pow(2);
-                temp = temp.add(BigInteger.ONE);
+                BigInteger mPlusOne = valuesForU.get(index).pow(2);
+                mPlusOne = mPlusOne.add(D);
 
-                boolean flag1 = temp.mod(valuesForM.get(index)).equals(BigInteger.ZERO);
-                temp = temp.divide(valuesForM.get(index));
-                boolean flag = temp.equals(BigInteger.ZERO);
-                if (flag || !flag1) {
+                boolean ok1 = mPlusOne.mod(valuesForM.get(index)).equals(BigInteger.ZERO);
+                mPlusOne = mPlusOne.divide(valuesForM.get(index));
+                boolean ok2 = mPlusOne.equals(BigInteger.ZERO);
+
+                if (!ok1 || ok2) {
                     if (!used) {
                         getCoeffs(w, p, 0, true);
                     } else {
                         return null;
                     }
                 }
-                BigInteger min1 = valuesForU.get(index).mod(temp);
-                BigInteger min2 = temp.subtract(valuesForU.get(index)).mod(temp);
+
+                BigInteger min1 = valuesForU.get(index).mod(mPlusOne);
+                BigInteger min2 = mPlusOne.subtract(valuesForU.get(index)).mod(mPlusOne);
+
                 valuesForU.add(min1.min(min2));
-                valuesForM.add(temp);
+                valuesForM.add(mPlusOne);
+
                 index++;
             } while (!valuesForM.get(index).equals(BigInteger.ONE));
 
             BigInteger a = valuesForU.get(index - 1);
             BigInteger b = BigInteger.ONE;
             index--;
+
             while (index != 0) {
                 BigInteger chisOne = valuesForU.get(index - 1).multiply(a);
                 BigInteger chisOneNegate = chisOne.negate();
+
                 chisOne = chisOne.add(BigInteger.ONE.multiply(b));
                 chisOneNegate = chisOneNegate.add(BigInteger.ONE.multiply(b));
+
                 BigInteger znam = a.pow(TWO.intValue());
                 znam = znam.add(BigInteger.ONE.multiply(b.pow(TWO.intValue())));
+
                 BigInteger chisTwo = a.negate();
                 BigInteger chisTwoNegate = chisTwo;
                 chisTwo = chisTwo.add(valuesForU.get(index - 1).multiply(b));
                 chisTwoNegate = chisTwoNegate.subtract(valuesForU.get(index - 1).multiply(b));
+
                 if (chisOne.mod(znam).equals(BigInteger.ZERO)) {
                     a = chisOne.divide(znam);
                 } else {
                     a = chisOneNegate.divide(znam);
                 }
+
                 if (chisTwo.mod(znam).equals(BigInteger.ZERO)) {
                     b = chisTwo.divide(znam);
                 } else {
@@ -256,11 +275,13 @@ public class Main {
                 }
                 index--;
             }
+
             return new Trio(a, b, null);
         } catch (ArithmeticException e) {
             return null;
         }
     }
+    //Окончание 2 шага
 
     //Шаг 3 - проверка коэффициетов
     private static Trio checkCoeffs(Trio coeffs, BigInteger p) {
@@ -293,7 +314,8 @@ public class Main {
         if (check.getA().equals(check.getC())) {
             return false;
         }
-        for (int i = 1; i <= 5; i++) {
+        int m = 5; //степень безопасности выбирается в соответствии с таблицой
+        for (int i = 1; i <= m; i++) {
             if (check.getA().modPow(BigInteger.valueOf(i), check.getC()).equals(BigInteger.ONE)) {
                 return false;
             }
@@ -303,19 +325,24 @@ public class Main {
 
     //Шаг 5 - генерация произвольной точки и ее проверка
     private static Trio generateAndCheckB(Trio check) {
-        Random random = new Random();
-        BigInteger p = check.getA();
-/*        BigInteger x0 = new BigInteger(random.nextInt(p.bitLength() + 1) + p.bitLength() / 2, certainty, new SecureRandom()).mod(p);
-        BigInteger y0 = new BigInteger(random.nextInt(p.bitLength() + 1) + p.bitLength() / 2, certainty, new SecureRandom()).mod(p);*/
-        BigInteger x0 = BigInteger.ONE;
-        BigInteger y0 = TWO;
-        BigInteger n = check.getB();
-        BigInteger r = check.getC();
-        BigInteger r2 = r.multiply(TWO).mod(p);
-        BigInteger r4 = r.multiply(FOUR).mod(p);
-        BigInteger a = y0.pow(TWO.intValue()).subtract(x0.pow(THREE.intValue())).mod(p);
-        a = a.multiply(x0.modInverse(p));
+        BigInteger p = check.getA(), n = check.getB(), r = check.getC();
+
+        int len = p.bitLength();
+        BigInteger x0;
+        do {
+            x0 = getRandomBigInteger(len, p);
+        } while (!x0.gcd(p).equals(BigInteger.ONE));
+        BigInteger y0 = getRandomBigInteger(len, p);
+
+//        BigInteger x0 = BigInteger.ONE;
+//        BigInteger y0 = TWO;
+
+        BigInteger r2 = r.multiply(TWO).mod(p), r4 = r.multiply(FOUR).mod(p);
+
+        BigInteger a = y0.pow(2).subtract(x0.pow(3)).multiply(x0.modInverse(p)).mod(p);
         BigInteger minusA = p.subtract(a);
+
+        //Проверка квадратичных вычетов/невычетов
         if ((r2.equals(n) && !(getLegendreSymbol(minusA, n) == 1)) || (r4.equals(n) && (getLegendreSymbol(minusA, n) == 1))) {
             return new Trio(x0, y0, a);
         } else {
@@ -323,48 +350,26 @@ public class Main {
         }
     }
 
+    private static BigInteger getRandomBigInteger(int len, BigInteger p) {
+        return new BigInteger(new Random().nextInt(len + 1) + len / 2, certainty, new SecureRandom()).mod(p);
+    }
+
+    //Шаг 6 - проверка выбранной точки (сложение ее с собой N раз)
     private static boolean checkPoint(Trio point, BigInteger n, BigInteger p) {
         if (point == null) {
             return true;
         }
         Trio result = point;
-        BigInteger i;
-        try {
-            for (i = BigInteger.ZERO; n.subtract(BigInteger.ONE).compareTo(i) >= 0; i = i.add(BigInteger.ONE)) {
-                result = sumPoints(result, point, p);
-                if (result == null) {
-                    return true;
-                }
+        for (BigInteger i = BigInteger.ZERO; n.subtract(BigInteger.ONE).compareTo(i) >= 0; i = i.add(BigInteger.ONE)) {
+            result = sumPoints(result, point, p);
+            if (result == null) {
+                return true;
             }
-        } catch (ArithmeticException e) {
-            //do nothing
         }
         return false;
     }
 
-    private static void writePoints(Trio point, BigInteger n, BigInteger p) throws IOException {
-        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("pointX.txt"));
-        BufferedWriter bufferedWriter1 = new BufferedWriter(new FileWriter("pointY.txt"));
-        Trio result = point;
-        BigInteger i;
-        try {
-            for (i = BigInteger.ZERO; n.subtract(BigInteger.ONE).compareTo(i) >= 0; i = i.add(BigInteger.ONE)) {
-                result = sumPoints(result, point, p);
-                if (result == null) {
-                    break;
-                } else {
-                    bufferedWriter.write(result.getA() + "\n");
-                    bufferedWriter1.write(result.getB() + "\n");
-                }
-            }
-        } catch (ArithmeticException e) {
-            //если мы нашли обратный элемент, то просто закончить искать точки
-        } finally {
-            bufferedWriter.close();
-            bufferedWriter1.close();
-        }
-    }
-
+    //Сумма точек
     private static Trio sumPoints(Trio result, Trio point, BigInteger p) {
         if (result == null) {
             return null;
@@ -386,5 +391,24 @@ public class Main {
         BigInteger x3 = lambda.pow(TWO.intValue()).subtract(result.getA()).subtract(point.getA()).mod(p);
         BigInteger y3 = result.getA().subtract(x3).multiply(lambda).subtract(result.getB()).mod(p);
         return new Trio(x3, y3, null);
+    }
+
+    //Вывод в файл координат X, Y относительно порождающей точки
+    private static void writePoints(Trio point, BigInteger n, BigInteger p) throws IOException {
+        Trio result = point;
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("pointX.txt"));
+             BufferedWriter bufferedWriter1 = new BufferedWriter(new FileWriter("pointY.txt"))) {
+            for (BigInteger i = BigInteger.ZERO; n.subtract(BigInteger.ONE).compareTo(i) >= 0; i = i.add(BigInteger.ONE)) {
+                result = sumPoints(result, point, p);
+                if (result == null) {
+                    break;
+                } else {
+                    bufferedWriter.write(result.getA() + "\n");
+                    bufferedWriter1.write(result.getB() + "\n");
+                }
+            }
+        } catch (ArithmeticException e) {
+            //если мы нашли обратный элемент, то просто закончить искать точки
+        }
     }
 }
