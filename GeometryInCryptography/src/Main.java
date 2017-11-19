@@ -37,7 +37,6 @@ public class Main {
     public static final BigInteger THREE = new BigInteger("3");
     public static final BigInteger FOUR = new BigInteger("4");
     public static final BigInteger FIVE = new BigInteger("5");
-    public static final BigInteger SIX = new BigInteger("6");
     public static final BigInteger EIGHT = new BigInteger("8");
 
     private static final BigInteger D = BigInteger.ONE;
@@ -51,7 +50,6 @@ public class Main {
         Trio w, check, coeffs;
         boolean flag;
 
-        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("output.txt"));
         do {
             //1 шаг
             p = getPrimeNumber(len); //1st
@@ -67,6 +65,7 @@ public class Main {
             flag = checkTrio(check); //4th
         } while (!flag);
 
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("output.txt"));
         bufferedWriter.write("p: " + p.toString() + "\n");
 //        bufferedWriter.write("c: " + w.getA() + " d: " + w.getB() + "\n");
 
