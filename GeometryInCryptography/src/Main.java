@@ -317,15 +317,15 @@ public class Main {
     }
 
     //Шаг 4 - проверка полученных данных
-    boolean fourth(Trio check, int m) {
-        if (check == null) {
+    boolean fourth(Trio pnr, int m) {
+        if (pnr == null) {
             return false;
         }
-        if (check.getA().equals(check.getC())) {
+        if (pnr.getA().equals(pnr.getC())) {
             return false;
         }
         for (int i = 1; i <= m; i++) {
-            if (check.getA().modPow(BigInteger.valueOf(i), check.getC()).equals(BigInteger.ONE)) {
+            if (pnr.getA().modPow(BigInteger.valueOf(i), pnr.getC()).equals(BigInteger.ONE)) {
                 return false;
             }
         }
@@ -333,11 +333,13 @@ public class Main {
     }
 
     //Шаг 5 - генерация произвольной точки и ее проверка
-    Trio fifth(Trio check) {
+    Trio fifth(Trio pnr) {
         try {
-            BigInteger p = check.getA(), n = check.getB(), r = check.getC();
+            BigInteger p = pnr.getA(), n = pnr.getB(), r = pnr.getC();
 
             int len = p.bitLength();
+
+            //Генерация координат случайной точки
             BigInteger x0;
             do {
                 x0 = getRandomBigInteger(len, p);
@@ -431,8 +433,6 @@ public class Main {
         //Вывод точки в файл
         BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("output.txt"));
         bufferedWriter.write("p = " + p.toString() + "\n");
-
-//        bufferedWriter.write("(x0, y0) = (" + point.getA() + ", " + point.getB() + ")");
         bufferedWriter.write("А = " + point.getC() + "\n");
 
         Trio q = point;
