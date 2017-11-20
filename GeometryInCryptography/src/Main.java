@@ -47,35 +47,36 @@ public class Main {
         System.out.println("Введите длину числа p в битах:");
         int len = scanner.nextInt();
 
-        BigInteger p;
-        Trio check, coeffs;
-        while(true) {
-            //1 шаг
-            p = first(len);
+//        while (true) {
+            BigInteger p;
+            Trio check, coeffs;
+            while (true) {
+                //1 шаг
+                p = first(len);
 
-            //2 шаг
-            coeffs = second(p);
+                //2 шаг
+                coeffs = second(p);
 
-            //3 шаг -> p, N, r
-            check = third(coeffs, p);
+                //3 шаг -> p, N, r
+                check = third(coeffs, p);
 
-            //4 шаг
-            boolean ok = fourth(check);
+                //4 шаг
+                boolean ok = fourth(check);
 
-            if (ok) {
-                break;
+                if (ok) {
+                    break;
+                }
             }
-        }
 
-        //Начало шага 5
-        Pair<Trio, Trio> res = fifthAndSixth(check);
-        Trio startPoint = res.getKey(), point = res.getValue();
+            //5 шаг && 6 шаг
+            Pair<Trio, Trio> res = fifthAndSixth(check);
 
-        //Вывод координат X, Y в файл
-        writePoints(startPoint, check.getB(), check.getA());
+            //Вывод координат X, Y в файл
+            writePoints(res.getKey(), check.getB(), check.getA());
 
-        //Вывод данных в файл
-        print(p, point, check);
+            //Вывод данных в файл
+            print(p, res.getValue(), check);
+//        }
     }
 
     //Первый шаг, сегенрировать простое число p
@@ -89,11 +90,11 @@ public class Main {
 
     //Шаг второй, алгоритм 7.8.1 - Разложение простого числа в Z|-D^1/2|
     Trio second(BigInteger p) {
-        Trio w = findPrimeDecomposition(p, D);
+        Pair<BigInteger, BigInteger> w = findPrimeDecomposition(p, D);
         return getCoeffs(w, p, 1, false);
     }
 
-    Trio findPrimeDecomposition(BigInteger p, BigInteger D) {
+    Pair<BigInteger, BigInteger> findPrimeDecomposition(BigInteger p, BigInteger D) {
         BigInteger n = p.subtract(D);
         int legendreSymbol = getLegendreSymbol(n, p); //Зачем?
         if (legendreSymbol != 1) {
@@ -103,7 +104,6 @@ public class Main {
         }
     }
 
-    //Todo: может быть переписать
     int getLegendreSymbol(BigInteger a, BigInteger b) {
         if (!b.gcd(a).equals(BigInteger.ONE))
             return 0;
@@ -135,8 +135,7 @@ public class Main {
         }
     }
 
-    //Todo: to pair
-    Trio REASONAlgorithm(BigInteger p, BigInteger n) {
+    Pair<BigInteger, BigInteger> REASONAlgorithm(BigInteger p, BigInteger n) {
         BigInteger q = p.subtract(BigInteger.ONE); // p - 1
         int s = 0; // 0
 
@@ -147,7 +146,7 @@ public class Main {
 
         if (s == 1) {
             BigInteger r = n.modPow(p.add(BigInteger.ONE).divide(FOUR), p);
-            return new Trio(r, p.subtract(r), null); //r, p - r
+            return new Pair<>(r, p.subtract(r)); //r, p - r
         } else {
             //Выбрали произвольный квадратичный невычет
             BigInteger z = BigInteger.ONE;
@@ -180,12 +179,11 @@ public class Main {
 
                 m = index;
             }
-
-            return new Trio(r, p.subtract(r), null); //r, p - r
+            return new Pair<>(r, p.subtract(r)); //r, p - r
         }
     }
 
-    Trio getCoeffs(Trio w, BigInteger p, int choice, boolean used) {
+    Trio getCoeffs(Pair<BigInteger, BigInteger> w, BigInteger p, int choice, boolean used) {
         try {
             //Если нет решений
             if (w == null || p == null) {
@@ -195,7 +193,7 @@ public class Main {
             //Инициализация значений, шаг 3
             int index = 0;
             //Связан с выбором между r, p-r ???
-            BigInteger u = choice == 1 ? w.getA() : w.getB();
+            BigInteger u = choice == 1 ? w.getKey() : w.getValue();
 
             ArrayList<BigInteger> valuesForU = new ArrayList<BigInteger>();
             valuesForU.add(u);
@@ -393,6 +391,7 @@ public class Main {
         }
     }
 
+    //Зона вывода данных
     //Вывод в файл координат X, Y относительно порождающей точки
     void writePoints(Trio point, BigInteger n, BigInteger p) throws IOException {
         Trio result = point;
