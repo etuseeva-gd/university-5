@@ -49,25 +49,23 @@ public class Main {
 
         BigInteger p;
         Trio check, coeffs;
-        boolean flag;
-
-        do {
+        while(true) {
             //1 шаг
-            p = first(len); //1st
+            p = first(len);
 
             //2 шаг
             coeffs = second(p);
 
-            //3 шаг
-            check = third(coeffs, p); //3rd -> p, N, r
+            //3 шаг -> p, N, r
+            check = third(coeffs, p);
 
             //4 шаг
-            flag = fourth(check); //4th
-        } while (!flag);
+            boolean ok = fourth(check);
 
-        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("output.txt"));
-        bufferedWriter.write("p: " + p.toString() + "\n");
-//        bufferedWriter.write("c: " + w.getA() + " d: " + w.getB() + "\n");
+            if (ok) {
+                break;
+            }
+        }
 
         //Начало шага 5
         Pair<Trio, Trio> res = fifthAndSixth(check);
@@ -76,22 +74,8 @@ public class Main {
         //Вывод координат X, Y в файл
         writePoints(startPoint, check.getB(), check.getA());
 
-        //Вывод точки в файл
-        bufferedWriter.write("x0: " + point.getA() + " y0: " + point.getB() + " А: " + point.getC() + "\n");
-
-        Trio q = point;
-        BigInteger nDivR = check.getB().divide(check.getC());
-
-//        bufferedWriter.write("N: " + nDivR.intValue() + "\n");
-
-        for (int i = 0; i < nDivR.intValue() - 1; i++) {
-            q = sumPoints(q, point, check.getA());
-        }
-
-        bufferedWriter.write("Q = (" + q.getA().toString() + ", " + q.getB().toString() + ")");
-        bufferedWriter.write("r = " + check.getC());
-
-        bufferedWriter.close();
+        //Вывод данных в файл
+        print(p, point, check);
     }
 
     //Первый шаг, сегенрировать простое число p
@@ -426,5 +410,26 @@ public class Main {
         } catch (ArithmeticException e) {
             //если мы нашли обратный элемент, то просто закончить искать точки
         }
+    }
+
+    void print(BigInteger p, Trio point, Trio check) throws IOException {
+        //Вывод точки в файл
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("output.txt"));
+        bufferedWriter.write("p = " + p.toString() + "\n");
+
+//        bufferedWriter.write("(x0, y0) = (" + point.getA() + ", " + point.getB() + ")");
+        bufferedWriter.write("А = " + point.getC() + "\n");
+
+        Trio q = point;
+        BigInteger nDivR = check.getB().divide(check.getC());
+
+        for (int i = 0; i < nDivR.intValue() - 1; i++) {
+            q = sumPoints(q, point, check.getA());
+        }
+
+        bufferedWriter.write("Q = (" + q.getA().toString() + ", " + q.getB().toString() + ")\n");
+        bufferedWriter.write("r = " + check.getC());
+
+        bufferedWriter.close();
     }
 }
