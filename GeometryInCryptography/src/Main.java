@@ -49,21 +49,20 @@ public class Main {
 
         while (true) {
             BigInteger p;
-            Trio check, coeffs;
+            Trio pnr;
+
             while (true) {
                 //1 шаг
                 p = first(len);
 
-                System.out.println(p);
-
                 //2 шаг
-                coeffs = second(p);
+                Pair<BigInteger, BigInteger> ab = second(p);
 
                 //3 шаг -> p, N, r
-                check = third(coeffs, p);
+                pnr = third(ab, p);
 
                 //4 шаг
-                boolean ok = fourth(check);
+                boolean ok = fourth(pnr);
 
                 if (ok) {
                     break;
@@ -71,24 +70,27 @@ public class Main {
             }
 
             //5 шаг && 6 шаг
-            int pointNum = 1;
+            //Если циклится с поиском точки -> прервать и найти новое p
+            boolean ok = false;
+            int k = 1;
 
             Trio startPoint, point;
             do {
-                point = fifth(check); //5th
+                point = fifth(pnr); //5th
                 startPoint = point;
 
-                if (iter == ++pointNum) {
+                if (iter == ++k) {
+                    ok = true;
                     break;
                 }
-            } while (sixth(point, check.getB(), check.getA()));
+            } while (sixth(point, pnr.getB(), pnr.getA()));
 
-            if (iter != pointNum) {
+            if (!ok) {
                 //Вывод координат X, Y в файл
-                writePoints(startPoint, check.getB(), check.getA());
+                writePoints(startPoint, pnr.getB(), pnr.getA());
 
                 //Вывод данных в файл
-                print(p, point, check);
+                print(p, point, pnr);
                 break;
             }
         }
@@ -104,7 +106,7 @@ public class Main {
     }
 
     //Шаг второй, алгоритм 7.8.1 - Разложение простого числа в Z|-D^1/2|
-    Trio second(BigInteger p) {
+    Pair<BigInteger, BigInteger> second(BigInteger p) {
         Pair<BigInteger, BigInteger> w = findPrimeDecomposition(p, D);
         return getCoeffs(w, p, 1, false);
     }
@@ -198,7 +200,7 @@ public class Main {
         }
     }
 
-    Trio getCoeffs(Pair<BigInteger, BigInteger> w, BigInteger p, int choice, boolean used) {
+    Pair<BigInteger, BigInteger> getCoeffs(Pair<BigInteger, BigInteger> w, BigInteger p, int choice, boolean used) {
         try {
             //Если нет решений
             if (w == null || p == null) {
@@ -274,7 +276,7 @@ public class Main {
                 index--;
             }
 
-            return new Trio(a, b, null);
+            return new Pair<>(a, b);
         } catch (ArithmeticException e) {
             return null;
         }
@@ -282,17 +284,20 @@ public class Main {
     //Окончание 2 шага
 
     //Шаг 3 - проверка коэффициетов
-    Trio third(Trio coeffs, BigInteger p) {
-        if (coeffs == null || p == null) {
+    Trio third(Pair<BigInteger, BigInteger> ab, BigInteger p) {
+        if (ab == null || p == null) {
             return null;
         }
-        BigInteger a = coeffs.getA();
-        BigInteger b = coeffs.getB();
+
+        BigInteger a = ab.getKey();
+        BigInteger b = ab.getValue();
+
         ArrayList<BigInteger> valuesForT = new ArrayList<BigInteger>();
         valuesForT.add(b.multiply(TWO).negate());
         valuesForT.add(a.multiply(TWO));
         valuesForT.add(b.multiply(TWO));
         valuesForT.add(a.multiply(TWO).negate());
+
         for (BigInteger bigInteger : valuesForT) {
             bigInteger = bigInteger.add(BigInteger.ONE).add(p);
             if (bigInteger.mod(TWO).equals(BigInteger.ZERO) && bigInteger.divide(TWO).isProbablePrime(certainty)) {
