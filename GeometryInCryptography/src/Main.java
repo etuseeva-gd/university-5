@@ -45,7 +45,10 @@ public class Main {
     void run() throws IOException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Введите длину числа p в битах:");
-        int len = scanner.nextInt();
+        int len = Integer.parseInt(scanner.nextLine());
+
+        System.out.println("Введите m:");
+        int m = Integer.parseInt(scanner.nextLine());
 
         while (true) {
             BigInteger p;
@@ -62,7 +65,7 @@ public class Main {
                 pnr = third(ab, p);
 
                 //4 шаг
-                boolean ok = fourth(pnr);
+                boolean ok = fourth(pnr, m);
 
                 if (ok) {
                     break;
@@ -75,7 +78,7 @@ public class Main {
             int k = 1;
 
             Trio startPoint, point;
-            do {
+            while (true) {
                 point = fifth(pnr); //5th
                 startPoint = point;
 
@@ -83,7 +86,11 @@ public class Main {
                     ok = true;
                     break;
                 }
-            } while (sixth(point, pnr.getB(), pnr.getA()));
+
+                if (!sixth(point, pnr.getB(), pnr.getA())) {
+                    break;
+                }
+            };
 
             if (!ok) {
                 //Вывод координат X, Y в файл
@@ -292,7 +299,7 @@ public class Main {
         BigInteger a = ab.getKey();
         BigInteger b = ab.getValue();
 
-        ArrayList<BigInteger> valuesForT = new ArrayList<BigInteger>();
+        ArrayList<BigInteger> valuesForT = new ArrayList<>();
         valuesForT.add(b.multiply(TWO).negate());
         valuesForT.add(a.multiply(TWO));
         valuesForT.add(b.multiply(TWO));
@@ -310,14 +317,13 @@ public class Main {
     }
 
     //Шаг 4 - проверка полученных данных
-    boolean fourth(Trio check) {
+    boolean fourth(Trio check, int m) {
         if (check == null) {
             return false;
         }
         if (check.getA().equals(check.getC())) {
             return false;
         }
-        int m = 5; //степень безопасности выбирается в соответствии с таблицой
         for (int i = 1; i <= m; i++) {
             if (check.getA().modPow(BigInteger.valueOf(i), check.getC()).equals(BigInteger.ONE)) {
                 return false;
