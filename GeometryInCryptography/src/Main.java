@@ -34,7 +34,7 @@ class Trio {
 }
 
 public class Main {
-    private int certainty = 200;
+    private int certainty = 200, iter = 1000;
     private BigInteger TWO = new BigInteger("2"), THREE = new BigInteger("3"), FOUR = new BigInteger("4"),
             FIVE = new BigInteger("5"), EIGHT = new BigInteger("8"), D = BigInteger.ONE;
 
@@ -47,12 +47,14 @@ public class Main {
         System.out.println("Введите длину числа p в битах:");
         int len = scanner.nextInt();
 
-//        while (true) {
+        while (true) {
             BigInteger p;
             Trio check, coeffs;
             while (true) {
                 //1 шаг
                 p = first(len);
+
+                System.out.println(p);
 
                 //2 шаг
                 coeffs = second(p);
@@ -69,14 +71,27 @@ public class Main {
             }
 
             //5 шаг && 6 шаг
-            Pair<Trio, Trio> res = fifthAndSixth(check);
+            int pointNum = 1;
 
-            //Вывод координат X, Y в файл
-            writePoints(res.getKey(), check.getB(), check.getA());
+            Trio startPoint, point;
+            do {
+                point = fifth(check); //5th
+                startPoint = point;
 
-            //Вывод данных в файл
-            print(p, res.getValue(), check);
-//        }
+                if (iter == ++pointNum) {
+                    break;
+                }
+            } while (sixth(point, check.getB(), check.getA()));
+
+            if (iter != pointNum) {
+                //Вывод координат X, Y в файл
+                writePoints(startPoint, check.getB(), check.getA());
+
+                //Вывод данных в файл
+                print(p, point, check);
+                break;
+            }
+        }
     }
 
     //Первый шаг, сегенрировать простое число p
@@ -307,17 +322,7 @@ public class Main {
     }
 
     //Шаг 5 - генерация произвольной точки и ее проверка
-    Pair<Trio, Trio> fifthAndSixth(Trio check) {
-        Trio startPoint, point;
-        do {
-            point = generateAndCheckB(check); //5th
-            startPoint = point;
-        } while (sixth(point, check.getB(), check.getA()));
-
-        return new Pair<>(startPoint, point);
-    }
-
-    Trio generateAndCheckB(Trio check) {
+    Trio fifth(Trio check) {
         try {
             BigInteger p = check.getA(), n = check.getB(), r = check.getC();
 
