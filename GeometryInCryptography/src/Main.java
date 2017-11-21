@@ -1,3 +1,5 @@
+import javafx.util.Pair;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -32,73 +34,77 @@ class Trio {
 }
 
 public class Main {
-    public static final int certainty = 200;
-    public static final BigInteger TWO = new BigInteger("2");
-    public static final BigInteger THREE = new BigInteger("3");
-    public static final BigInteger FOUR = new BigInteger("4");
-    public static final BigInteger FIVE = new BigInteger("5");
-    public static final BigInteger EIGHT = new BigInteger("8");
-
-    private static final BigInteger D = BigInteger.ONE;
+    private int certainty = 200, iter = 1000;
+    private BigInteger TWO = new BigInteger("2"), THREE = new BigInteger("3"), FOUR = new BigInteger("4"),
+            FIVE = new BigInteger("5"), EIGHT = new BigInteger("8"), D = BigInteger.ONE;
 
     public static void main(String[] args) throws IOException {
+        new Main().run();
+    }
+
+    void run() throws IOException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Введите длину числа p в битах:");
-        int len = scanner.nextInt();
+        int len = Integer.parseInt(scanner.nextLine());
 
-        BigInteger p;
-        Trio w, check, coeffs;
-        boolean flag;
+        System.out.println("Введите m:");
+        int m = Integer.parseInt(scanner.nextLine());
 
-        do {
-            //1 шаг
-            p = getPrimeNumber(len); //1st
+        while (true) {
+            BigInteger p;
+            Trio pnr;
 
-            //2 шаг
-            w = findPrimeDecomposition(p, D); //2nd - a
-            coeffs = getCoeffs(w, p, 1, false); //2nd - b
+            while (true) {
+                //1 шаг
+                p = first(len);
 
-            //3 шаг
-            check = checkCoeffs(coeffs, p); //3rd -> p, N, r
+                //2 шаг
+                Pair<BigInteger, BigInteger> ab = second(p);
 
-            //4 шаг
-            flag = checkTrio(check); //4th
-        } while (!flag);
+                //3 шаг -> p, N, r
+                pnr = third(ab, p);
 
-        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("output.txt"));
-        bufferedWriter.write("p: " + p.toString() + "\n");
-//        bufferedWriter.write("c: " + w.getA() + " d: " + w.getB() + "\n");
+                //4 шаг
+                boolean ok = fourth(pnr, m);
 
-        //Начало шага 5
-        Trio startPoint, point;
-        do {
-            point = generateAndCheckB(check); //5th
-            startPoint = point;
-        } while (checkPoint(point, check.getB(), check.getA()));
+                if (ok) {
+                    break;
+                }
+            }
 
-        //Вывод координат X, Y в файл
-        writePoints(startPoint, check.getB(), check.getA());
+            //5 шаг && 6 шаг
+            //Если циклится с поиском точки -> прервать и найти новое p
+            boolean ok = false;
+            int k = 1;
 
-        //Вывод точки в файл
-        bufferedWriter.write("x0: " + point.getA() + " y0: " + point.getB() + " А: " + point.getC() + "\n");
+            Trio startPoint, point;
+            while (true) {
+                point = fifth(pnr); //5th
+                startPoint = point;
 
-        Trio q = point;
-        BigInteger nDivR = check.getB().divide(check.getC());
+                if (iter == ++k) {
+                    ok = true;
+                    break;
+                }
 
-//        bufferedWriter.write("N: " + nDivR.intValue() + "\n");
+                if (!sixth(point, pnr.getB(), pnr.getA())) {
+                    break;
+                }
+            };
 
-        for (int i = 0; i < nDivR.intValue() - 1; i++) {
-            q = sumPoints(q, point, check.getA());
+            if (!ok) {
+                //Вывод координат X, Y в файл
+                writePoints(startPoint, pnr.getB(), pnr.getA());
+
+                //Вывод данных в файл
+                print(p, point, pnr);
+                break;
+            }
         }
-
-        bufferedWriter.write("Q = (" + q.getA().toString() + ", " + q.getB().toString() + ")");
-        bufferedWriter.write("r = " + check.getC());
-
-        bufferedWriter.close();
     }
 
     //Первый шаг, сегенрировать простое число p
-    private static BigInteger getPrimeNumber(int len) {
+    BigInteger first(int len) {
         BigInteger p = new BigInteger(len, certainty, new SecureRandom());
         while (!p.isProbablePrime(certainty) || !p.mod(FOUR).equals(BigInteger.ONE)) {
             p = new BigInteger(len, certainty, new SecureRandom());
@@ -107,7 +113,12 @@ public class Main {
     }
 
     //Шаг второй, алгоритм 7.8.1 - Разложение простого числа в Z|-D^1/2|
-    private static Trio findPrimeDecomposition(BigInteger p, BigInteger D) {
+    Pair<BigInteger, BigInteger> second(BigInteger p) {
+        Pair<BigInteger, BigInteger> w = findPrimeDecomposition(p, D);
+        return getCoeffs(w, p, 1, false);
+    }
+
+    Pair<BigInteger, BigInteger> findPrimeDecomposition(BigInteger p, BigInteger D) {
         BigInteger n = p.subtract(D);
         int legendreSymbol = getLegendreSymbol(n, p); //Зачем?
         if (legendreSymbol != 1) {
@@ -117,8 +128,7 @@ public class Main {
         }
     }
 
-    //Todo: может быть переписать
-    public static int getLegendreSymbol(BigInteger a, BigInteger b) {
+    int getLegendreSymbol(BigInteger a, BigInteger b) {
         if (!b.gcd(a).equals(BigInteger.ONE))
             return 0;
         int r = 1;
@@ -149,8 +159,7 @@ public class Main {
         }
     }
 
-    //Todo: to pair
-    private static Trio REASONAlgorithm(BigInteger p, BigInteger n) {
+    Pair<BigInteger, BigInteger> REASONAlgorithm(BigInteger p, BigInteger n) {
         BigInteger q = p.subtract(BigInteger.ONE); // p - 1
         int s = 0; // 0
 
@@ -161,7 +170,7 @@ public class Main {
 
         if (s == 1) {
             BigInteger r = n.modPow(p.add(BigInteger.ONE).divide(FOUR), p);
-            return new Trio(r, p.subtract(r), null); //r, p - r
+            return new Pair<>(r, p.subtract(r)); //r, p - r
         } else {
             //Выбрали произвольный квадратичный невычет
             BigInteger z = BigInteger.ONE;
@@ -194,12 +203,11 @@ public class Main {
 
                 m = index;
             }
-
-            return new Trio(r, p.subtract(r), null); //r, p - r
+            return new Pair<>(r, p.subtract(r)); //r, p - r
         }
     }
 
-    private static Trio getCoeffs(Trio w, BigInteger p, int choice, boolean used) {
+    Pair<BigInteger, BigInteger> getCoeffs(Pair<BigInteger, BigInteger> w, BigInteger p, int choice, boolean used) {
         try {
             //Если нет решений
             if (w == null || p == null) {
@@ -209,7 +217,7 @@ public class Main {
             //Инициализация значений, шаг 3
             int index = 0;
             //Связан с выбором между r, p-r ???
-            BigInteger u = choice == 1 ? w.getA() : w.getB();
+            BigInteger u = choice == 1 ? w.getKey() : w.getValue();
 
             ArrayList<BigInteger> valuesForU = new ArrayList<BigInteger>();
             valuesForU.add(u);
@@ -275,7 +283,7 @@ public class Main {
                 index--;
             }
 
-            return new Trio(a, b, null);
+            return new Pair<>(a, b);
         } catch (ArithmeticException e) {
             return null;
         }
@@ -283,17 +291,20 @@ public class Main {
     //Окончание 2 шага
 
     //Шаг 3 - проверка коэффициетов
-    private static Trio checkCoeffs(Trio coeffs, BigInteger p) {
-        if (coeffs == null || p == null) {
+    Trio third(Pair<BigInteger, BigInteger> ab, BigInteger p) {
+        if (ab == null || p == null) {
             return null;
         }
-        BigInteger a = coeffs.getA();
-        BigInteger b = coeffs.getB();
-        ArrayList<BigInteger> valuesForT = new ArrayList<BigInteger>();
+
+        BigInteger a = ab.getKey();
+        BigInteger b = ab.getValue();
+
+        ArrayList<BigInteger> valuesForT = new ArrayList<>();
         valuesForT.add(b.multiply(TWO).negate());
         valuesForT.add(a.multiply(TWO));
         valuesForT.add(b.multiply(TWO));
         valuesForT.add(a.multiply(TWO).negate());
+
         for (BigInteger bigInteger : valuesForT) {
             bigInteger = bigInteger.add(BigInteger.ONE).add(p);
             if (bigInteger.mod(TWO).equals(BigInteger.ZERO) && bigInteger.divide(TWO).isProbablePrime(certainty)) {
@@ -306,16 +317,15 @@ public class Main {
     }
 
     //Шаг 4 - проверка полученных данных
-    private static boolean checkTrio(Trio check) {
-        if (check == null) {
+    boolean fourth(Trio pnr, int m) {
+        if (pnr == null) {
             return false;
         }
-        if (check.getA().equals(check.getC())) {
+        if (pnr.getA().equals(pnr.getC())) {
             return false;
         }
-        int m = 5; //степень безопасности выбирается в соответствии с таблицой
         for (int i = 1; i <= m; i++) {
-            if (check.getA().modPow(BigInteger.valueOf(i), check.getC()).equals(BigInteger.ONE)) {
+            if (pnr.getA().modPow(BigInteger.valueOf(i), pnr.getC()).equals(BigInteger.ONE)) {
                 return false;
             }
         }
@@ -323,38 +333,41 @@ public class Main {
     }
 
     //Шаг 5 - генерация произвольной точки и ее проверка
-    private static Trio generateAndCheckB(Trio check) {
-        BigInteger p = check.getA(), n = check.getB(), r = check.getC();
+    Trio fifth(Trio pnr) {
+        try {
+            BigInteger p = pnr.getA(), n = pnr.getB(), r = pnr.getC();
 
-        int len = p.bitLength();
-        BigInteger x0;
-        do {
-            x0 = getRandomBigInteger(len, p);
-        } while (!x0.gcd(p).equals(BigInteger.ONE));
-        BigInteger y0 = getRandomBigInteger(len, p);
+            int len = p.bitLength();
 
-//        BigInteger x0 = BigInteger.ONE;
-//        BigInteger y0 = TWO;
+            //Генерация координат случайной точки
+            BigInteger x0;
+            do {
+                x0 = getRandomBigInteger(len, p);
+            } while (!x0.gcd(p).equals(BigInteger.ONE));
+            BigInteger y0 = getRandomBigInteger(len, p);
 
-        BigInteger r2 = r.multiply(TWO).mod(p), r4 = r.multiply(FOUR).mod(p);
+            BigInteger r2 = r.multiply(TWO).mod(p), r4 = r.multiply(FOUR).mod(p);
 
-        BigInteger a = y0.pow(2).subtract(x0.pow(3)).multiply(x0.modInverse(p)).mod(p);
-        BigInteger minusA = p.subtract(a);
+            BigInteger a = y0.pow(2).subtract(x0.pow(3)).multiply(x0.modInverse(p)).mod(p);
+            BigInteger minusA = p.subtract(a);
 
-        //Проверка квадратичных вычетов/невычетов
-        if ((r2.equals(n) && !(getLegendreSymbol(minusA, n) == 1)) || (r4.equals(n) && (getLegendreSymbol(minusA, n) == 1))) {
-            return new Trio(x0, y0, a);
-        } else {
+            //Проверка квадратичных вычетов/невычетов
+            if ((r2.equals(n) && !(getLegendreSymbol(minusA, n) == 1)) || (r4.equals(n) && (getLegendreSymbol(minusA, n) == 1))) {
+                return new Trio(x0, y0, a);
+            } else {
+                return null;
+            }
+        } catch (ArithmeticException e) {
             return null;
         }
     }
 
-    private static BigInteger getRandomBigInteger(int len, BigInteger p) {
+    BigInteger getRandomBigInteger(int len, BigInteger p) {
         return new BigInteger(new Random().nextInt(len + 1) + len / 2, certainty, new SecureRandom()).mod(p);
     }
 
     //Шаг 6 - проверка выбранной точки (сложение ее с собой N раз)
-    private static boolean checkPoint(Trio point, BigInteger n, BigInteger p) {
+    boolean sixth(Trio point, BigInteger n, BigInteger p) {
         if (point == null) {
             return true;
         }
@@ -369,31 +382,36 @@ public class Main {
     }
 
     //Сумма точек
-    private static Trio sumPoints(Trio result, Trio point, BigInteger p) {
-        if (result == null) {
+    Trio sumPoints(Trio result, Trio point, BigInteger p) {
+        try {
+            if (result == null) {
+                return null;
+            }
+            BigInteger lambda;
+            if (result.getA().equals(point.getA()) && result.getB().equals(point.getB())) {
+                if (result.getB().equals(BigInteger.ZERO)) {
+                    return null;
+                } else {
+                    lambda = result.getA().pow(TWO.intValue());
+                    lambda = lambda.multiply(THREE);
+                    lambda = lambda.multiply(TWO.multiply(result.getB()).modInverse(p));
+                }
+            } else {
+                BigInteger chis = point.getB().subtract(result.getB());
+                BigInteger znam = point.getA().subtract(result.getA());
+                lambda = chis.multiply(znam.modInverse(p));
+            }
+            BigInteger x3 = lambda.pow(TWO.intValue()).subtract(result.getA()).subtract(point.getA()).mod(p);
+            BigInteger y3 = result.getA().subtract(x3).multiply(lambda).subtract(result.getB()).mod(p);
+            return new Trio(x3, y3, null);
+        } catch (ArithmeticException e) {
             return null;
         }
-        BigInteger lambda;
-        if (result.getA().equals(point.getA()) && result.getB().equals(point.getB())) {
-            if (result.getB().equals(BigInteger.ZERO)) {
-                return null;
-            } else {
-                lambda = result.getA().pow(TWO.intValue());
-                lambda = lambda.multiply(THREE);
-                lambda = lambda.multiply(TWO.multiply(result.getB()).modInverse(p));
-            }
-        } else {
-            BigInteger chis = point.getB().subtract(result.getB());
-            BigInteger znam = point.getA().subtract(result.getA());
-            lambda = chis.multiply(znam.modInverse(p));
-        }
-        BigInteger x3 = lambda.pow(TWO.intValue()).subtract(result.getA()).subtract(point.getA()).mod(p);
-        BigInteger y3 = result.getA().subtract(x3).multiply(lambda).subtract(result.getB()).mod(p);
-        return new Trio(x3, y3, null);
     }
 
+    //Зона вывода данных
     //Вывод в файл координат X, Y относительно порождающей точки
-    private static void writePoints(Trio point, BigInteger n, BigInteger p) throws IOException {
+    void writePoints(Trio point, BigInteger n, BigInteger p) throws IOException {
         Trio result = point;
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("pointX.txt"));
              BufferedWriter bufferedWriter1 = new BufferedWriter(new FileWriter("pointY.txt"))) {
@@ -409,5 +427,24 @@ public class Main {
         } catch (ArithmeticException e) {
             //если мы нашли обратный элемент, то просто закончить искать точки
         }
+    }
+
+    void print(BigInteger p, Trio point, Trio check) throws IOException {
+        //Вывод точки в файл
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("output.txt"));
+        bufferedWriter.write("p = " + p.toString() + "\n");
+        bufferedWriter.write("А = " + point.getC() + "\n");
+
+        Trio q = point;
+        BigInteger nDivR = check.getB().divide(check.getC());
+
+        for (int i = 0; i < nDivR.intValue() - 1; i++) {
+            q = sumPoints(q, point, check.getA());
+        }
+
+        bufferedWriter.write("Q = (" + q.getA().toString() + ", " + q.getB().toString() + ")\n");
+        bufferedWriter.write("r = " + check.getC());
+
+        bufferedWriter.close();
     }
 }
