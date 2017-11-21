@@ -30,9 +30,6 @@ public class PrimeNumbers {
         while (true) {
             BigInteger a = getRandBigInteger(pLen).mod(p).add(BigInteger.ONE);
             BigInteger g = a.modPow(p.subtract(BigInteger.ONE).divide(q), p);
-//            if (g.equals(BigInteger.ZERO)) {
-//                g = g.add(BigInteger.ONE);
-//            }
             if (!g.equals(BigInteger.ONE)) {
                 return g;
             }
