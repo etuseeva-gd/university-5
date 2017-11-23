@@ -86,11 +86,11 @@ public class Main {
 
             BigInteger x;
             do {
-                x = genPrimeNum(n.bitLength());
+                x = getRandBigInteger(n.bitLength()).mod(n);
             } while (!x.gcd(n).equals(BigInteger.ONE));
 
             BigInteger x_1 = x.modInverse(n);
-            BigInteger y = new BigInteger("-1").multiply(x_1.multiply(x_1)).mod(n);
+            BigInteger y = x_1.multiply(x_1).negate().mod(n);
 
             out.println(x);
             out2.println(y);
@@ -113,9 +113,16 @@ public class Main {
             BigInteger hiddenMes = strToBI(in4.readLine());
 
             //условие
+            if (!hiddenMes.gcd(n).equals(BigInteger.ONE)) {
+                System.out.println("Введеное скрытое сообщение не взаимно просто с n");
+                return;
+            }
 
-            BigInteger s1 = m.divide(hiddenMes).add(hiddenMes).divide(new BigInteger("2")).mod(n);
-            BigInteger s2 = x.divide(new BigInteger("2")).multiply(m.divide(hiddenMes).subtract(hiddenMes)).mod(n);
+            BigInteger twoInv = BigInteger.valueOf(2).modInverse(n);
+            BigInteger hmInv = hiddenMes.modInverse(n);
+
+            BigInteger s1 = m.multiply(hmInv).add(hiddenMes).multiply(twoInv).mod(n);
+            BigInteger s2 = m.multiply(hmInv).subtract(hiddenMes).multiply(x).multiply(twoInv).mod(n);
 
             out.println(s1);
             out.println(s2);
@@ -139,7 +146,7 @@ public class Main {
             BigInteger s1 = new BigInteger(in4.readLine());
             BigInteger s2 = new BigInteger(in4.readLine());
 
-            BigInteger m1 = s1.multiply(s1).add(y.multiply(s2.multiply(s2))).mod(n);
+            BigInteger m1 = s1.pow(2).add(y.multiply(s2.pow(2))).mod(n);
 
             out.println(m1);
 
@@ -157,7 +164,7 @@ public class Main {
         try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(commonParams)));
              BufferedReader in2 = new BufferedReader(new InputStreamReader(new FileInputStream(closeKeyX)));
              BufferedReader in3 = new BufferedReader(new InputStreamReader(new FileInputStream(signature)));
-             PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(result)))) {
+             PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(resultMessage)))) {
 
             BigInteger n = new BigInteger(in.readLine());
             BigInteger x = new BigInteger(in2.readLine());
