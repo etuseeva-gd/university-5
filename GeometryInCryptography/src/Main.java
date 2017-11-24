@@ -429,8 +429,8 @@ public class Main {
         }
     }
 
+    //Вывод данных в файл
     void print(BigInteger p, Trio point, Trio check) throws IOException {
-        //Вывод точки в файл
         BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("output.txt"));
         bufferedWriter.write("p = " + p.toString() + "\n");
         bufferedWriter.write("А = " + point.getC() + "\n");

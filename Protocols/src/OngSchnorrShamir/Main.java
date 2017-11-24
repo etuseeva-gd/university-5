@@ -61,21 +61,30 @@ public class Main {
         }
     }
 
-    void first() throws FileNotFoundException, NoSuchAlgorithmException {
-        Scanner sc = new Scanner(System.in);
+    void first() throws IOException, NoSuchAlgorithmException {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(message)));
+             BufferedReader in2 = new BufferedReader(new InputStreamReader(new FileInputStream(hiddenMessage)))) {
+//            Scanner sc = new Scanner(System.in);
 
-        System.out.println("Введите длину p:");
-        int pLen = Integer.parseInt(sc.nextLine());
-        System.out.println("Введите длину q:");
-        int qLen = Integer.parseInt(sc.nextLine());
+            BigInteger m = strToBI(in.readLine());
+            BigInteger hiddenMes = strToBI(in2.readLine());
+            BigInteger maxMes = m.max(hiddenMes);
 
-        PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(commonParams)));
+//            System.out.println("Введите длину p:");
+//            int pLen = Integer.parseInt(sc.nextLine());
+//            System.out.println("Введите длину q:");
+//            int qLen = Integer.parseInt(sc.nextLine());
 
-        BigInteger p = genPrimeNum(pLen), q = genPrimeNum(qLen);
-        out.println(p.multiply(q));
+            PrintWriter out = new PrintWriter(new BufferedOutputStream(new FileOutputStream(commonParams)));
 
-        out.close();
-        System.out.println("Общие параметры (n): common_params.txt");
+//            BigInteger p = genPrimeNum(pLen), q = genPrimeNum(qLen);
+//            out.println(p.multiply(q));
+
+            out.print(genPrimeNum(maxMes.bitLength() + 1));
+
+            out.close();
+            System.out.println("Общие параметры (n): common_params.txt");
+        }
     }
 
     void second() throws IOException, NoSuchAlgorithmException {
