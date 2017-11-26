@@ -9,30 +9,6 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
-class Trio {
-    private BigInteger a;
-    private BigInteger b;
-    private BigInteger c;
-
-    public Trio(BigInteger a, BigInteger b, BigInteger c) {
-        this.a = a;
-        this.b = b;
-        this.c = c;
-    }
-
-    public BigInteger getA() {
-        return a;
-    }
-
-    public BigInteger getB() {
-        return b;
-    }
-
-    public BigInteger getC() {
-        return c;
-    }
-}
-
 public class Main {
     private int certainty = 200, iter = 1000;
     private BigInteger TWO = new BigInteger("2"), THREE = new BigInteger("3"), FOUR = new BigInteger("4"),
@@ -117,12 +93,12 @@ public class Main {
     //Шаг второй, алгоритм 7.8.1 - Разложение простого числа в Z|-D^1/2|
     Pair<BigInteger, BigInteger> second(BigInteger p) {
         Pair<BigInteger, BigInteger> w = findPrimeDecomposition(p, D);
-        return getCoeffs(w, p, 1, false);
+        return getAB(w, p, 1, false);
     }
 
     Pair<BigInteger, BigInteger> findPrimeDecomposition(BigInteger p, BigInteger D) {
         BigInteger n = p.subtract(D);
-        int legendreSymbol = getLegendreSymbol(n, p); //Зачем?
+        int legendreSymbol = getLegendreSymbol(n, p);
         if (legendreSymbol != 1) {
             return null;
         } else {
@@ -209,7 +185,7 @@ public class Main {
         }
     }
 
-    Pair<BigInteger, BigInteger> getCoeffs(Pair<BigInteger, BigInteger> w, BigInteger p, int choice, boolean used) {
+    Pair<BigInteger, BigInteger> getAB(Pair<BigInteger, BigInteger> w, BigInteger p, int choice, boolean used) {
         try {
             //Если нет решений
             if (w == null || p == null) {
@@ -218,7 +194,6 @@ public class Main {
 
             //Инициализация значений, шаг 3
             int index = 0;
-            //Связан с выбором между r, p-r ???
             BigInteger u = choice == 1 ? w.getKey() : w.getValue();
 
             ArrayList<BigInteger> valuesForU = new ArrayList<BigInteger>();
@@ -237,7 +212,7 @@ public class Main {
 
                 if (!ok1 || ok2) {
                     if (!used) {
-                        getCoeffs(w, p, 0, true);
+                        getAB(w, p, 0, true);
                     } else {
                         return null;
                     }
@@ -446,5 +421,29 @@ public class Main {
 
         System.out.println("Образующая точка - Q = (" + q.getA().toString() + ", " + q.getB().toString() + ")");
         System.out.println("Простого порядка - r = " + check.getC());
+    }
+
+    class Trio {
+        private BigInteger a;
+        private BigInteger b;
+        private BigInteger c;
+
+        public Trio(BigInteger a, BigInteger b, BigInteger c) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+        }
+
+        public BigInteger getA() {
+            return a;
+        }
+
+        public BigInteger getB() {
+            return b;
+        }
+
+        public BigInteger getC() {
+            return c;
+        }
     }
 }
