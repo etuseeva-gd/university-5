@@ -92,7 +92,7 @@ public class Main {
                 if (!sixth(point, pnr.getB(), pnr.getA())) {
                     break;
                 }
-            };
+            }
 
             if (!ok) {
                 //Вывод координат X, Y в файл
@@ -395,7 +395,7 @@ public class Main {
                     return null;
                 } else {
                     lambda = result.getA().pow(TWO.intValue());
-                    lambda = lambda.multiply(THREE);
+                    lambda = lambda.multiply(THREE).add(result.getC());
                     lambda = lambda.multiply(TWO.multiply(result.getB()).modInverse(p));
                 }
             } else {
@@ -415,8 +415,8 @@ public class Main {
     //Вывод в файл координат X, Y относительно порождающей точки
     void writePoints(Trio point, BigInteger n, BigInteger p) throws IOException {
         Trio result = point;
-        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("pointX.txt"));
-             BufferedWriter bufferedWriter1 = new BufferedWriter(new FileWriter("pointY.txt"))) {
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("pointsX.txt"));
+             BufferedWriter bufferedWriter1 = new BufferedWriter(new FileWriter("pointsY.txt"))) {
             for (BigInteger i = BigInteger.ZERO; n.subtract(BigInteger.ONE).compareTo(i) >= 0; i = i.add(BigInteger.ONE)) {
                 result = sumPoints(result, point, p);
                 if (result == null) {
@@ -427,7 +427,7 @@ public class Main {
                 }
             }
         } catch (ArithmeticException e) {
-            //если мы нашли обратный элемент, то просто закончить искать точки
+            return;
         }
     }
 
