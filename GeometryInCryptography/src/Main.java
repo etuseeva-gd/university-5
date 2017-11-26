@@ -44,7 +44,7 @@ public class Main {
 
     void run() throws IOException {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Введите длину числа p в битах:");
+//        System.out.println("Введите длину числа p в битах:");
 //        int len = Integer.parseInt(scanner.nextLine());
         int len = 9;
 
@@ -394,7 +394,7 @@ public class Main {
                 if (result.getB().equals(BigInteger.ZERO)) {
                     return null;
                 } else {
-                    lambda = result.getA().pow(TWO.intValue());
+                    lambda = result.getA().pow(2);
                     lambda = lambda.multiply(THREE).add(result.getC());
                     lambda = lambda.multiply(TWO.multiply(result.getB()).modInverse(p));
                 }
@@ -403,9 +403,9 @@ public class Main {
                 BigInteger znam = point.getA().subtract(result.getA());
                 lambda = chis.multiply(znam.modInverse(p));
             }
-            BigInteger x3 = lambda.pow(TWO.intValue()).subtract(result.getA()).subtract(point.getA()).mod(p);
+            BigInteger x3 = lambda.pow(2).subtract(result.getA()).subtract(point.getA()).mod(p);
             BigInteger y3 = result.getA().subtract(x3).multiply(lambda).subtract(result.getB()).mod(p);
-            return new Trio(x3, y3, null);
+            return new Trio(x3, y3, result.getC());
         } catch (ArithmeticException e) {
             return null;
         }
