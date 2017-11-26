@@ -152,7 +152,7 @@ public class Main {
     Pair<BigInteger, BigInteger> getPoint(String str) {
         str = str.replace("(", "").replace(")", "");
         String[] strings = str.split(",");
-        return new Pair<>(new BigInteger(strings[0]), new BigInteger(strings[1]));
+        return new Pair<>(new BigInteger(strings[0].trim()), new BigInteger(strings[1].trim()));
     }
 
     Pair<BigInteger, BigInteger> multPoint(BigInteger k, Pair<BigInteger, BigInteger> point, BigInteger a, BigInteger p) {
