@@ -57,7 +57,6 @@ public class Main {
             Trio pnr;
 
             while (true) {
-                System.out.println(1);
                 //1 шаг
                 p = first(len);
 
@@ -69,14 +68,11 @@ public class Main {
 
                 //4 шаг
                 boolean ok = fourth(pnr, m);
-                System.out.println(ok);
 
                 if (ok) {
                     break;
                 }
             }
-
-            System.out.println(56);
 
             //5 шаг && 6 шаг
             //Если циклится с поиском точки -> прервать и найти новое p
