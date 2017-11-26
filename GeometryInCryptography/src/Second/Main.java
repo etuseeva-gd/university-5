@@ -93,7 +93,10 @@ public class Main {
             return;
         }
 
-        printStr(Math.random() + "", "rand_bit.txt");
+        System.out.println("Введите бит (0 или 1):");
+        Scanner sc = new Scanner(System.in);
+        printStr(sc.nextLine(), "rand_bit.txt");
+        sc.close();
     }
 
     void third() throws IOException {
@@ -101,12 +104,15 @@ public class Main {
         int bit = Integer.parseInt(readOneStr("rand_bit.txt"));
         //
 
+        String filePath = "k_4.txt";
+        Files.deleteIfExists(new File(filePath).toPath());
+
         if (bit == 0) {
             //Отдает k
-            Files.copy(new File("k.txt").toPath(), new File("k_4.txt").toPath());
+            Files.copy(new File("k.txt").toPath(), new File(filePath).toPath());
         } else {
             //Отдает k1
-            Files.copy(new File("k1.txt").toPath(), new File("k_4.txt").toPath());
+            Files.copy(new File("k1.txt").toPath(), new File(filePath).toPath());
         }
     }
 
@@ -129,7 +135,7 @@ public class Main {
         if (isPointsEquals(R, chPoint)) {
             System.out.println("Проверка пройдена. Пользователь знает l!");
         } else {
-            System.out.println("Проверка не пройдена. Пользователь на знает l!");
+            System.out.println("Проверка не пройдена. Пользователь не знает l!");
         }
     }
 
@@ -158,8 +164,11 @@ public class Main {
 
     Pair<BigInteger, BigInteger> multPoint(BigInteger k, Pair<BigInteger, BigInteger> point, BigInteger a, BigInteger p) {
         Pair<BigInteger, BigInteger> res = point;
-        for (int i = 0; i < k.intValue(); i++) {
+        for (int i = 0; i < k.intValue() - 1; i++) {
             res = sum(res, point, a, p);
+            if (res == null) {
+                return null;
+            }
         }
         return res;
     }
@@ -175,7 +184,7 @@ public class Main {
             BigInteger x1 = firstPoint.getKey(), y1 = firstPoint.getValue();
             BigInteger x2 = secondPoint.getKey(), y2 = secondPoint.getValue();
 
-            if (x1.equals(x2)) {
+            if (isPointsEquals(firstPoint, secondPoint)) {
                 if (y1.equals(BigInteger.ZERO)) {
                     return null;
                 } else {
@@ -192,7 +201,36 @@ public class Main {
 
             BigInteger x3 = lambda.pow(2).subtract(x1).subtract(x2).mod(p);
             BigInteger y3 = x1.subtract(x3).multiply(lambda).subtract(y1).mod(p);
+            return new Pair<>(x3, y3);
+        } catch (ArithmeticException e) {
+            return null;
+        }
+    }
 
+    Pair<BigInteger, BigInteger> sum1(Pair<BigInteger, BigInteger> result, Pair<BigInteger, BigInteger> point,
+                                      BigInteger a, BigInteger p) {
+        try {
+            if (result == null) {
+                return null;
+            }
+            BigInteger lambda;
+            if (result.getKey().equals(point.getKey()) && result.getValue().equals(point.getValue())) {
+                if (result.getValue().equals(BigInteger.ZERO)) {
+                    return null;
+                } else {
+                    lambda = result.getKey().pow(2);
+                    lambda = lambda.multiply(BigInteger.valueOf(3));
+                    lambda = lambda.add(a);
+                    lambda = lambda.multiply(BigInteger.valueOf(2).multiply(result.getValue()).modInverse(p));
+                    System.out.println(lambda);
+                }
+            } else {
+                BigInteger chis = point.getValue().subtract(result.getValue());
+                BigInteger znam = point.getKey().subtract(result.getKey());
+                lambda = chis.multiply(znam.modInverse(p));
+            }
+            BigInteger x3 = lambda.pow(BigInteger.valueOf(2).intValue()).subtract(result.getKey()).subtract(point.getKey()).mod(p);
+            BigInteger y3 = result.getKey().subtract(x3).multiply(lambda).subtract(result.getValue()).mod(p);
             return new Pair<>(x3, y3);
         } catch (ArithmeticException e) {
             return null;
