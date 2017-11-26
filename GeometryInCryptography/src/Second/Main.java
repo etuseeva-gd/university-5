@@ -207,36 +207,6 @@ public class Main {
         }
     }
 
-    Pair<BigInteger, BigInteger> sum1(Pair<BigInteger, BigInteger> result, Pair<BigInteger, BigInteger> point,
-                                      BigInteger a, BigInteger p) {
-        try {
-            if (result == null) {
-                return null;
-            }
-            BigInteger lambda;
-            if (result.getKey().equals(point.getKey()) && result.getValue().equals(point.getValue())) {
-                if (result.getValue().equals(BigInteger.ZERO)) {
-                    return null;
-                } else {
-                    lambda = result.getKey().pow(2);
-                    lambda = lambda.multiply(BigInteger.valueOf(3));
-                    lambda = lambda.add(a);
-                    lambda = lambda.multiply(BigInteger.valueOf(2).multiply(result.getValue()).modInverse(p));
-                    System.out.println(lambda);
-                }
-            } else {
-                BigInteger chis = point.getValue().subtract(result.getValue());
-                BigInteger znam = point.getKey().subtract(result.getKey());
-                lambda = chis.multiply(znam.modInverse(p));
-            }
-            BigInteger x3 = lambda.pow(BigInteger.valueOf(2).intValue()).subtract(result.getKey()).subtract(point.getKey()).mod(p);
-            BigInteger y3 = result.getKey().subtract(x3).multiply(lambda).subtract(result.getValue()).mod(p);
-            return new Pair<>(x3, y3);
-        } catch (ArithmeticException e) {
-            return null;
-        }
-    }
-
     void printPoint(Pair<BigInteger, BigInteger> point, String file) throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
         bw.write("(" + point.getKey() + "," + point.getValue() + ")");
@@ -262,5 +232,4 @@ public class Main {
         BigInteger x2 = secondPoint.getKey(), y2 = secondPoint.getValue();
         return x1.equals(x2) && y1.equals(y2);
     }
-
 }
