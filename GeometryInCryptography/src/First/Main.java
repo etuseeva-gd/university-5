@@ -440,6 +440,17 @@ public class Main {
 
             bf.write("Образующая точка - Q = (" + q.getA().toString() + ", " + q.getB().toString() + ")\n");
             bf.write("Простого порядка - r = " + check.getC() + "\n");
+
+//            System.out.println("Проверка образующей точки");
+//            Trio res = q;
+//            for (int i = 2; i < check.getC().intValue() + 1; i++) {
+//                res = sumPoints(res, q, check.getA());
+//                if (res == null) {
+//                    System.out.println(i);
+//                    break;
+//                }
+//                System.out.println(res.getA() + " " + res.getB());
+//            }
         }
     }
 

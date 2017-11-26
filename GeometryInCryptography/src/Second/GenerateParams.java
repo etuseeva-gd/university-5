@@ -29,7 +29,7 @@ public class GenerateParams {
         BigInteger a = new BigInteger(sc.nextLine());
         bw.write(a + "\n");
 
-        System.out.println("Введите порождающую точку Q(x,y):");
+        System.out.println("Введите образующую точку Q(x,y):");
         Pair<BigInteger, BigInteger> Q = m.getPoint(sc.nextLine());
         bw.write(getStrPoint(Q) + "\n");
 

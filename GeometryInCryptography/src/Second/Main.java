@@ -64,20 +64,12 @@ public class Main {
         BigInteger l = new BigInteger(readOneStr("l.txt"));
         //
 
-        BigInteger k, k1;
-        Pair<BigInteger, BigInteger> R;
-        while (true) {
-            k = new BigInteger(cp.r.bitLength() - 1, new Random()).mod(cp.r);
-            k1 = k.multiply(l).mod(cp.r);
-
-            R = multPoint(k, cp.P, cp.a, cp.p);
-            if (R != null) {
-                break;
-            }
-        }
-
+        BigInteger k = new BigInteger(cp.r.bitLength() - 1, new Random()).mod(cp.r);
         printStr(k + "", "k.txt");
+        BigInteger k1 = k.multiply(l).mod(cp.r);
         printStr(k1 + "", "k1.txt");
+
+        Pair<BigInteger, BigInteger> R = multPoint(k, cp.P, cp.a, cp.p);
         printPoint(R, "R.txt");
     }
 
@@ -168,11 +160,6 @@ public class Main {
         Pair<BigInteger, BigInteger> res = point;
         for (int i = 0; i < k.intValue() - 1; i++) {
             res = sum(res, point, a, p);
-
-            //Todo: ???
-            if (res == null) {
-                return null;
-            }
         }
         return res;
     }
