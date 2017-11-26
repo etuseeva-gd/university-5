@@ -93,8 +93,7 @@ public class Main {
             return;
         }
 
-        System.out.println(new Random().nextInt() + "");
-        printStr(new Random().nextInt() + "", "rand_bit.txt");
+        printStr(Math.random() + "", "rand_bit.txt");
     }
 
     void third() throws IOException {
@@ -167,33 +166,37 @@ public class Main {
 
     Pair<BigInteger, BigInteger> sum(Pair<BigInteger, BigInteger> firstPoint, Pair<BigInteger, BigInteger> secondPoint,
                                      BigInteger a, BigInteger p) {
-        if (firstPoint == null) {
+        try {
+            if (firstPoint == null) {
+                return null;
+            }
+
+            BigInteger lambda;
+            BigInteger x1 = firstPoint.getKey(), y1 = firstPoint.getValue();
+            BigInteger x2 = secondPoint.getKey(), y2 = secondPoint.getValue();
+
+            if (x1.equals(x2)) {
+                if (y1.equals(BigInteger.ZERO)) {
+                    return null;
+                } else {
+                    lambda = x1.pow(2);
+                    lambda = lambda.multiply(BigInteger.valueOf(3));
+                    lambda = lambda.add(a);
+                    lambda = lambda.multiply(BigInteger.valueOf(2).multiply(y1).modInverse(p));
+                }
+            } else {
+                BigInteger top = y2.subtract(y1);
+                BigInteger bottom = x2.subtract(x1);
+                lambda = top.multiply(bottom.modInverse(p));
+            }
+
+            BigInteger x3 = lambda.pow(2).subtract(x1).subtract(x2).mod(p);
+            BigInteger y3 = x1.subtract(x3).multiply(lambda).subtract(y1).mod(p);
+
+            return new Pair<>(x3, y3);
+        } catch (ArithmeticException e) {
             return null;
         }
-
-        BigInteger lambda;
-        BigInteger x1 = firstPoint.getKey(), y1 = firstPoint.getValue();
-        BigInteger x2 = secondPoint.getKey(), y2 = secondPoint.getValue();
-
-        if (isPointsEquals(firstPoint, secondPoint)) {
-            if (y1.equals(BigInteger.ZERO)) {
-                return null;
-            } else {
-                lambda = x1.pow(2);
-                lambda = lambda.multiply(BigInteger.valueOf(3));
-                lambda = lambda.add(a);
-                lambda = lambda.multiply(BigInteger.valueOf(2).multiply(y1).modInverse(p));
-            }
-        } else {
-            BigInteger top = y2.subtract(y1);
-            BigInteger bottom = x2.subtract(x1);
-            lambda = top.multiply(bottom.modInverse(p));
-        }
-
-        BigInteger x3 = lambda.pow(2).subtract(x1).subtract(x2).mod(p);
-        BigInteger y3 = x1.subtract(x3).multiply(lambda).subtract(y1).mod(p);
-
-        return new Pair<>(x3, y3);
     }
 
     void printPoint(Pair<BigInteger, BigInteger> point, String file) throws IOException {
