@@ -24,13 +24,9 @@ public class Main {
         System.out.println("2 - Верификатор: Проверить R и послать случайный бит");
         System.out.println("3 - Претендент: Предьявление показателя k(или k') на основе бита");
         System.out.println("4 - Верификатор: Проверка знания l претендента");
-        System.out.println();
         System.out.println("P.S.1 Общие параметры должны быть записаны в common_params.txt");
-        System.out.println("1 строка - p");
-        System.out.println("2 строка - a");
-        System.out.println("3 строка - Q");
-        System.out.println("4 строка - r");
-        System.out.println("5 строка - P");
+        System.out.println("1 строка - p, 2 строка - a, 3 строка - Q");
+        System.out.println("4 строка - r, 5 строка - P");
         System.out.println("P.S.2 l (P = lQ) должна быть записана в l.txt");
 
         Scanner sc = new Scanner(System.in);
@@ -68,14 +64,20 @@ public class Main {
         BigInteger l = new BigInteger(readOneStr("l.txt"));
         //
 
-        BigInteger k = new BigInteger(cp.r.bitLength() - 1, new Random()).mod(cp.r);
+        BigInteger k, k1;
+        Pair<BigInteger, BigInteger> R;
+        while (true) {
+            k = new BigInteger(cp.r.bitLength() - 1, new Random()).mod(cp.r);
+            k1 = k.multiply(l).mod(cp.r);
+
+            R = multPoint(k, cp.P, cp.a, cp.p);
+            if (R != null) {
+                break;
+            }
+        }
+
         printStr(k + "", "k.txt");
-
-        BigInteger k1 = k.multiply(l).mod(cp.r);
         printStr(k1 + "", "k1.txt");
-
-        Pair<BigInteger, BigInteger> R = multPoint(k, cp.P, cp.a, cp.p);
-
         printPoint(R, "R.txt");
     }
 
@@ -166,6 +168,8 @@ public class Main {
         Pair<BigInteger, BigInteger> res = point;
         for (int i = 0; i < k.intValue() - 1; i++) {
             res = sum(res, point, a, p);
+
+            //Todo: ???
             if (res == null) {
                 return null;
             }
@@ -223,7 +227,6 @@ public class Main {
         BufferedReader br = new BufferedReader(new FileReader(file));
         String res = br.readLine();
         br.close();
-
         return res;
     }
 
