@@ -1,5 +1,6 @@
+package Help;
+
 import java.math.BigInteger;
-import java.util.Scanner;
 
 class Pair {
     private BigInteger a;
