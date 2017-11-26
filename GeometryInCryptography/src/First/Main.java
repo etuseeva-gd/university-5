@@ -53,6 +53,8 @@ public class Main {
                 }
             }
 
+            System.out.println(p);
+
             //5 шаг && 6 шаг
             //Если циклится с поиском точки -> прервать и найти новое p
             boolean ok = false;
@@ -358,12 +360,11 @@ public class Main {
             for (BigInteger i = BigInteger.ONE; i.compareTo(n.subtract(BigInteger.ONE)) < 0;
                  i = i.add(BigInteger.ONE)) {
                 result = sumPoints(result, point, p);
-                if (result == null)
+                if (result == null) {
                     return true;
-                for (Trio t : points) {
-                    if (result.compareTo(t) == 0) {
-                        return true;
-                    }
+                }
+                if (points.contains(result)) {
+                    return true;
                 }
                 points.add(result);
             }
@@ -442,19 +443,20 @@ public class Main {
             bf.write("Простого порядка - r = " + check.getC() + "\n");
 
 //            System.out.println("Проверка образующей точки");
-//            Trio res = q;
-//            for (int i = 2; i < check.getC().intValue() + 1; i++) {
-//                res = sumPoints(res, q, check.getA());
-//                if (res == null) {
-//                    System.out.println(i);
-//                    break;
-//                }
+            Trio res = q;
+            for (int i = 2; i < check.getC().intValue() + 1; i++) {
+                res = sumPoints(res, q, check.getA());
+                if (res == null) {
+                    System.out.println(i);
+                    break;
+                }
 //                System.out.println(res.getA() + " " + res.getB());
-//            }
+            }
         }
     }
 
     class Trio implements Comparable<Trio> {
+
         private BigInteger a;
         private BigInteger b;
         private BigInteger c;
@@ -463,6 +465,26 @@ public class Main {
             this.a = a;
             this.b = b;
             this.c = c;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Trio trio = (Trio) o;
+
+            if (a != null ? !a.equals(trio.a) : trio.a != null) return false;
+            if (b != null ? !b.equals(trio.b) : trio.b != null) return false;
+            return c != null ? c.equals(trio.c) : trio.c == null;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = a != null ? a.hashCode() : 0;
+            result = 31 * result + (b != null ? b.hashCode() : 0);
+            result = 31 * result + (c != null ? c.hashCode() : 0);
+            return result;
         }
 
         public BigInteger getA() {
@@ -486,6 +508,18 @@ public class Main {
                     return b.compareTo(o.b);
             }
             return c.compareTo(o.c);
+        }
+
+        public void setA(BigInteger a) {
+            this.a = a;
+        }
+
+        public void setB(BigInteger b) {
+            this.b = b;
+        }
+
+        public void setC(BigInteger c) {
+            this.c = c;
         }
     }
 }

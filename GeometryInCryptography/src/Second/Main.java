@@ -25,8 +25,7 @@ public class Main {
         System.out.println("3 - Претендент: Предьявление показателя k(или k') на основе бита");
         System.out.println("4 - Верификатор: Проверка знания l претендента");
         System.out.println("P.S.1 Общие параметры должны быть записаны в common_params.txt");
-        System.out.println("1 строка - p, 2 строка - a, 3 строка - Q");
-        System.out.println("4 строка - r, 5 строка - P");
+        System.out.println("      1 строка - p, 2 строка - a, 3 строка - Q, 4 строка - r, 5 строка - P");
         System.out.println("P.S.2 l (P = lQ) должна быть записана в l.txt");
 
         Scanner sc = new Scanner(System.in);
