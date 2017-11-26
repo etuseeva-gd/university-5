@@ -45,16 +45,19 @@ public class Main {
     void run() throws IOException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Введите длину числа p в битах:");
-        int len = Integer.parseInt(scanner.nextLine());
+//        int len = Integer.parseInt(scanner.nextLine());
+        int len = 9;
 
-        System.out.println("Введите m:");
-        int m = Integer.parseInt(scanner.nextLine());
+//        System.out.println("Введите m:");
+//        int m = Integer.parseInt(scanner.nextLine());
+        int m = 71;
 
         while (true) {
             BigInteger p;
             Trio pnr;
 
             while (true) {
+                System.out.println(1);
                 //1 шаг
                 p = first(len);
 
@@ -66,21 +69,24 @@ public class Main {
 
                 //4 шаг
                 boolean ok = fourth(pnr, m);
+                System.out.println(ok);
 
                 if (ok) {
                     break;
                 }
             }
 
+            System.out.println(56);
+
             //5 шаг && 6 шаг
             //Если циклится с поиском точки -> прервать и найти новое p
             boolean ok = false;
-            int k = 1;
+            int k = 0;
 
-            Trio startPoint, point;
+            Trio firstPoint, point;
             while (true) {
                 point = fifth(pnr); //5th
-                startPoint = point;
+                firstPoint = point;
 
                 if (iter == ++k) {
                     ok = true;
@@ -94,7 +100,7 @@ public class Main {
 
             if (!ok) {
                 //Вывод координат X, Y в файл
-                writePoints(startPoint, pnr.getB(), pnr.getA());
+                writePoints(firstPoint, pnr.getB(), pnr.getA());
 
                 //Вывод данных в файл
                 print(p, point, pnr);
@@ -431,9 +437,9 @@ public class Main {
 
     //Вывод данных в файл
     void print(BigInteger p, Trio point, Trio check) throws IOException {
-        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("output.txt"));
-        bufferedWriter.write("p = " + p.toString() + "\n");
-        bufferedWriter.write("А = " + point.getC() + "\n");
+        System.out.println("Параметры элептической кривой:");
+        System.out.println("p = " + p.toString());
+        System.out.println("А = " + point.getC());
 
         Trio q = point;
         BigInteger nDivR = check.getB().divide(check.getC());
@@ -442,9 +448,7 @@ public class Main {
             q = sumPoints(q, point, check.getA());
         }
 
-        bufferedWriter.write("Q = (" + q.getA().toString() + ", " + q.getB().toString() + ")\n");
-        bufferedWriter.write("r = " + check.getC());
-
-        bufferedWriter.close();
+        System.out.println("Образующая точка - Q = (" + q.getA().toString() + ", " + q.getB().toString() + ")");
+        System.out.println("Простого порядка - r = " + check.getC());
     }
 }
