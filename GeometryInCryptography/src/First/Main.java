@@ -324,13 +324,13 @@ public class Main {
             } while (!x0.gcd(p).equals(BigInteger.ONE));
             BigInteger y0 = getRandomBigInteger(len, p);
 
-            BigInteger r2 = r.multiply(TWO).mod(p), r4 = r.multiply(FOUR).mod(p);
+            BigInteger r2 = r.multiply(TWO), r4 = r.multiply(FOUR);
 
             BigInteger a = y0.pow(2).subtract(x0.pow(3)).multiply(x0.modInverse(p)).mod(p);
             BigInteger minusA = p.subtract(a);
 
             //Проверка квадратичных вычетов/невычетов
-            if ((r2.equals(n) && !(getLegendreSymbol(minusA, n) == 1)) || (r4.equals(n) && (getLegendreSymbol(minusA, n) == 1))) {
+            if ((r2.equals(n) && !(getLegendreSymbol(minusA, p) == 1)) || (r4.equals(n) && (getLegendreSymbol(minusA, p) == 1))) {
                 return new Trio(x0, y0, a);
             } else {
                 return null;
@@ -393,6 +393,9 @@ public class Main {
         Trio result = point;
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("pointsX.txt"));
              BufferedWriter bufferedWriter1 = new BufferedWriter(new FileWriter("pointsY.txt"))) {
+            bufferedWriter.write(result.getA() + "\n");
+            bufferedWriter1.write(result.getB() + "\n");
+
             for (BigInteger i = BigInteger.ZERO; n.subtract(BigInteger.ONE).compareTo(i) >= 0; i = i.add(BigInteger.ONE)) {
                 result = sumPoints(result, point, p);
                 if (result == null) {
