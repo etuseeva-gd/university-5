@@ -1,4 +1,4 @@
-package Help;
+package help;
 
 import java.io.*;
 import java.util.*;
