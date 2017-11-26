@@ -55,10 +55,10 @@ public class Main {
             boolean ok = false;
             int k = 0;
 
-            Trio firstPoint, point;
+            Trio beginPoint, point;
             while (true) {
                 point = fifth(pnr); //5th
-                firstPoint = point;
+                beginPoint = point;
 
                 if (iter == ++k) {
                     ok = true;
@@ -72,7 +72,7 @@ public class Main {
 
             if (!ok) {
                 //Вывод координат X, Y в файл
-                writePoints(firstPoint, pnr.getB(), pnr.getA());
+                writePoints(beginPoint, pnr.getB(), pnr.getA());
 
                 //Вывод данных в файл
                 print(p, point, pnr);
@@ -265,7 +265,6 @@ public class Main {
             return null;
         }
     }
-    //Окончание 2 шага
 
     //Шаг 3 - проверка коэффициетов
     Trio third(Pair<BigInteger, BigInteger> ab, BigInteger p) {
@@ -387,7 +386,7 @@ public class Main {
     }
 
     //Зона вывода данных
-    //Вывод в файл координат X, Y относительно порождающей точки
+    //Вывод в файл координат X, Y
     void writePoints(Trio point, BigInteger n, BigInteger p) throws IOException {
         Trio result = point;
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("pointsX.txt"));
