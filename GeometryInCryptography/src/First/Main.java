@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -22,13 +23,13 @@ public class Main {
 
     void run() throws IOException {
         Scanner scanner = new Scanner(System.in);
-//        System.out.println("Введите длину числа p в битах:");
-//        int len = Integer.parseInt(scanner.nextLine());
-        int len = 9;
+        System.out.println("Введите длину числа p в битах:");
+        int len = Integer.parseInt(scanner.nextLine());
+//        int len = 9;
 
-//        System.out.println("Введите m:");
-//        int m = Integer.parseInt(scanner.nextLine());
-        int m = 71;
+        System.out.println("Введите m:");
+        int m = Integer.parseInt(scanner.nextLine());
+//        int m = 71;
 
         while (true) {
             BigInteger p;
@@ -350,13 +351,26 @@ public class Main {
             return true;
         }
         Trio result = point;
-        for (BigInteger i = BigInteger.ZERO; n.subtract(BigInteger.ONE).compareTo(i) >= 0; i = i.add(BigInteger.ONE)) {
-            result = sumPoints(result, point, p);
-            if (result == null) {
-                return true;
+
+        List<Trio> points = new ArrayList<>();
+        points.add(result);
+        try {
+            for (BigInteger i = BigInteger.ONE; i.compareTo(n.subtract(BigInteger.ONE)) < 0;
+                 i = i.add(BigInteger.ONE)) {
+                result = sumPoints(result, point, p);
+                if (result == null)
+                    return true;
+                for (Trio t : points) {
+                    if (result.compareTo(t) == 0) {
+                        return true;
+                    }
+                }
+                points.add(result);
             }
+        } catch (ArithmeticException e) {
+            return true;
         }
-        return false;
+        return sumPoints(result, point, p) != null;
     }
 
     //Сумма точек
@@ -412,22 +426,24 @@ public class Main {
 
     //Вывод данных в файл
     void print(BigInteger p, Trio point, Trio check) throws IOException {
-        System.out.println("Параметры элептической кривой:");
-        System.out.println("p = " + p.toString());
-        System.out.println("А = " + point.getC());
+        try (BufferedWriter bf = new BufferedWriter(new FileWriter("output.txt"))) {
+            bf.write("Параметры элептической кривой:\n");
+            bf.write("p = " + p.toString() + "\n");
+            bf.write("А = " + point.getC() + "\n");
 
-        Trio q = point;
-        BigInteger nDivR = check.getB().divide(check.getC());
+            Trio q = point;
+            BigInteger nDivR = check.getB().divide(check.getC());
 
-        for (int i = 0; i < nDivR.intValue() - 1; i++) {
-            q = sumPoints(q, point, check.getA());
+            for (int i = 0; i < nDivR.intValue() - 1; i++) {
+                q = sumPoints(q, point, check.getA());
+            }
+
+            bf.write("Образующая точка - Q = (" + q.getA().toString() + ", " + q.getB().toString() + ")\n");
+            bf.write("Простого порядка - r = " + check.getC() + "\n");
         }
-
-        System.out.println("Образующая точка - Q = (" + q.getA().toString() + ", " + q.getB().toString() + ")");
-        System.out.println("Простого порядка - r = " + check.getC());
     }
 
-    class Trio {
+    class Trio implements Comparable<Trio> {
         private BigInteger a;
         private BigInteger b;
         private BigInteger c;
@@ -448,6 +464,17 @@ public class Main {
 
         public BigInteger getC() {
             return c;
+        }
+
+        @Override
+        public int compareTo(Trio o) {
+            if (a.compareTo(o.a) != 0)
+                return a.compareTo(o.a);
+            else {
+                if (b.compareTo(o.b) != 0)
+                    return b.compareTo(o.b);
+            }
+            return c.compareTo(o.c);
         }
     }
 }

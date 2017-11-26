@@ -9,8 +9,8 @@ public class CheckPoints {
     }
 
     public static void main(String[] args) throws IOException {
-        int p = 389; //Ввести
-        int a = 280; //Ввести
+        int p = 877; //Ввести
+        int a = 600; //Ввести
 
         BufferedReader brX = new BufferedReader(new FileReader("pointsX.txt"));
         BufferedReader brY = new BufferedReader(new FileReader("pointsY.txt"));
@@ -32,7 +32,7 @@ public class CheckPoints {
                     m.get(x).add(y);
 
                 } else {
-                    System.out.println("no ok!");
+                    System.out.println("not ok!");
                     return;
                 }
             } catch (NumberFormatException e) {
@@ -45,13 +45,16 @@ public class CheckPoints {
         Map<Integer, Set<Integer>> res = new TreeMap<Integer, Set<Integer>>(m);
         m.forEach((x, ys) -> {
             ys.forEach(y -> {
-                int newY = (-1 * y) + p;
-                if (!ys.contains(newY)) {
-                    if (isBelong(x, newY, p, a)) {
-                        res.get(x).add(newY);
-                    } else {
-                        System.out.println("not ok");
-                        return;
+                if (y != 0) {
+                    int newY = (-1 * y) + p;
+                    if (!ys.contains(newY)) {
+                        System.out.println("не все точки");
+                        if (isBelong(x, newY, p, a)) {
+                            res.get(x).add(newY);
+                        } else {
+                            System.out.println("not ok");
+                            return;
+                        }
                     }
                 }
             });
