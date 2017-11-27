@@ -95,7 +95,8 @@ public class Main {
         return p;
     }
 
-    //Шаг второй, алгоритм 7.8.1 - Разложение простого числа в Z|-D^1/2|
+    //Шаг второй, алгоритм 7.8.1 - Разложение простого числа на множители в Z|-D^1/2|
+    //p = a^2 + b^2
     Pair<BigInteger, BigInteger> second(BigInteger p) {
         Pair<BigInteger, BigInteger> w = findPrimeDecomposition(p, D);
         return getAB(w, p, 1, false);
@@ -107,7 +108,7 @@ public class Main {
         if (legendreSymbol != 1) {
             return null;
         } else {
-            return REASONAlgorithm(p, n);
+            return shAlhgorithm(n, p);
         }
     }
 
@@ -142,52 +143,71 @@ public class Main {
         }
     }
 
-    Pair<BigInteger, BigInteger> REASONAlgorithm(BigInteger p, BigInteger n) {
-        BigInteger q = p.subtract(BigInteger.ONE); // p - 1
-        int s = 0; // 0
+    int Y(BigInteger a, BigInteger n) {
+        if (a.mod(n).equals(BigInteger.ZERO))
+            return 0;
 
-        do {
-            q = q.divide(TWO);
-            s++;
-        } while (!q.mod(TWO).equals(BigInteger.ONE));
-
-        if (s == 1) {
-            BigInteger r = n.modPow(p.add(BigInteger.ONE).divide(FOUR), p);
-            return new Pair<>(r, p.subtract(r)); //r, p - r
-        } else {
-            //Выбрали произвольный квадратичный невычет
-            BigInteger z = BigInteger.ONE;
-            do {
-                z = z.add(BigInteger.ONE);
-            }
-            while (getLegendreSymbol(z, p) != -1);
-
-            BigInteger c = z.modPow(q, p),
-                    r = n.modPow(q.add(BigInteger.ONE).divide(TWO), p),
-                    t = n.modPow(q, p);
-
-            int m = s;
-
-            while (!t.mod(p).equals(BigInteger.ONE)) {
-                int index = 1;
-                for (int i = 1; i < m; i++) {
-                    BigInteger exp = TWO.pow(i);
-                    if (t.modPow(exp, p).equals(BigInteger.ONE)) {
-                        index = i;
-                        break;
-                    }
-                }
-                BigInteger exp = TWO.pow(m - index - 1);
-                BigInteger b = c.modPow(exp, p);
-
-                r = r.multiply(b).mod(p);
-                t = t.multiply(b).multiply(b).mod(p);
-                c = b.multiply(b).mod(p);
-
-                m = index;
-            }
-            return new Pair<>(r, p.subtract(r)); //r, p - r
+        int res = 1;
+        if (a.compareTo(BigInteger.ZERO) == -1 && n.mod(BigInteger.valueOf(4)).equals(BigInteger.valueOf(3))) {
+            res *= -1;
+            a = a.multiply(BigInteger.valueOf(-1));
         }
+        while (true) {
+            a = a.mod(n);
+            int k = 0;
+            while (a.mod(BigInteger.valueOf(2)).equals(BigInteger.ZERO)) {
+                a = a.divide(BigInteger.valueOf(2));
+                k++;
+            }
+            if (k % 2 == 1 && (n.mod(BigInteger.valueOf(8)).equals(BigInteger.valueOf(3)) || n.mod(BigInteger.valueOf(8)).equals(BigInteger.valueOf(5))))
+                res *= -1;
+            if (a.equals(BigInteger.ONE))
+                break;
+            BigInteger tmp = a;
+            a = n;
+            n = tmp;
+            if ((n.subtract(BigInteger.ONE)).multiply(a.subtract(BigInteger.ONE)).divide(BigInteger.valueOf(4)).mod(BigInteger.valueOf(2)).equals(BigInteger.ONE))
+                res *= -1;
+        }
+        return res;
+    }
+
+    //Алгоритм Шенкса
+    Pair<BigInteger, BigInteger> shAlhgorithm(BigInteger a, BigInteger p) {
+        if (Y(a, p) == -1)
+            return new Pair<>(BigInteger.valueOf(-1), BigInteger.valueOf(-1));
+        BigInteger n = BigInteger.ZERO;
+        if (Y(a, p) == 1) {
+            for (BigInteger i = BigInteger.valueOf(2); i.compareTo(p) == -1; i = i.add(BigInteger.ONE)) {
+                if (Y(i, p) == -1) {
+                    n = i;
+                    break;
+                }
+            }
+        }
+        BigInteger h = p.subtract(BigInteger.ONE);
+        long k = 0;
+        while (h.mod(BigInteger.valueOf(2)).equals(BigInteger.ZERO)) {
+            h = h.divide(BigInteger.valueOf(2));
+            k++;
+        }
+        BigInteger a1 = a.modPow(h.add(BigInteger.ONE).divide(BigInteger.valueOf(2)), p);
+        BigInteger a2 = a.modInverse(p);
+
+        BigInteger n1 = n.modPow(h, p);
+        BigInteger n2 = BigInteger.ONE;
+        for (int i = 0; i < k - 1; i++) {
+            BigInteger b = a1.multiply(n2).mod(p);
+            BigInteger c = a2.multiply(b.pow(2)).mod(p);
+            BigInteger d = c.modPow(BigInteger.valueOf((int) Math.pow(2, k - 2 - i)), p);
+            int ji = 0;
+            if (d.equals(BigInteger.ONE))
+                ji = 0;
+            else if (d.equals(p.subtract(BigInteger.ONE)))
+                ji = 1;
+            n2 = n2.multiply(n1.pow((int) Math.pow(2, i) * ji)).mod(p);
+        }
+        return new Pair<>(a1.multiply(n2).mod(p), a1.multiply(n2).negate().mod(p));
     }
 
     Pair<BigInteger, BigInteger> getAB(Pair<BigInteger, BigInteger> w, BigInteger p, int choice, boolean used) {
