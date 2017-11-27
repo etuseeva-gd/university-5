@@ -27,6 +27,11 @@ public class Main {
         int len = Integer.parseInt(scanner.nextLine());
 //        int len = 9;
 
+        if (len < 8) {
+            System.out.println("Длина в должна быть больше, либо равно 8");
+            return;
+        }
+
         System.out.println("Введите m:");
         int m = Integer.parseInt(scanner.nextLine());
 //        int m = 71;
