@@ -9,8 +9,8 @@ public class CheckPoints {
     }
 
     public static void main(String[] args) throws IOException {
-        int p = 877; //Ввести
-        int a = 600; //Ввести
+        int p = 349; //Ввести
+        int a = 179; //Ввести
 
         BufferedReader brX = new BufferedReader(new FileReader("pointsX.txt"));
         BufferedReader brY = new BufferedReader(new FileReader("pointsY.txt"));

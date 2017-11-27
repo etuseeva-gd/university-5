@@ -20,18 +20,20 @@ public class Main {
 
     void run() throws IOException {
         System.out.println("Выберите что вы хотите сделать?");
+        System.out.println("0 - Сгенерировать параметры");
         System.out.println("1 - Претендент: Сгенерировать и послать точку R верификатору");
         System.out.println("2 - Верификатор: Проверить R и послать случайный бит");
         System.out.println("3 - Претендент: Предьявление показателя k(или k') на основе бита");
         System.out.println("4 - Верификатор: Проверка знания l претендента");
-        System.out.println("P.S.1 Общие параметры должны быть записаны в common_params.txt");
-        System.out.println("      1 строка - p, 2 строка - a, 3 строка - Q, 4 строка - r, 5 строка - P");
-        System.out.println("P.S.2 l (P = lQ) должна быть записана в l.txt");
 
         Scanner sc = new Scanner(System.in);
         String action = sc.nextLine();
 
         switch (action) {
+            case "0": {
+                genParams();
+                break;
+            }
             case "1": {
                 first();
                 break;
@@ -54,6 +56,48 @@ public class Main {
         }
 
         sc.close();
+    }
+
+    void genParams() throws IOException {
+        deleteAll();
+
+        BufferedWriter bw = new BufferedWriter(new FileWriter("common_params.txt"));
+        BufferedWriter bwL = new BufferedWriter(new FileWriter("l.txt"));
+        Scanner sc = new Scanner(System.in);
+
+        //common_params.txt
+        System.out.println("Введите модуль p:");
+        BigInteger p = new BigInteger(sc.nextLine());
+        bw.write(p + "\n");
+
+        System.out.println("Введите a:");
+        BigInteger a = new BigInteger(sc.nextLine());
+        bw.write(a + "\n");
+
+        System.out.println("Введите образующую точку Q(x,y):");
+        Pair<BigInteger, BigInteger> Q = getPoint(sc.nextLine());
+        bw.write(getStrPoint(Q) + "\n");
+
+        System.out.println("Введите порядок точки Q - r:");
+        BigInteger r = new BigInteger(sc.nextLine());
+        bw.write(r + "\n");
+
+        //l.txt
+        System.out.println("Введите l:");
+        BigInteger l = new BigInteger(sc.nextLine());
+        bwL.write(l + "\n");
+
+        //common_params.txt
+        Pair<BigInteger, BigInteger> R = multPoint(l, Q, a, p);
+        bw.write(getStrPoint(R) + "\n");
+
+        sc.close();
+        bw.close();
+        bwL.close();
+
+        BufferedWriter bwR = new BufferedWriter(new FileWriter("round.txt"));
+        bwR.write(0 + "");
+        bwR.close();
     }
 
     void first() throws IOException {
@@ -83,6 +127,7 @@ public class Main {
 
         if (R == null || rR != null) {
             System.out.println("Полученное R не корректное!");
+            deleteAll();
             return;
         }
 
@@ -126,9 +171,17 @@ public class Main {
         //Было полученно на прошлых шагах
         Pair<BigInteger, BigInteger> R = getPoint(readOneStr("R.txt"));
         if (isPointsEquals(R, chPoint)) {
-            System.out.println("Проверка пройдена. Пользователь знает l!");
+            int k = Integer.parseInt(readOneStr("round.txt"));
+            k++;
+
+            System.out.println("Проверка пройдена. Пользователь знает l! С вероятностью " + (1 - 1 / Math.pow(2.0, k)));
+
+            printStr(k + "", "round.txt");
         } else {
             System.out.println("Проверка не пройдена. Пользователь не знает l!");
+
+            Files.deleteIfExists(new File("common_params.txt").toPath());
+            Files.deleteIfExists(new File("l.txt").toPath());
         }
     }
 
@@ -220,5 +273,20 @@ public class Main {
         BigInteger x1 = firstPoint.getKey(), y1 = firstPoint.getValue();
         BigInteger x2 = secondPoint.getKey(), y2 = secondPoint.getValue();
         return x1.equals(x2) && y1.equals(y2);
+    }
+
+    String getStrPoint(Pair<BigInteger, BigInteger> point) {
+        return "(" + point.getKey() + "," + point.getValue() + ")";
+    }
+
+    void deleteAll() throws IOException {
+        Files.deleteIfExists(new File("common_params.txt").toPath());
+        Files.deleteIfExists(new File("l.txt").toPath());
+        Files.deleteIfExists(new File("round.txt").toPath());
+        Files.deleteIfExists(new File("k.txt").toPath());
+        Files.deleteIfExists(new File("k1.txt").toPath());
+        Files.deleteIfExists(new File("rand_bit.txt").toPath());
+        Files.deleteIfExists(new File("k_4.txt").toPath());
+        Files.deleteIfExists(new File("R.txt").toPath());
     }
 }
