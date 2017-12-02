@@ -87,21 +87,17 @@ public class Third {
             }
 
             if (Objects.equals(action, "7")) {
-                break;
+                sc.close();
+                return;
             }
 
             System.out.println("Введите следующее действие:");
         }
-
-        sc.close();
     }
 
     //Gen params
     void zero() throws IOException {
-        //p
-        //A
-        //Q
-        //r
+        //p a Q r
         new EllipticalCurves().genParams("common_params.txt");
     }
 

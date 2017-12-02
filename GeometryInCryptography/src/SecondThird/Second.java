@@ -1,5 +1,6 @@
 package SecondThird;
 
+import First.EllipticalCurves;
 import javafx.util.Pair;
 
 import java.io.*;
@@ -20,87 +21,96 @@ public class Second {
 
     void run() throws IOException {
         System.out.println("Выберите что вы хотите сделать?");
+
+        //Генерация параметров
         System.out.println("0 - Сгенерировать параметры");
-        System.out.println("1 - Претендент: Сгенерировать и послать точку R верификатору");
-        System.out.println("2 - Верификатор: Проверить R и послать случайный бит");
-        System.out.println("3 - Претендент: Предьявление показателя k(или k') на основе бита");
-        System.out.println("4 - Верификатор: Проверка знания l претендента");
+        System.out.println("1 - Сгенерировать вход претендента (l)");
+
+        //Протокол
+        System.out.println("2 - 1 шаг. Претендент: Сгенерировать и послать точку R верификатору");
+        System.out.println("3 - 2 шаг. Верификатор: Проверить R и послать случайный бит");
+        System.out.println("4 - 3 шаг. Претендент: Предьявление показателя k(или k') на основе бита");
+        System.out.println("5 - 4 шаг. Верификатор: Проверка знания l претендента");
+
+        System.out.println("6 - Выход.");
 
         Scanner sc = new Scanner(System.in);
-        String action = sc.nextLine();
+        while (true) {
+            String action = sc.nextLine();
 
-        switch (action) {
-            case "0": {
-                genParams();
-                break;
-            }
-            case "1": {
-                first();
-                break;
-            }
-            case "2": {
-                second();
-                break;
-            }
-            case "3": {
-                third();
-                break;
-            }
-            case "4": {
-                fourth();
-                break;
-            }
-            default: {
-                System.out.println("Неверная операция!");
+            switch (action) {
+                case "0": {
+                    zero();
+                    break;
+                }
+                case "1": {
+                    first();
+                    break;
+                }
+                case "2": {
+                    second();
+                    break;
+                }
+                case "3": {
+                    third();
+                    break;
+                }
+                case "4": {
+                    fourth();
+                    break;
+                }
+                case "5": {
+                    fifth();
+                    break;
+                }
+                case "6": {
+                    sc.close();
+                    return;
+                }
+                default: {
+                    System.out.println("Неверная операция!");
+                }
             }
         }
-
-        sc.close();
     }
 
-    void genParams() throws IOException {
+    void zero() throws IOException {
         deleteAll();
-
-        BufferedWriter bw = new BufferedWriter(new FileWriter("common_params.txt"));
-        BufferedWriter bwL = new BufferedWriter(new FileWriter("l.txt"));
-        Scanner sc = new Scanner(System.in);
-
-        //common_params.txt
-        System.out.println("Введите модуль p:");
-        BigInteger p = new BigInteger(sc.nextLine());
-        bw.write(p + "\n");
-
-        System.out.println("Введите a:");
-        BigInteger a = new BigInteger(sc.nextLine());
-        bw.write(a + "\n");
-
-        System.out.println("Введите образующую точку Q(x,y):");
-        Pair<BigInteger, BigInteger> Q = getPoint(sc.nextLine());
-        bw.write(getStrPoint(Q) + "\n");
-
-        System.out.println("Введите порядок точки Q - r:");
-        BigInteger r = new BigInteger(sc.nextLine());
-        bw.write(r + "\n");
-
-        //l.txt
-        System.out.println("Введите l:");
-        BigInteger l = new BigInteger(sc.nextLine());
-        bwL.write(l + "\n");
-
-        //common_params.txt
-        Pair<BigInteger, BigInteger> R = multPoint(l, Q, a, p);
-        bw.write(getStrPoint(R) + "\n");
-
-        sc.close();
-        bw.close();
-        bwL.close();
-
-        BufferedWriter bwR = new BufferedWriter(new FileWriter("round.txt"));
-        bwR.write(0 + "");
-        bwR.close();
+        //p a Q r
+        new EllipticalCurves().genParams("common_params.txt");
     }
 
     void first() throws IOException {
+        BufferedReader br = new BufferedReader(new FileReader("common_params.txt"));
+        BigInteger p = new BigInteger(br.readLine());
+        BigInteger a = new BigInteger(br.readLine());
+        Pair<BigInteger, BigInteger> Q = getPoint(br.readLine());
+        BigInteger r = new BigInteger(br.readLine());
+        br.close();
+
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Введите l:");
+
+        BigInteger l = new BigInteger(sc.nextLine());
+        while (l.compareTo(r) > 0) {
+            System.out.println("Не корректное l (l > r), введите другое.");
+            l = new BigInteger(sc.nextLine());
+        }
+
+        printStr(l + "", "l.txt");
+
+        Pair<BigInteger, BigInteger> R = multPoint(l, Q, a, p);
+
+        BufferedWriter bw = new BufferedWriter(new FileWriter("common_params.txt"));
+        bw.write(p + "\n");
+        bw.write(a + "\n");
+        bw.write(getStrPoint(Q) + "\n");
+        bw.write(r + "\n");
+        bw.write(getStrPoint(R) + "\n");
+        bw.close();
+    }
+
+    void second() throws IOException {
         CommonParams cp = getCommonParams();
 
         //Знает сам
@@ -116,7 +126,7 @@ public class Second {
         printPoint(R, "R.txt");
     }
 
-    void second() throws IOException {
+    void third() throws IOException {
         CommonParams cp = getCommonParams();
 
         //Получил от претендента
@@ -137,7 +147,7 @@ public class Second {
         sc.close();
     }
 
-    void third() throws IOException {
+    void fourth() throws IOException {
         //Получил от верификатора
         int bit = Integer.parseInt(readOneStr("rand_bit.txt"));
         //
@@ -154,7 +164,7 @@ public class Second {
         }
     }
 
-    void fourth() throws IOException {
+    void fifth() throws IOException {
         CommonParams cp = getCommonParams();
 
         //Было полученно на прошлых шагах
@@ -217,7 +227,7 @@ public class Second {
     }
 
     public static Pair<BigInteger, BigInteger> sum(Pair<BigInteger, BigInteger> firstPoint, Pair<BigInteger, BigInteger> secondPoint,
-                                     BigInteger a, BigInteger p) {
+                                                   BigInteger a, BigInteger p) {
         try {
             if (firstPoint == null) {
                 return null;
@@ -282,11 +292,13 @@ public class Second {
     public static void deleteAll() throws IOException {
         Files.deleteIfExists(new File("common_params.txt").toPath());
         Files.deleteIfExists(new File("l.txt").toPath());
-        Files.deleteIfExists(new File("round.txt").toPath());
         Files.deleteIfExists(new File("k.txt").toPath());
         Files.deleteIfExists(new File("k1.txt").toPath());
         Files.deleteIfExists(new File("rand_bit.txt").toPath());
         Files.deleteIfExists(new File("k_4.txt").toPath());
         Files.deleteIfExists(new File("R.txt").toPath());
+
+        Files.deleteIfExists(new File("round.txt").toPath());
+        Files.deleteIfExists(new File("step.txt").toPath());
     }
 }
