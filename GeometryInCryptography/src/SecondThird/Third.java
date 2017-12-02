@@ -8,6 +8,8 @@ import java.math.BigInteger;
 import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
@@ -20,6 +22,7 @@ public class Third {
     }
 
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
+//        new Third().bigMessageToSmall(BigInteger.valueOf(250));
         new Third().run();
     }
 
@@ -330,7 +333,7 @@ public class Third {
     }
 
     public static Pair<BigInteger, BigInteger> sumPoints(Pair<BigInteger, BigInteger> firstPoint, Pair<BigInteger, BigInteger> secondPoint,
-                                                        BigInteger a, BigInteger p) {
+                                                         BigInteger a, BigInteger p) {
         try {
             if (firstPoint == null && secondPoint != null) {
                 return secondPoint;
@@ -365,5 +368,47 @@ public class Third {
         } catch (ArithmeticException e) {
             return null;
         }
+    }
+
+    List<BigInteger> bigMessageToSmall(BigInteger r) {
+        StringBuilder message = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new FileReader("message.txt"))) {
+            String line = br.readLine();
+            while (line != null) {
+                message.append(line);
+                line = br.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        byte[] byteArr = String.valueOf(message).getBytes();
+        BigInteger m = new BigInteger(byteArr);
+        int len = String.valueOf(r).length() - 1;
+
+        List<BigInteger> mess = new ArrayList<>();
+        String mStr = String.valueOf(m);
+        {
+            int i = 0;
+            while (i + len < mStr.length()) {
+                mess.add(new BigInteger(mStr.substring(i, i + len)));
+                i += len;
+            }
+
+            if (i < mStr.length()) {
+                mess.add(new BigInteger(mStr.substring(i)));
+            }
+        }
+        return mess;
+    }
+
+    void fromSmallMessToBig(List<BigInteger> mess) {
+        StringBuilder out = new StringBuilder();
+        mess.forEach(m -> {
+            byte[] byteArr = m.toByteArray();
+            String partMes = new String(byteArr);
+            out.append(partMes);
+        });
+        System.out.println(out);
     }
 }
