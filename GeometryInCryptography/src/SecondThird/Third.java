@@ -22,7 +22,6 @@ public class Third {
     }
 
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
-//        new Third().bigMessageToSmall(BigInteger.valueOf(250));
         new Third().run();
     }
 
@@ -179,70 +178,76 @@ public class Third {
         BigInteger betta = f(R).multiply(f(R1).modInverse(params.p)).mod(params.r);
         write(betta + "", "betta.txt");
 
-        BigInteger m = new BigInteger("123"); //Todo: message!!!
-        BigInteger m1 = alpha.multiply(betta.modInverse(params.p)).multiply(m).mod(params.r);
+        List<BigInteger> m = bigMessageToSmall(params.r);
+
+        StringBuilder m1 = new StringBuilder();
+        m.forEach(mt -> {
+            m1.append(alpha.multiply(betta.modInverse(params.p)).multiply(mt).mod(params.r)).append('\n');
+        });
         write(m1 + "", "m1.txt");
     }
 
     void fourth() throws IOException {
         CommonParams params = getCommonParams();
 
-        //Todo: rewrite
-        BigInteger m1 = new BigInteger(readOneStr("m1.txt"));
-
-        if (m1.equals(BigInteger.ZERO)) {
-            System.out.println("Не корректное m'!");
-            deleteAll();
-            System.exit(1);
-        }
-
         BigInteger l = new BigInteger(readOneStr("l.txt"));
         Pair<BigInteger, BigInteger> R1 = getPoint(readOneStr("R1.txt"));
         BigInteger k1 = new BigInteger(readOneStr("k1.txt"));
 
-        BigInteger s1 = l.multiply(f(R1)).add(k1.multiply(m1)).mod(params.r);
+        //Todo: rewrite
+        List<BigInteger> m1 = readNumbers("m1.txt");
 
+        StringBuilder s1 = new StringBuilder();
+        m1.forEach(m1t -> {
+            if (m1t.equals(BigInteger.ZERO)) {
+                System.out.println("Не корректное m'!");
+                try {
+                    deleteAll();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                System.exit(1);
+            }
+            s1.append(l.multiply(f(R1)).add(k1.multiply(m1t)).mod(params.r)).append('\n');
+        });
         write(s1 + "", "s1.txt");
     }
 
     void fifth() throws IOException {
         CommonParams params = getCommonParams();
 
-        BigInteger s1 = new BigInteger(readOneStr("s1.txt"));
         Pair<BigInteger, BigInteger> R1 = getPoint(readOneStr("R1.txt"));
         BigInteger m1 = new BigInteger(readOneStr("m1.txt"));
-
-        Pair<BigInteger, BigInteger> left = multPoint(s1, params.Q, params.a, params.p);
 
         Pair<BigInteger, BigInteger> right1 = multPoint(f(R1), params.P, params.a, params.p);
         Pair<BigInteger, BigInteger> right2 = multPoint(m1, R1, params.a, params.p);
         Pair<BigInteger, BigInteger> right = sumPoints(right1, right2, params.a, params.p);
 
-        if (!isPointsEquals(left, right)) {
-            System.out.println("Подпись недействительна!");
-            deleteAll();
-            System.exit(1);
-        }
-
         BigInteger betta = new BigInteger(readOneStr("betta.txt"));
-        BigInteger s = s1.multiply(betta).mod(params.r);
-
-        BigInteger m = new BigInteger("123"); //Todo: rewrite
         Pair<BigInteger, BigInteger> R = getPoint(readOneStr("R.txt"));
+        List<BigInteger> s1 = readNumbers("s1.txt");
+
+        StringBuilder s = new StringBuilder();
+        s1.forEach(s1t -> {
+            Pair<BigInteger, BigInteger> left = multPoint(s1t, params.Q, params.a, params.p);
+
+            if (!isPointsEquals(left, right)) {
+                System.out.println("Подпись недействительна!");
+                try {
+                    deleteAll();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                System.exit(1);
+            }
+
+            s.append(s1t.multiply(betta).mod(params.r)).append('\n');
+        });
 
         //Todo: maybe remove
         deleteUnnecessaryFiles();
 
-        //Результат
-        System.out.println(m);
-        System.out.println(R);
-        System.out.println(s);
-
-        StringBuilder coin = new StringBuilder();
-        coin.append(m).append("\n");
-        coin.append(getStrPoint(R)).append("\n");
-        coin.append(s).append("\n");
-        write(String.valueOf(coin), "coin.txt");
+        write(s + "", "s.txt");
     }
 
     //Store
@@ -318,6 +323,8 @@ public class Third {
 
         Files.deleteIfExists(new File("coin.txt").toPath());
 
+        Files.deleteIfExists(new File("s.txt").toPath());
+
         Files.deleteIfExists(new File("step.txt").toPath());
     }
 
@@ -325,7 +332,6 @@ public class Third {
         Files.deleteIfExists(new File("l.txt").toPath());
         Files.deleteIfExists(new File("k1.txt").toPath());
         Files.deleteIfExists(new File("R1.txt").toPath());
-        Files.deleteIfExists(new File("R.txt").toPath());
         Files.deleteIfExists(new File("betta.txt").toPath());
         Files.deleteIfExists(new File("m1.txt").toPath());
         Files.deleteIfExists(new File("s1.txt").toPath());
@@ -410,5 +416,19 @@ public class Third {
             out.append(partMes);
         });
         System.out.println(out);
+    }
+
+    List<BigInteger> readNumbers(String file) {
+        List<BigInteger> lines = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line = br.readLine();
+            while (line != null) {
+                lines.add(new BigInteger(line));
+                line = br.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return lines;
     }
 }
