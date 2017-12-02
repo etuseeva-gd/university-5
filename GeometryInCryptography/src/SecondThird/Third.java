@@ -236,7 +236,7 @@ public class Third {
     }
 
     //Store
-    void sixth() {
+    void sixth() throws IOException {
         CommonParams params = getCommonParams();
         Coin coin = getCoin();
 

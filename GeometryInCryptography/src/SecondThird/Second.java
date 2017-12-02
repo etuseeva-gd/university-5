@@ -96,12 +96,18 @@ public class Second {
     }
 
     void first() throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader("common_params.txt"));
-        BigInteger p = new BigInteger(br.readLine());
-        BigInteger a = new BigInteger(br.readLine());
-        Pair<BigInteger, BigInteger> Q = getPoint(br.readLine());
-        BigInteger r = new BigInteger(br.readLine());
-        br.close();
+        BigInteger p = null, a = null, r = null;
+        Pair<BigInteger, BigInteger> Q = null;
+        try(BufferedReader br = new BufferedReader(new FileReader("common_params.txt"))){
+            p = new BigInteger(br.readLine());
+            a = new BigInteger(br.readLine());
+            Q = getPoint(br.readLine());
+           r = new BigInteger(br.readLine());
+        } catch (FileNotFoundException e) {
+            System.out.println("Нет сгенерированных параметров!");
+            deleteAll();
+            System.exit(1);
+        }
 
         Scanner sc = new Scanner(System.in);
         System.out.println("Введите l:");
@@ -177,6 +183,7 @@ public class Second {
 
         BigInteger k = new BigInteger(readOneStr("k_4.txt"));
         int bit = Integer.parseInt(readOneStr("rand_bit.txt"));
+        System.out.println(bit);
 
         Pair<BigInteger, BigInteger> chPoint = null;
         if (bit == 0) {
@@ -203,7 +210,7 @@ public class Second {
         }
     }
 
-    public static CommonParams getCommonParams() {
+    public static CommonParams getCommonParams() throws IOException {
         try {
             BufferedReader br = new BufferedReader(new FileReader("common_params.txt"));
             CommonParams commonParams = new CommonParams();
@@ -214,8 +221,9 @@ public class Second {
             commonParams.P = getPoint(br.readLine());
             br.close();
             return commonParams;
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            System.out.println("Нет сгенерированных параметров!");
+            deleteAll();
             System.exit(1);
         }
         return null;
