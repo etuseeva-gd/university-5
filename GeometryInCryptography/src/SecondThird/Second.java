@@ -41,11 +41,12 @@ public class Second {
             int action = Integer.parseInt(sc.nextLine());
 
             if (action != 0) {
-                if (action <= step) {
-                    System.out.println("Порядок действия протокола не соблюден! Последний шаг = " + step);
-//                    System.out.println("Порядок действия протокола не соблюден!");
-//                    System.out.println("Последний шаг = " + step);
+                if (action != step + 1) {
+                    System.out.println("Порядок действия протокола не соблюден! Последнее дейстивие = " + step);
                     continue;
+                } else {
+                    step++;
+                    printStr(step + "", "step.txt");
                 }
             }
 
@@ -57,27 +58,22 @@ public class Second {
                 }
                 case 1: {
                     first();
-                    System.out.println("Точка P = lQ вычислена.");
                     break;
                 }
                 case 2: {
                     second();
-                    System.out.println("Шаг 1. Конец");
                     break;
                 }
                 case 3: {
                     third();
-                    System.out.println("Шаг 2. Конец");
                     break;
                 }
                 case 4: {
                     fourth();
-                    System.out.println("Шаг 3. Конец");
                     break;
                 }
                 case 5: {
                     fifth();
-                    System.out.println("Шаг 4. Конец");
                     break;
                 }
                 case 6: {
@@ -89,13 +85,6 @@ public class Second {
                 }
             }
 
-            if (action >= 1 && action < 5) {
-                step++;
-            } else {
-                step = 0;
-            }
-
-            printStr(step + "", "step.txt");
             System.out.println("Введите следующее действие:");
         }
     }
@@ -127,11 +116,7 @@ public class Second {
 
         Pair<BigInteger, BigInteger> R = multPoint(l, Q, a, p);
 
-        BufferedWriter bw = new BufferedWriter(new FileWriter("common_params.txt"));
-        bw.write(p + "\n");
-        bw.write(a + "\n");
-        bw.write(getStrPoint(Q) + "\n");
-        bw.write(r + "\n");
+        BufferedWriter bw = new BufferedWriter(new FileWriter("common_params.txt", true));
         bw.write(getStrPoint(R) + "\n");
         bw.close();
     }
@@ -207,9 +192,10 @@ public class Second {
             int round = rStr == null ? 0 : Integer.parseInt(rStr);
             round++;
 
-            System.out.println("Проверка пройдена. Пользователь знает l! С вероятностью " + (1 - 1 / Math.pow(2.0, round)));
+            System.out.println("Проверка пройдена. Пользователь знает l с вероятностью " + (1 - 1 / Math.pow(2, round)) + "!");
+            printStr(round + "", "round.txt");
 
-            printStr(k + "", "round.txt");
+            refreshAll();
         } else {
             System.out.println("Проверка не пройдена. Пользователь не знает l!");
             deleteAll();
@@ -327,6 +313,26 @@ public class Second {
         Files.deleteIfExists(new File("R.txt").toPath());
 
         Files.deleteIfExists(new File("round.txt").toPath());
+        Files.deleteIfExists(new File("step.txt").toPath());
+    }
+
+    public static void refreshAll() throws IOException {
+        CommonParams params = getCommonParams();
+        try (BufferedWriter bf = new BufferedWriter(new FileWriter("common_params.txt"))) {
+            bf.write(params.p + "\n");
+            bf.write(params.a + "\n");
+            bf.write(getStrPoint(params.Q) + "\n");
+            bf.write(params.r + "\n");
+        }
+
+        Files.deleteIfExists(new File("l.txt").toPath());
+
+        Files.deleteIfExists(new File("k.txt").toPath());
+        Files.deleteIfExists(new File("k1.txt").toPath());
+        Files.deleteIfExists(new File("rand_bit.txt").toPath());
+        Files.deleteIfExists(new File("k_4.txt").toPath());
+        Files.deleteIfExists(new File("R.txt").toPath());
+
         Files.deleteIfExists(new File("step.txt").toPath());
     }
 }
