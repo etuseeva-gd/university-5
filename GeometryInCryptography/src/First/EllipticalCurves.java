@@ -12,13 +12,13 @@ import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
-public class Main {
+public class EllipticalCurves {
     private int certainty = 200, iter = 1000;
     private BigInteger TWO = new BigInteger("2"), THREE = new BigInteger("3"), FOUR = new BigInteger("4"),
             FIVE = new BigInteger("5"), EIGHT = new BigInteger("8"), D = BigInteger.ONE;
 
     public static void main(String[] args) throws IOException {
-        new Main().run();
+        new EllipticalCurves().run();
     }
 
     void run() throws IOException {
@@ -28,7 +28,7 @@ public class Main {
 //        int len = 9;
 
         if (len < 8) {
-            System.out.println("Длина в должна быть больше, либо равно 8");
+            System.out.println("Длина в должна быть больше, либо равна 8");
             return;
         }
 
@@ -86,6 +86,50 @@ public class Main {
 
                 //Вывод данных в файл
                 print(p, point, pnr);
+                break;
+            }
+        }
+    }
+
+    public void genParams(String fileName) throws IOException {
+        int len = 10, m = 71;
+        while (true) {
+            BigInteger p;
+            Trio pnr;
+            while (true) {
+                p = first(len);
+                Pair<BigInteger, BigInteger> ab = second(p);
+                pnr = third(ab, p);
+                boolean ok = fourth(pnr, m);
+                if (ok) {
+                    break;
+                }
+            }
+            boolean ok = false;
+            int k = 0;
+            Trio point;
+            while (true) {
+                point = fifth(pnr);
+                if (iter == ++k) {
+                    ok = true;
+                    break;
+                }
+                if (!sixth(point, pnr.getB(), pnr.getA())) {
+                    break;
+                }
+            }
+            if (!ok) {
+                try (BufferedWriter bf = new BufferedWriter(new FileWriter(fileName))) {
+                    bf.write(p.toString() + "\n");
+                    bf.write(point.getC() + "\n");
+                    Trio q = point;
+                    BigInteger nDivR = pnr.getB().divide(pnr.getC());
+                    for (int i = 0; i < nDivR.intValue() - 1; i++) {
+                        q = sumPoints(q, point, pnr.getA());
+                    }
+                    bf.write("(" + q.getA().toString() + ", " + q.getB().toString() + ")\n");
+                    bf.write(pnr.getC() + "\n");
+                }
                 break;
             }
         }

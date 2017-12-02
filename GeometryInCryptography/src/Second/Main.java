@@ -9,7 +9,7 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
-    class CommonParams {
+    public class CommonParams {
         BigInteger p, a, r;
         Pair<BigInteger, BigInteger> P, Q;
     }
@@ -185,7 +185,7 @@ public class Main {
         }
     }
 
-    CommonParams getCommonParams() {
+    public CommonParams getCommonParams() {
         try {
             BufferedReader br = new BufferedReader(new FileReader("common_params.txt"));
             CommonParams commonParams = new CommonParams();
@@ -202,13 +202,13 @@ public class Main {
         return null;
     }
 
-    Pair<BigInteger, BigInteger> getPoint(String str) {
+    public Pair<BigInteger, BigInteger> getPoint(String str) {
         str = str.replace("(", "").replace(")", "");
         String[] strings = str.split(",");
         return new Pair<>(new BigInteger(strings[0].trim()), new BigInteger(strings[1].trim()));
     }
 
-    Pair<BigInteger, BigInteger> multPoint(BigInteger k, Pair<BigInteger, BigInteger> point, BigInteger a, BigInteger p) {
+    public Pair<BigInteger, BigInteger> multPoint(BigInteger k, Pair<BigInteger, BigInteger> point, BigInteger a, BigInteger p) {
         Pair<BigInteger, BigInteger> res = point;
         for (int i = 0; i < k.intValue() - 1; i++) {
             res = sum(res, point, a, p);
@@ -216,7 +216,7 @@ public class Main {
         return res;
     }
 
-    Pair<BigInteger, BigInteger> sum(Pair<BigInteger, BigInteger> firstPoint, Pair<BigInteger, BigInteger> secondPoint,
+    public Pair<BigInteger, BigInteger> sum(Pair<BigInteger, BigInteger> firstPoint, Pair<BigInteger, BigInteger> secondPoint,
                                      BigInteger a, BigInteger p) {
         try {
             if (firstPoint == null) {
@@ -250,36 +250,36 @@ public class Main {
         }
     }
 
-    void printPoint(Pair<BigInteger, BigInteger> point, String file) throws IOException {
+    public void printPoint(Pair<BigInteger, BigInteger> point, String file) throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
         bw.write("(" + point.getKey() + "," + point.getValue() + ")");
         bw.close();
     }
 
-    void printStr(String str, String file) throws IOException {
+    public void printStr(String str, String file) throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-        bw.write(str);
+        bw.write(str + '\n');
         bw.close();
     }
 
-    String readOneStr(String file) throws IOException {
+    public String readOneStr(String file) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(file));
         String res = br.readLine();
         br.close();
         return res;
     }
 
-    boolean isPointsEquals(Pair<BigInteger, BigInteger> firstPoint, Pair<BigInteger, BigInteger> secondPoint) {
+    public boolean isPointsEquals(Pair<BigInteger, BigInteger> firstPoint, Pair<BigInteger, BigInteger> secondPoint) {
         BigInteger x1 = firstPoint.getKey(), y1 = firstPoint.getValue();
         BigInteger x2 = secondPoint.getKey(), y2 = secondPoint.getValue();
         return x1.equals(x2) && y1.equals(y2);
     }
 
-    String getStrPoint(Pair<BigInteger, BigInteger> point) {
+    public String getStrPoint(Pair<BigInteger, BigInteger> point) {
         return "(" + point.getKey() + "," + point.getValue() + ")";
     }
 
-    void deleteAll() throws IOException {
+    public void deleteAll() throws IOException {
         Files.deleteIfExists(new File("common_params.txt").toPath());
         Files.deleteIfExists(new File("l.txt").toPath());
         Files.deleteIfExists(new File("round.txt").toPath());
