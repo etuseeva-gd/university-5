@@ -46,7 +46,7 @@ public class Second {
                     continue;
                 } else {
                     step++;
-                    printStr(step + "", "step.txt");
+                    write(step + "", "step.txt");
                 }
             }
 
@@ -118,7 +118,7 @@ public class Second {
             l = new BigInteger(sc.nextLine());
         }
 
-        printStr(l + "", "l.txt");
+        write(l + "", "l.txt");
 
         Pair<BigInteger, BigInteger> R = multPoint(l, Q, a, p);
 
@@ -135,9 +135,9 @@ public class Second {
         //
 
         BigInteger k = new BigInteger(cp.r.bitLength() - 1, new Random()).mod(cp.r);
-        printStr(k + "", "k.txt");
+        write(k + "", "k.txt");
         BigInteger k1 = k.multiply(l).mod(cp.r);
-        printStr(k1 + "", "k1.txt");
+        write(k1 + "", "k1.txt");
 
         Pair<BigInteger, BigInteger> R = multPoint(k, cp.P, cp.a, cp.p);
         printPoint(R, "R.txt");
@@ -158,7 +158,7 @@ public class Second {
             System.exit(1);
         }
 
-        printStr((Math.random() > 0.5 ? 1 : 0) + "", "rand_bit.txt");
+        write((Math.random() > 0.5 ? 1 : 0) + "", "rand_bit.txt");
     }
 
     void fourth() throws IOException {
@@ -200,7 +200,7 @@ public class Second {
             round++;
 
             System.out.println("Проверка пройдена. Пользователь знает l с вероятностью " + (1 - 1 / Math.pow(2, round)) + "!");
-            printStr(round + "", "round.txt");
+            write(round + "", "round.txt");
 
             refreshAll();
         } else {
@@ -283,9 +283,9 @@ public class Second {
         bw.close();
     }
 
-    public static void printStr(String str, String file) throws IOException {
+    public static void write(String str, String file) throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-        bw.write(str + '\n');
+        bw.write(str);
         bw.close();
     }
 

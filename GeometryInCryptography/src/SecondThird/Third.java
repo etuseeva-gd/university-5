@@ -105,7 +105,7 @@ public class Third {
     void first() throws IOException {
         BigInteger p = null, a = null, r = null;
         Pair<BigInteger, BigInteger> Q = null;
-        try(BufferedReader br = new BufferedReader(new FileReader("common_params.txt"))){
+        try (BufferedReader br = new BufferedReader(new FileReader("common_params.txt"))) {
             p = new BigInteger(br.readLine());
             a = new BigInteger(br.readLine());
             Q = getPoint(br.readLine());
@@ -125,7 +125,7 @@ public class Third {
             l = new BigInteger(sc.nextLine());
         }
 
-        printStr(l + "", "l.txt");
+        write(l + "", "l.txt");
 
         Pair<BigInteger, BigInteger> R = multPoint(l, Q, a, p);
 
@@ -144,8 +144,8 @@ public class Third {
             Pair<BigInteger, BigInteger> R1 = multPoint(k1, params.Q, params.a, params.p);
 
             if (!f(R1).equals(BigInteger.ZERO)) {
-                printStr(k1 + "", "k1.txt");
-                printStr(getStrPoint(R1), "R1.txt");
+                write(k1 + "", "k1.txt");
+                write(getStrPoint(R1), "R1.txt");
                 break;
             }
         } while (true);
@@ -170,15 +170,15 @@ public class Third {
                 break;
             }
         } while (true);
-        printStr(R + "", "R.txt");
+        write(R + "", "R.txt");
 
         //Todo: check mod p and r
         BigInteger betta = f(R).multiply(f(R1).modInverse(params.p)).mod(params.r);
-        printStr(betta + "", "betta.txt");
+        write(betta + "", "betta.txt");
 
         BigInteger m = new BigInteger("123"); //Todo: message!!!
         BigInteger m1 = alpha.multiply(betta.modInverse(params.p)).multiply(m).mod(params.r);
-        printStr(m1 + "", "m1.txt");
+        write(m1 + "", "m1.txt");
     }
 
     void fourth() throws IOException {
@@ -199,7 +199,7 @@ public class Third {
 
         BigInteger s1 = l.multiply(f(R1)).add(k1.multiply(m1)).mod(params.r);
 
-        printStr(s1 + "", "s1.txt");
+        write(s1 + "", "s1.txt");
     }
 
     void fifth() throws IOException {
@@ -213,7 +213,7 @@ public class Third {
 
         Pair<BigInteger, BigInteger> right1 = multPoint(f(R1), params.P, params.a, params.p);
         Pair<BigInteger, BigInteger> right2 = multPoint(m1, R1, params.a, params.p);
-        Pair<BigInteger, BigInteger> right = sum(right1, right2, params.a, params.p);
+        Pair<BigInteger, BigInteger> right = sumPoints(right1, right2, params.a, params.p);
 
         if (!isPointsEquals(left, right)) {
             System.out.println("Подпись недействительна!");
@@ -235,7 +235,11 @@ public class Third {
         System.out.println(R);
         System.out.println(s);
 
-        //Todo: result to file
+        StringBuilder coin = new StringBuilder();
+        coin.append(m).append("\n");
+        coin.append(getStrPoint(R)).append("\n");
+        coin.append(s).append("\n");
+        write(String.valueOf(coin), "coin.txt");
     }
 
     //Store
@@ -256,7 +260,7 @@ public class Third {
         Pair<BigInteger, BigInteger> left = multPoint(coin.s, params.Q, params.a, params.p);
         Pair<BigInteger, BigInteger> right1 = multPoint(f(coin.R), params.P, params.a, params.p);
         Pair<BigInteger, BigInteger> right2 = multPoint(coin.m, coin.R, params.a, params.p);
-        Pair<BigInteger, BigInteger> right = sum(right1, right2, params.a, params.p);
+        Pair<BigInteger, BigInteger> right = sumPoints(right1, right2, params.a, params.p);
 
         if (!isPointsEquals(left, right)) {
             System.out.println("Подпись недействительна! Соотношение не выполняется!");
@@ -323,5 +327,43 @@ public class Third {
         Files.deleteIfExists(new File("m1.txt").toPath());
         Files.deleteIfExists(new File("s1.txt").toPath());
         Files.deleteIfExists(new File("step.txt").toPath());
+    }
+
+    public static Pair<BigInteger, BigInteger> sumPoints(Pair<BigInteger, BigInteger> firstPoint, Pair<BigInteger, BigInteger> secondPoint,
+                                                        BigInteger a, BigInteger p) {
+        try {
+            if (firstPoint == null && secondPoint != null) {
+                return secondPoint;
+            } else if (secondPoint == null && firstPoint != null) {
+                return firstPoint;
+            } else if (secondPoint == null && firstPoint == null) {
+                return null;
+            }
+
+            BigInteger lambda;
+            BigInteger x1 = firstPoint.getKey(), y1 = firstPoint.getValue();
+            BigInteger x2 = secondPoint.getKey(), y2 = secondPoint.getValue();
+
+            if (isPointsEquals(firstPoint, secondPoint)) {
+                if (y1.equals(BigInteger.ZERO)) {
+                    return null;
+                } else {
+                    lambda = x1.pow(2);
+                    lambda = lambda.multiply(BigInteger.valueOf(3));
+                    lambda = lambda.add(a);
+                    lambda = lambda.multiply(BigInteger.valueOf(2).multiply(y1).modInverse(p));
+                }
+            } else {
+                BigInteger top = y2.subtract(y1);
+                BigInteger bottom = x2.subtract(x1);
+                lambda = top.multiply(bottom.modInverse(p));
+            }
+
+            BigInteger x3 = lambda.pow(2).subtract(x1).subtract(x2).mod(p);
+            BigInteger y3 = x1.subtract(x3).multiply(lambda).subtract(y1).mod(p);
+            return new Pair<>(x3, y3);
+        } catch (ArithmeticException e) {
+            return null;
+        }
     }
 }
