@@ -1,5 +1,6 @@
-package Second;
+package help;
 
+import SecondThird.Second;
 import javafx.util.Pair;
 
 import java.io.BufferedWriter;
@@ -14,7 +15,7 @@ public class GenerateParams {
     }
 
     void run() throws IOException {
-        Main m = new Main();
+        Second.Second m = new Second.Second();
 
         BufferedWriter bw = new BufferedWriter(new FileWriter("common_params.txt"));
         BufferedWriter bwL = new BufferedWriter(new FileWriter("l.txt"));

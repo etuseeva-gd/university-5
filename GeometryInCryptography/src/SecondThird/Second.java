@@ -1,4 +1,4 @@
-package Second;
+package SecondThird;
 
 import javafx.util.Pair;
 
@@ -8,14 +8,14 @@ import java.nio.file.Files;
 import java.util.Random;
 import java.util.Scanner;
 
-public class Main {
-    public class CommonParams {
+public class Second {
+    public static class CommonParams {
         BigInteger p, a, r;
         Pair<BigInteger, BigInteger> P, Q;
     }
 
     public static void main(String[] args) throws IOException {
-        new Main().run();
+        new Second().run();
     }
 
     void run() throws IOException {
@@ -185,7 +185,7 @@ public class Main {
         }
     }
 
-    public CommonParams getCommonParams() {
+    public static CommonParams getCommonParams() {
         try {
             BufferedReader br = new BufferedReader(new FileReader("common_params.txt"));
             CommonParams commonParams = new CommonParams();
@@ -202,13 +202,13 @@ public class Main {
         return null;
     }
 
-    public Pair<BigInteger, BigInteger> getPoint(String str) {
+    public static Pair<BigInteger, BigInteger> getPoint(String str) {
         str = str.replace("(", "").replace(")", "");
         String[] strings = str.split(",");
         return new Pair<>(new BigInteger(strings[0].trim()), new BigInteger(strings[1].trim()));
     }
 
-    public Pair<BigInteger, BigInteger> multPoint(BigInteger k, Pair<BigInteger, BigInteger> point, BigInteger a, BigInteger p) {
+    public static Pair<BigInteger, BigInteger> multPoint(BigInteger k, Pair<BigInteger, BigInteger> point, BigInteger a, BigInteger p) {
         Pair<BigInteger, BigInteger> res = point;
         for (int i = 0; i < k.intValue() - 1; i++) {
             res = sum(res, point, a, p);
@@ -216,7 +216,7 @@ public class Main {
         return res;
     }
 
-    public Pair<BigInteger, BigInteger> sum(Pair<BigInteger, BigInteger> firstPoint, Pair<BigInteger, BigInteger> secondPoint,
+    public static Pair<BigInteger, BigInteger> sum(Pair<BigInteger, BigInteger> firstPoint, Pair<BigInteger, BigInteger> secondPoint,
                                      BigInteger a, BigInteger p) {
         try {
             if (firstPoint == null) {
@@ -250,36 +250,36 @@ public class Main {
         }
     }
 
-    public void printPoint(Pair<BigInteger, BigInteger> point, String file) throws IOException {
+    public static void printPoint(Pair<BigInteger, BigInteger> point, String file) throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
         bw.write("(" + point.getKey() + "," + point.getValue() + ")");
         bw.close();
     }
 
-    public void printStr(String str, String file) throws IOException {
+    public static void printStr(String str, String file) throws IOException {
         BufferedWriter bw = new BufferedWriter(new FileWriter(file));
         bw.write(str + '\n');
         bw.close();
     }
 
-    public String readOneStr(String file) throws IOException {
+    public static String readOneStr(String file) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(file));
         String res = br.readLine();
         br.close();
         return res;
     }
 
-    public boolean isPointsEquals(Pair<BigInteger, BigInteger> firstPoint, Pair<BigInteger, BigInteger> secondPoint) {
+    public static boolean isPointsEquals(Pair<BigInteger, BigInteger> firstPoint, Pair<BigInteger, BigInteger> secondPoint) {
         BigInteger x1 = firstPoint.getKey(), y1 = firstPoint.getValue();
         BigInteger x2 = secondPoint.getKey(), y2 = secondPoint.getValue();
         return x1.equals(x2) && y1.equals(y2);
     }
 
-    public String getStrPoint(Pair<BigInteger, BigInteger> point) {
+    public static String getStrPoint(Pair<BigInteger, BigInteger> point) {
         return "(" + point.getKey() + "," + point.getValue() + ")";
     }
 
-    public void deleteAll() throws IOException {
+    public static void deleteAll() throws IOException {
         Files.deleteIfExists(new File("common_params.txt").toPath());
         Files.deleteIfExists(new File("l.txt").toPath());
         Files.deleteIfExists(new File("round.txt").toPath());

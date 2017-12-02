@@ -1,4 +1,4 @@
-package Third;
+package SecondThird;
 
 import First.EllipticalCurves;
 import javafx.util.Pair;
@@ -8,20 +8,14 @@ import java.math.BigInteger;
 import java.util.Objects;
 import java.util.Scanner;
 
-public class Main {
-    private class Protocol extends Second.Main {
-    }
+import static SecondThird.Second.*;
 
-    private Protocol protocol = null;
-
+public class Third {
     public static void main(String[] args) throws IOException {
-
-        new Main().run();
+        new Third().run();
     }
 
     void run() throws IOException {
-        this.protocol = new Protocol();
-
         System.out.println("Введите, то, что вы хотите сделать:");
         System.out.println("0 - Сгенерировать общие параметры для клиента и банка");
         System.out.println("1 - Сгенерировать вход банка (l)");
@@ -83,7 +77,7 @@ public class Main {
         BufferedReader br = new BufferedReader(new FileReader("common_params.txt"));
         BigInteger p = new BigInteger(br.readLine());
         BigInteger a = new BigInteger(br.readLine());
-        Pair<BigInteger, BigInteger> Q = protocol.getPoint(br.readLine());
+        Pair<BigInteger, BigInteger> Q = getPoint(br.readLine());
         BigInteger r = new BigInteger(br.readLine());
         br.close();
 
@@ -96,21 +90,21 @@ public class Main {
             l = new BigInteger(sc.nextLine());
         }
 
-        protocol.printStr(l + "", "l.txt");
+        printStr(l + "", "l.txt");
 
-        Pair<BigInteger, BigInteger> R = protocol.multPoint(l, Q, a, p);
+        Pair<BigInteger, BigInteger> R = multPoint(l, Q, a, p);
 
         BufferedWriter bw = new BufferedWriter(new FileWriter("common_params.txt"));
         bw.write(p + "\n");
         bw.write(a + "\n");
-        bw.write(protocol.getStrPoint(Q) + "\n");
+        bw.write(getStrPoint(Q) + "\n");
         bw.write(r + "\n");
-        bw.write(protocol.getStrPoint(R) + "\n");
+        bw.write(getStrPoint(R) + "\n");
         bw.close();
     }
 
     void second() {
-        Second.Main.CommonParams params = protocol.getCommonParams();
+        CommonParams params = getCommonParams();
 
 
     }
