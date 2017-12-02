@@ -15,8 +15,6 @@ public class GenerateParams {
     }
 
     void run() throws IOException {
-        Second.Second m = new Second.Second();
-
         BufferedWriter bw = new BufferedWriter(new FileWriter("common_params.txt"));
         BufferedWriter bwL = new BufferedWriter(new FileWriter("l.txt"));
         Scanner sc = new Scanner(System.in);
@@ -31,7 +29,7 @@ public class GenerateParams {
         bw.write(a + "\n");
 
         System.out.println("Введите образующую точку Q(x,y):");
-        Pair<BigInteger, BigInteger> Q = m.getPoint(sc.nextLine());
+        Pair<BigInteger, BigInteger> Q = Second.getPoint(sc.nextLine());
         bw.write(getStrPoint(Q) + "\n");
 
         System.out.println("Введите порядок точки Q - r:");
@@ -44,7 +42,7 @@ public class GenerateParams {
         bwL.write(l + "\n");
 
         //common_params.txt
-        Pair<BigInteger, BigInteger> R = m.multPoint(l, Q, a, p);
+        Pair<BigInteger, BigInteger> R = Second.multPoint(l, Q, a, p);
         bw.write(getStrPoint(R) + "\n");
 
         sc.close();

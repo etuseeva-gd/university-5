@@ -29,41 +29,58 @@ public class Second {
         //Протокол
         System.out.println("2 - 1 шаг. Претендент: Сгенерировать и послать точку R верификатору");
         System.out.println("3 - 2 шаг. Верификатор: Проверить R и послать случайный бит");
-        System.out.println("4 - 3 шаг. Претендент: Предьявление показателя k(или k') на основе бита");
+        System.out.println("4 - 3 шаг. Претендент: Предьявление показателя k (или k') на основе бита");
         System.out.println("5 - 4 шаг. Верификатор: Проверка знания l претендента");
 
         System.out.println("6 - Выход.");
 
         Scanner sc = new Scanner(System.in);
         while (true) {
-            String action = sc.nextLine();
+            String strStep = readOneStr("step.txt");
+            int step = strStep == null ? 0 : Integer.parseInt(strStep);
+            int action = Integer.parseInt(sc.nextLine());
+
+            if (action != 0) {
+                if (action <= step) {
+                    System.out.println("Порядок действия протокола не соблюден! Последний шаг = " + step);
+//                    System.out.println("Порядок действия протокола не соблюден!");
+//                    System.out.println("Последний шаг = " + step);
+                    continue;
+                }
+            }
 
             switch (action) {
-                case "0": {
+                case 0: {
                     zero();
+                    System.out.println("Параметры сгенерировались!");
                     break;
                 }
-                case "1": {
+                case 1: {
                     first();
+                    System.out.println("Точка P = lQ вычислена.");
                     break;
                 }
-                case "2": {
+                case 2: {
                     second();
+                    System.out.println("Шаг 1. Конец");
                     break;
                 }
-                case "3": {
+                case 3: {
                     third();
+                    System.out.println("Шаг 2. Конец");
                     break;
                 }
-                case "4": {
+                case 4: {
                     fourth();
+                    System.out.println("Шаг 3. Конец");
                     break;
                 }
-                case "5": {
+                case 5: {
                     fifth();
+                    System.out.println("Шаг 4. Конец");
                     break;
                 }
-                case "6": {
+                case 6: {
                     sc.close();
                     return;
                 }
@@ -71,6 +88,15 @@ public class Second {
                     System.out.println("Неверная операция!");
                 }
             }
+
+            if (action >= 1 && action < 5) {
+                step++;
+            } else {
+                step = 0;
+            }
+
+            printStr(step + "", "step.txt");
+            System.out.println("Введите следующее действие:");
         }
     }
 
@@ -138,13 +164,10 @@ public class Second {
         if (R == null || rR != null) {
             System.out.println("Полученное R не корректное!");
             deleteAll();
-            return;
+            System.exit(1);
         }
 
-        System.out.println("Введите бит (0 или 1):");
-        Scanner sc = new Scanner(System.in);
-        printStr(sc.nextLine(), "rand_bit.txt");
-        sc.close();
+        printStr((Math.random() > 0.5 ? 1 : 0) + "", "rand_bit.txt");
     }
 
     void fourth() throws IOException {
@@ -167,31 +190,30 @@ public class Second {
     void fifth() throws IOException {
         CommonParams cp = getCommonParams();
 
-        //Было полученно на прошлых шагах
-        BigInteger K = new BigInteger(readOneStr("k_4.txt"));
+        BigInteger k = new BigInteger(readOneStr("k_4.txt"));
         int bit = Integer.parseInt(readOneStr("rand_bit.txt"));
 
         Pair<BigInteger, BigInteger> chPoint = null;
         if (bit == 0) {
-            chPoint = multPoint(K, cp.P, cp.a, cp.p);
+            chPoint = multPoint(k, cp.P, cp.a, cp.p);
         } else {
-            chPoint = multPoint(K, cp.Q, cp.a, cp.p);
+            chPoint = multPoint(k, cp.Q, cp.a, cp.p);
         }
 
         //Было полученно на прошлых шагах
         Pair<BigInteger, BigInteger> R = getPoint(readOneStr("R.txt"));
         if (isPointsEquals(R, chPoint)) {
-            int k = Integer.parseInt(readOneStr("round.txt"));
-            k++;
+            String rStr = readOneStr("round.txt");
+            int round = rStr == null ? 0 : Integer.parseInt(rStr);
+            round++;
 
-            System.out.println("Проверка пройдена. Пользователь знает l! С вероятностью " + (1 - 1 / Math.pow(2.0, k)));
+            System.out.println("Проверка пройдена. Пользователь знает l! С вероятностью " + (1 - 1 / Math.pow(2.0, round)));
 
             printStr(k + "", "round.txt");
         } else {
             System.out.println("Проверка не пройдена. Пользователь не знает l!");
-
-            Files.deleteIfExists(new File("common_params.txt").toPath());
-            Files.deleteIfExists(new File("l.txt").toPath());
+            deleteAll();
+            System.exit(1);
         }
     }
 
@@ -208,6 +230,7 @@ public class Second {
             return commonParams;
         } catch (IOException e) {
             e.printStackTrace();
+            System.exit(1);
         }
         return null;
     }
@@ -272,11 +295,16 @@ public class Second {
         bw.close();
     }
 
-    public static String readOneStr(String file) throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(file));
-        String res = br.readLine();
-        br.close();
-        return res;
+    public static String readOneStr(String file) {
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new FileReader(file));
+            String line = br.readLine();
+            br.close();
+            return line;
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     public static boolean isPointsEquals(Pair<BigInteger, BigInteger> firstPoint, Pair<BigInteger, BigInteger> secondPoint) {

@@ -50,7 +50,7 @@ public class Third {
                 }
                 case "1": {
                     first();
-                    System.out.println("Точка P = lQ вычислена. l сохранено.");
+                    System.out.println("Точка P = lQ вычислена.");
                     break;
                 }
                 case "2": {
