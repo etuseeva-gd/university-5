@@ -5,6 +5,7 @@ import javafx.util.Pair;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Objects;
@@ -102,12 +103,18 @@ public class Third {
     }
 
     void first() throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader("common_params.txt"));
-        BigInteger p = new BigInteger(br.readLine());
-        BigInteger a = new BigInteger(br.readLine());
-        Pair<BigInteger, BigInteger> Q = getPoint(br.readLine());
-        BigInteger r = new BigInteger(br.readLine());
-        br.close();
+        BigInteger p = null, a = null, r = null;
+        Pair<BigInteger, BigInteger> Q = null;
+        try(BufferedReader br = new BufferedReader(new FileReader("common_params.txt"))){
+            p = new BigInteger(br.readLine());
+            a = new BigInteger(br.readLine());
+            Q = getPoint(br.readLine());
+            r = new BigInteger(br.readLine());
+        } catch (FileNotFoundException e) {
+            System.out.println("Нет сгенерированных параметров!");
+            deleteAll();
+            System.exit(1);
+        }
 
         Scanner sc = new Scanner(System.in);
         System.out.println("Введите l:");
@@ -122,11 +129,7 @@ public class Third {
 
         Pair<BigInteger, BigInteger> R = multPoint(l, Q, a, p);
 
-        BufferedWriter bw = new BufferedWriter(new FileWriter("common_params.txt"));
-        bw.write(p + "\n");
-        bw.write(a + "\n");
-        bw.write(getStrPoint(Q) + "\n");
-        bw.write(r + "\n");
+        BufferedWriter bw = new BufferedWriter(new FileWriter("common_params.txt", true));
         bw.write(getStrPoint(R) + "\n");
         bw.close();
     }
@@ -154,9 +157,8 @@ public class Third {
 
         if (!isBelongsCurve(R1, params.a, params.p)) {
             System.out.println("Не корректное R'!");
-            //error
-            //stop
-            return;
+            deleteAll();
+            System.exit(1);
         }
 
         BigInteger alpha;
@@ -187,9 +189,8 @@ public class Third {
 
         if (m1.equals(BigInteger.ZERO)) {
             System.out.println("Не корректное m'!");
-            //error
-            //stop
-            return;
+            deleteAll();
+            System.exit(1);
         }
 
         BigInteger l = new BigInteger(readOneStr("l.txt"));
@@ -216,9 +217,8 @@ public class Third {
 
         if (!isPointsEquals(left, right)) {
             System.out.println("Подпись недействительна!");
-            //error
-            //stop
-            return;
+            deleteAll();
+            System.exit(1);
         }
 
         BigInteger betta = new BigInteger(readOneStr("betta.txt"));
@@ -226,6 +226,9 @@ public class Third {
 
         BigInteger m = new BigInteger("123"); //Todo: rewrite
         Pair<BigInteger, BigInteger> R = getPoint(readOneStr("R.txt"));
+
+        //Todo: maybe remove
+        deleteUnnecessaryFiles();
 
         //Результат
         System.out.println(m);
@@ -242,16 +245,12 @@ public class Third {
 
         if (coin.m.equals(BigInteger.ZERO)) {
             System.out.println("Подпись недействительна! m = 0");
-            //error
-            //stop
-            return;
+            System.exit(1);
         }
 
         if (f(coin.R).equals(BigInteger.ZERO)) {
             System.out.println("Подпись недействительна! f(R) = 0");
-            //error
-            //stop
-            return;
+            System.exit(1);
         }
 
         Pair<BigInteger, BigInteger> left = multPoint(coin.s, params.Q, params.a, params.p);
@@ -261,9 +260,7 @@ public class Third {
 
         if (!isPointsEquals(left, right)) {
             System.out.println("Подпись недействительна! Соотношение не выполняется!");
-            //error
-            //stop
-            return;
+            System.exit(1);
         }
     }
 
@@ -297,5 +294,34 @@ public class Third {
             res.add(BigInteger.ONE);
         }
         return res;
+    }
+
+    void deleteAll() throws IOException {
+        Files.deleteIfExists(new File("common_params.txt").toPath());
+        Files.deleteIfExists(new File("l.txt").toPath());
+
+        Files.deleteIfExists(new File("k1.txt").toPath());
+        Files.deleteIfExists(new File("R1.txt").toPath());
+
+        Files.deleteIfExists(new File("R.txt").toPath());
+        Files.deleteIfExists(new File("betta.txt").toPath());
+        Files.deleteIfExists(new File("m1.txt").toPath());
+
+        Files.deleteIfExists(new File("s1.txt").toPath());
+
+        Files.deleteIfExists(new File("coin.txt").toPath());
+
+        Files.deleteIfExists(new File("step.txt").toPath());
+    }
+
+    void deleteUnnecessaryFiles() throws IOException {
+        Files.deleteIfExists(new File("l.txt").toPath());
+        Files.deleteIfExists(new File("k1.txt").toPath());
+        Files.deleteIfExists(new File("R1.txt").toPath());
+        Files.deleteIfExists(new File("R.txt").toPath());
+        Files.deleteIfExists(new File("betta.txt").toPath());
+        Files.deleteIfExists(new File("m1.txt").toPath());
+        Files.deleteIfExists(new File("s1.txt").toPath());
+        Files.deleteIfExists(new File("step.txt").toPath());
     }
 }
