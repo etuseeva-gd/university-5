@@ -131,10 +131,10 @@ public class Third {
 
         write(l + "", "l.txt");
 
-        Pair<BigInteger, BigInteger> R = multPoint(l, Q, a, p);
+        Pair<BigInteger, BigInteger> P = multPoint(l, Q, a, p);
 
         BufferedWriter bw = new BufferedWriter(new FileWriter("common_params.txt", true));
-        bw.write(getStrPoint(R) + "\n");
+        bw.write(getStrPoint(P) + "\n");
         bw.close();
     }
 

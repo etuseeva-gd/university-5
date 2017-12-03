@@ -302,6 +302,9 @@ public class Second {
     }
 
     public static boolean isPointsEquals(Pair<BigInteger, BigInteger> firstPoint, Pair<BigInteger, BigInteger> secondPoint) {
+        if (firstPoint == null || secondPoint == null) {
+            return false;
+        }
         BigInteger x1 = firstPoint.getKey(), y1 = firstPoint.getValue();
         BigInteger x2 = secondPoint.getKey(), y2 = secondPoint.getValue();
         return x1.equals(x2) && y1.equals(y2);
