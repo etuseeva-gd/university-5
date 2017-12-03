@@ -36,6 +36,8 @@ public class Second {
 
         Scanner sc = new Scanner(System.in);
         while (true) {
+            System.out.println("Введите действие:");
+
             String strStep = readOneStr("step.txt");
             int step = strStep == null ? 0 : Integer.parseInt(strStep);
             int action = Integer.parseInt(sc.nextLine());
@@ -84,8 +86,6 @@ public class Second {
                     System.out.println("Неверная операция!");
                 }
             }
-
-            System.out.println("Введите следующее действие:");
         }
     }
 

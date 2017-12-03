@@ -32,7 +32,7 @@ public class Third {
         System.out.println("2 - 1 шаг. Банк: генерация R'");
         System.out.println("3 - 2 шаг. Клиент: Проверка R', вычисление m'");
         System.out.println("4 - 3 шаг. Банк: Проверка m', вычисление подписи s'");
-        System.out.println("5 - 4 шаг. Книет: Проверка подписи, результат");
+        System.out.println("5 - 4 шаг. Клиет: Проверка подписи, результат");
 
         //Погашение монеты
         System.out.println("6 - 1-3 шаги. Погашение монеты");
@@ -41,6 +41,8 @@ public class Third {
 
         Scanner sc = new Scanner(System.in);
         while (true) {
+            System.out.println("Введите действие:");
+
             String strStep = readOneStr("step.txt");
             int step = strStep == null ? 0 : Integer.parseInt(strStep);
             int action = Integer.parseInt(sc.nextLine());
@@ -99,8 +101,6 @@ public class Third {
                     System.out.println("Неверная операция!");
                 }
             }
-
-            System.out.println("Введите следующее действие:");
         }
     }
 
@@ -277,6 +277,7 @@ public class Third {
             Pair<BigInteger, BigInteger> left = multPoint(s, params.Q, params.a, params.p);
             Pair<BigInteger, BigInteger> right1 = multPoint(f(coin.R), params.P, params.a, params.p);
             Pair<BigInteger, BigInteger> right2 = multPoint(m, coin.R, params.a, params.p);
+
             Pair<BigInteger, BigInteger> right = sumPoints(right1, right2, params.a, params.p);
 
             if (!isPointsEquals(left, right)) {
@@ -315,23 +316,23 @@ public class Third {
     }
 
     void deleteAll() throws IOException {
-        Files.deleteIfExists(new File("common_params.txt").toPath());
-        Files.deleteIfExists(new File("l.txt").toPath());
-
-        Files.deleteIfExists(new File("k1.txt").toPath());
-        Files.deleteIfExists(new File("R1.txt").toPath());
-
-        Files.deleteIfExists(new File("R.txt").toPath());
-        Files.deleteIfExists(new File("betta.txt").toPath());
-        Files.deleteIfExists(new File("m1.txt").toPath());
-
-        Files.deleteIfExists(new File("s1.txt").toPath());
-
-        Files.deleteIfExists(new File("coin.txt").toPath());
-
-        Files.deleteIfExists(new File("s.txt").toPath());
-
-        Files.deleteIfExists(new File("step.txt").toPath());
+//        Files.deleteIfExists(new File("common_params.txt").toPath());
+//        Files.deleteIfExists(new File("l.txt").toPath());
+//
+//        Files.deleteIfExists(new File("k1.txt").toPath());
+//        Files.deleteIfExists(new File("R1.txt").toPath());
+//
+//        Files.deleteIfExists(new File("R.txt").toPath());
+//        Files.deleteIfExists(new File("betta.txt").toPath());
+//        Files.deleteIfExists(new File("m1.txt").toPath());
+//
+//        Files.deleteIfExists(new File("s1.txt").toPath());
+//
+//        Files.deleteIfExists(new File("coin.txt").toPath());
+//
+//        Files.deleteIfExists(new File("s.txt").toPath());
+//
+//        Files.deleteIfExists(new File("step.txt").toPath());
     }
 
     void deleteUnnecessaryFiles() throws IOException {
