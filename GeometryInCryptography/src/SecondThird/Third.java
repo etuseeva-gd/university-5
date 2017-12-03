@@ -316,23 +316,23 @@ public class Third {
     }
 
     void deleteAll() throws IOException {
-//        Files.deleteIfExists(new File("common_params.txt").toPath());
-//        Files.deleteIfExists(new File("l.txt").toPath());
-//
-//        Files.deleteIfExists(new File("k1.txt").toPath());
-//        Files.deleteIfExists(new File("R1.txt").toPath());
-//
-//        Files.deleteIfExists(new File("R.txt").toPath());
-//        Files.deleteIfExists(new File("betta.txt").toPath());
-//        Files.deleteIfExists(new File("m1.txt").toPath());
-//
-//        Files.deleteIfExists(new File("s1.txt").toPath());
-//
-//        Files.deleteIfExists(new File("coin.txt").toPath());
-//
-//        Files.deleteIfExists(new File("s.txt").toPath());
-//
-//        Files.deleteIfExists(new File("step.txt").toPath());
+        Files.deleteIfExists(new File("common_params.txt").toPath());
+        Files.deleteIfExists(new File("l.txt").toPath());
+
+        Files.deleteIfExists(new File("k1.txt").toPath());
+        Files.deleteIfExists(new File("R1.txt").toPath());
+
+        Files.deleteIfExists(new File("R.txt").toPath());
+        Files.deleteIfExists(new File("betta.txt").toPath());
+        Files.deleteIfExists(new File("m1.txt").toPath());
+
+        Files.deleteIfExists(new File("s1.txt").toPath());
+
+        Files.deleteIfExists(new File("coin.txt").toPath());
+
+        Files.deleteIfExists(new File("s.txt").toPath());
+
+        Files.deleteIfExists(new File("step.txt").toPath());
     }
 
     void deleteUnnecessaryFiles() throws IOException {
