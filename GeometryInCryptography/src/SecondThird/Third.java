@@ -176,14 +176,16 @@ public class Third {
         } while (true);
         write(getStrPoint(R), "R.txt");
 
-        BigInteger betta = f(R).multiply(f(R1).modInverse(params.r)).mod(params.r);
+        BigInteger FR1Inv = f(R1).modInverse(params.r);
+        BigInteger betta = f(R).multiply(FR1Inv).mod(params.r);
         write(betta + "", "betta.txt");
 
         List<BigInteger> m = bigMessageToSmall(params.r);
 
         StringBuilder m1 = new StringBuilder();
         for (BigInteger mt : m) {
-            m1.append(alpha.multiply(betta.modInverse(params.r)).multiply(mt).mod(params.r)).append('\n');
+            BigInteger bettaInv = betta.modInverse(params.r);
+            m1.append(alpha.multiply(bettaInv).multiply(mt).mod(params.r)).append('\n');
         }
         write(m1 + "", "m1.txt");
     }
@@ -195,11 +197,9 @@ public class Third {
         Pair<BigInteger, BigInteger> R1 = getPoint(readOneStr("R1.txt"));
         BigInteger k1 = new BigInteger(readOneStr("k1.txt"));
 
-        //Todo: rewrite
         List<BigInteger> m1 = readNumbers("m1.txt");
 
         StringBuilder s1 = new StringBuilder();
-
         for (int i = 0; i < m1.size(); i++) {
             BigInteger m1t = m1.get(i);
             if (m1t.equals(BigInteger.ZERO)) {
