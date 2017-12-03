@@ -24,9 +24,8 @@ public class EllipticalCurves {
     void run() throws IOException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Введите длину числа p в битах:");
-        int len = Integer.parseInt(scanner.nextLine());
-//        int len = 9;
 
+        int len = Integer.parseInt(scanner.nextLine());
         if (len < 8) {
             System.out.println("Длина в должна быть больше, либо равна 8");
             return;
@@ -34,7 +33,6 @@ public class EllipticalCurves {
 
         System.out.println("Введите m:");
         int m = Integer.parseInt(scanner.nextLine());
-//        int m = 71;
 
         while (true) {
             BigInteger p;
@@ -157,7 +155,7 @@ public class EllipticalCurves {
         if (legendreSymbol != 1) {
             return null;
         } else {
-            return shAlhgorithm(n, p);
+            return shAlgorithm(n, p);
         }
     }
 
@@ -222,9 +220,10 @@ public class EllipticalCurves {
     }
 
     //Алгоритм Шенкса
-    Pair<BigInteger, BigInteger> shAlhgorithm(BigInteger a, BigInteger p) {
-        if (Y(a, p) == -1)
+    Pair<BigInteger, BigInteger> shAlgorithm(BigInteger a, BigInteger p) {
+        if (Y(a, p) == -1) {
             return new Pair<>(BigInteger.valueOf(-1), BigInteger.valueOf(-1));
+        }
         BigInteger n = BigInteger.ZERO;
         if (Y(a, p) == 1) {
             for (BigInteger i = BigInteger.valueOf(2); i.compareTo(p) == -1; i = i.add(BigInteger.ONE)) {
@@ -525,7 +524,6 @@ public class EllipticalCurves {
     }
 
     class Trio implements Comparable<Trio> {
-
         private BigInteger a;
         private BigInteger b;
         private BigInteger c;
