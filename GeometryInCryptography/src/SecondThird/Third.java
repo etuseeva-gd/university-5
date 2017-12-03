@@ -237,7 +237,7 @@ public class Third {
             Pair<BigInteger, BigInteger> left = multPoint(s1t, params.Q, params.a, params.p);
 
             if (!isPointsEquals(left, right)) {
-                System.out.println("Ошибка при генерации подписи!");
+                System.out.println("Подпись недействительна! Ошибка!");
                 deleteAll();
                 System.exit(1);
             }
@@ -283,7 +283,7 @@ public class Third {
             }
         }
 
-        System.out.println("Подпись корректна!");
+        System.out.println("Подпись подлинная!");
     }
 
     Coin getCoin() throws IOException {
