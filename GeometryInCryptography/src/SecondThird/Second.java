@@ -40,7 +40,7 @@ public class Second {
             int step = strStep == null ? 0 : Integer.parseInt(strStep);
             int action = Integer.parseInt(sc.nextLine());
 
-            if (action != 0) {
+            if (action > 0 && action < 6) {
                 if (action != step + 1) {
                     System.out.println("Порядок действия протокола не соблюден! Последнее дейстивие = " + step);
                     continue;

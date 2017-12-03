@@ -92,7 +92,7 @@ public class EllipticalCurves {
     }
 
     public void genParams(String fileName) throws IOException {
-        int len = 10, m = 71;
+        int len = 12, m = 71;
         while (true) {
             BigInteger p;
             Trio pnr;

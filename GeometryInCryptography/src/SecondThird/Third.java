@@ -8,10 +8,7 @@ import java.math.BigInteger;
 import java.nio.file.Files;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
 
 import static SecondThird.Second.*;
 
@@ -44,49 +41,61 @@ public class Third {
 
         Scanner sc = new Scanner(System.in);
         while (true) {
-            String action = sc.nextLine();
+            String strStep = readOneStr("step.txt");
+            int step = strStep == null ? 0 : Integer.parseInt(strStep);
+            int action = Integer.parseInt(sc.nextLine());
+
+            if (action > 0 && action < 6) {
+                if (action != step + 1) {
+                    System.out.println("Порядок генерации не соблюден! Последнее дейстивие = " + step);
+                    continue;
+                } else {
+                    step++;
+                    write(step + "", "step.txt");
+                }
+            }
 
             switch (action) {
-                case "0": {
+                case 0: {
                     zero();
                     System.out.println("Общие параметры сгенерировались.");
                     break;
                 }
-                case "1": {
+                case 1: {
                     first();
                     System.out.println("Точка P = lQ вычислена.");
                     break;
                 }
-                case "2": {
+                case 2: {
                     second();
                     System.out.println("Вычислено R'.");
                     break;
                 }
-                case "3": {
+                case 3: {
                     third();
                     System.out.println("Вычисленно m'.");
                     break;
                 }
-                case "4": {
+                case 4: {
                     fourth();
                     System.out.println("Вычисленно s'.");
                     break;
                 }
-                case "5": {
+                case 5: {
                     fifth();
                     System.out.println("Результат (m, R, s).");
                     break;
                 }
-                case "6": {
+                case 6: {
                     sixth();
                     System.out.println("");
                     break;
                 }
-                case "7": {
+                case 7: {
                     break;
                 }
                 default: {
-                    System.out.println("Ошибка в веденой операции");
+                    System.out.println("Неверная операция!");
                 }
             }
 
@@ -406,6 +415,7 @@ public class Third {
             i = mStr.length() - 1;
         }
 
+        Collections.reverse(mess);
         return mess;
     }
 
