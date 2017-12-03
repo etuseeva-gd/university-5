@@ -302,6 +302,9 @@ public class Second {
     }
 
     public static boolean isPointsEquals(Pair<BigInteger, BigInteger> firstPoint, Pair<BigInteger, BigInteger> secondPoint) {
+        if (firstPoint == null && secondPoint == null) {
+            return true;
+        }
         if (firstPoint == null || secondPoint == null) {
             return false;
         }

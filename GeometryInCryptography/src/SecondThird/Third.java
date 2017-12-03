@@ -136,7 +136,7 @@ public class Third {
 
         write(l + "", "l.txt");
 
-        Pair<BigInteger, BigInteger> P = multPoint(l, Q, a, p);
+        Pair<BigInteger, BigInteger> P = mult(l, Q, a, p);
 
         BufferedWriter bw = new BufferedWriter(new FileWriter("common_params.txt", true));
         bw.write(getStrPoint(P) + "\n");
@@ -150,7 +150,7 @@ public class Third {
         BigInteger k1;
         do {
             k1 = getRandomNumber(params.r);
-            Pair<BigInteger, BigInteger> R1 = multPoint(k1, params.Q, params.a, params.p);
+            Pair<BigInteger, BigInteger> R1 = mult(k1, params.Q, params.a, params.p);
 
             if (!f(R1).equals(BigInteger.ZERO)) {
                 write(k1 + "", "k1.txt");
@@ -174,7 +174,7 @@ public class Third {
         Pair<BigInteger, BigInteger> R;
         do {
             alpha = getRandomNumber(params.r);
-            R = multPoint(alpha, R1, params.a, params.p);
+            R = mult(alpha, R1, params.a, params.p);
             if (!f(R).equals(BigInteger.ZERO)) {
                 break;
             }
@@ -230,14 +230,14 @@ public class Third {
         for (int i = 0; i < s1.size(); i++) {
             BigInteger m1t = m1.get(i), s1t = s1.get(i);
 
-            Pair<BigInteger, BigInteger> right1 = multPoint(f(R1), params.P, params.a, params.p);
-            Pair<BigInteger, BigInteger> right2 = multPoint(m1t, R1, params.a, params.p);
-            Pair<BigInteger, BigInteger> right = sumPoints(right1, right2, params.a, params.p);
+            Pair<BigInteger, BigInteger> right1 = mult(f(R1), params.P, params.a, params.p);
+            Pair<BigInteger, BigInteger> right2 = mult(m1t, R1, params.a, params.p);
+            Pair<BigInteger, BigInteger> right = sum(right1, right2, params.a, params.p);
 
-            Pair<BigInteger, BigInteger> left = multPoint(s1t, params.Q, params.a, params.p);
+            Pair<BigInteger, BigInteger> left = mult(s1t, params.Q, params.a, params.p);
 
             if (!isPointsEquals(left, right)) {
-                System.out.println("Подпись недействительна! Ошибка!");
+                System.out.println("Подпись недействительна!");
                 deleteAll();
                 System.exit(1);
             }
@@ -271,11 +271,11 @@ public class Third {
         for (int i = 0; i < coin.m.size(); i++) {
             BigInteger s = coin.s.get(i), m = coin.m.get(i);
 
-            Pair<BigInteger, BigInteger> left = multPoint(s, params.Q, params.a, params.p);
-            Pair<BigInteger, BigInteger> right1 = multPoint(f(coin.R), params.P, params.a, params.p);
-            Pair<BigInteger, BigInteger> right2 = multPoint(m, coin.R, params.a, params.p);
+            Pair<BigInteger, BigInteger> left = mult(s, params.Q, params.a, params.p);
+            Pair<BigInteger, BigInteger> right1 = mult(f(coin.R), params.P, params.a, params.p);
+            Pair<BigInteger, BigInteger> right2 = mult(m, coin.R, params.a, params.p);
 
-            Pair<BigInteger, BigInteger> right = sumPoints(right1, right2, params.a, params.p);
+            Pair<BigInteger, BigInteger> right = sum(right1, right2, params.a, params.p);
 
             if (!isPointsEquals(left, right)) {
                 System.out.println("Подпись недействительна! Соотношение не выполняется!");
@@ -342,42 +342,19 @@ public class Third {
         Files.deleteIfExists(new File("step.txt").toPath());
     }
 
-    public static Pair<BigInteger, BigInteger> sumPoints(Pair<BigInteger, BigInteger> firstPoint, Pair<BigInteger, BigInteger> secondPoint,
-                                                         BigInteger a, BigInteger p) {
-        try {
-            if (firstPoint == null && secondPoint != null) {
-                return secondPoint;
-            } else if (secondPoint == null && firstPoint != null) {
-                return firstPoint;
-            } else if (secondPoint == null && firstPoint == null) {
-                return null;
-            }
-
-            BigInteger lambda;
-            BigInteger x1 = firstPoint.getKey(), y1 = firstPoint.getValue();
-            BigInteger x2 = secondPoint.getKey(), y2 = secondPoint.getValue();
-
-            if (isPointsEquals(firstPoint, secondPoint)) {
-                if (y1.equals(BigInteger.ZERO)) {
-                    return null;
-                } else {
-                    lambda = x1.pow(2);
-                    lambda = lambda.multiply(BigInteger.valueOf(3));
-                    lambda = lambda.add(a);
-                    lambda = lambda.multiply(BigInteger.valueOf(2).multiply(y1).modInverse(p));
-                }
-            } else {
-                BigInteger top = y2.subtract(y1);
-                BigInteger bottom = x2.subtract(x1);
-                lambda = top.multiply(bottom.modInverse(p));
-            }
-
-            BigInteger x3 = lambda.pow(2).subtract(x1).subtract(x2).mod(p);
-            BigInteger y3 = x1.subtract(x3).multiply(lambda).subtract(y1).mod(p);
-            return new Pair<>(x3, y3);
-        } catch (ArithmeticException e) {
+    public static Pair<BigInteger, BigInteger> mult(BigInteger k, Pair<BigInteger, BigInteger> point, BigInteger a, BigInteger p) {
+        if (k.equals(BigInteger.ZERO)) {
             return null;
         }
+        Pair<BigInteger, BigInteger> res = point;
+        for (int i = 0; i < k.intValue() - 1; i++) {
+            if (res == null) {
+                res = point;
+            } else {
+                res = sum(res, point, a, p);
+            }
+        }
+        return res;
     }
 
     List<BigInteger> bigMessageToSmall(BigInteger r) {
@@ -394,6 +371,11 @@ public class Third {
 
         byte[] byteArr = String.valueOf(message).getBytes();
         BigInteger m = new BigInteger(byteArr);
+
+        if (m.compareTo(BigInteger.ZERO) < 0) {
+            m = m.negate();
+        }
+
         String mStr = String.valueOf(m);
 
         List<BigInteger> mess = new ArrayList<>();
