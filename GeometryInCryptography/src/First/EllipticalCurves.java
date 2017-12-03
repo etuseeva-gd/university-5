@@ -56,7 +56,7 @@ public class EllipticalCurves {
                 }
             }
 
-            System.out.println(p);
+//            System.out.println(p);
 
             //5 шаг && 6 шаг
             //Если циклится с поиском точки -> прервать и найти новое p
@@ -136,13 +136,15 @@ public class EllipticalCurves {
     //Первый шаг, сегенрировать простое число p
     BigInteger first(int len) {
         BigInteger p = new BigInteger(len, certainty, new SecureRandom());
+        //p = 1 (mod 4)
         while (!p.isProbablePrime(certainty) || !p.mod(FOUR).equals(BigInteger.ONE)) {
             p = new BigInteger(len, certainty, new SecureRandom());
         }
         return p;
     }
 
-    //Шаг второй, алгоритм 7.8.1 - Разложение простого числа на множители в Z|-D^1/2|
+    //Шаг второй, Разложение простого числа на множители в Z|-D^1/2|
+    //Алгоритм Шенкса
     //p = a^2 + b^2
     Pair<BigInteger, BigInteger> second(BigInteger p) {
         Pair<BigInteger, BigInteger> w = findPrimeDecomposition(p, D);
@@ -258,7 +260,7 @@ public class EllipticalCurves {
         return new Pair<>(a1.multiply(n2).mod(p), a1.multiply(n2).negate().mod(p));
     }
 
-    Pair<BigInteger, BigInteger> getAB(Pair<BigInteger, BigInteger> w, BigInteger p, int choice, boolean used) {
+    Pair<BigInteger, BigInteger> getAB(Pair<BigInteger, BigInteger> w, BigInteger p, int step, boolean used) {
         try {
             //Если нет решений
             if (w == null || p == null) {
@@ -267,7 +269,7 @@ public class EllipticalCurves {
 
             //Инициализация значений, шаг 3
             int index = 0;
-            BigInteger u = choice == 1 ? w.getKey() : w.getValue();
+            BigInteger u = step == 1 ? w.getKey() : w.getValue();
 
             ArrayList<BigInteger> valuesForU = new ArrayList<BigInteger>();
             valuesForU.add(u);
@@ -276,12 +278,11 @@ public class EllipticalCurves {
             valuesForM.add(p);
 
             do {
-                BigInteger mPlusOne = valuesForU.get(index).pow(2);
-                mPlusOne = mPlusOne.add(D);
+                BigInteger m1 = valuesForU.get(index).pow(2).add(D);
+                boolean ok1 = m1.mod(valuesForM.get(index)).equals(BigInteger.ZERO);
 
-                boolean ok1 = mPlusOne.mod(valuesForM.get(index)).equals(BigInteger.ZERO);
-                mPlusOne = mPlusOne.divide(valuesForM.get(index));
-                boolean ok2 = mPlusOne.equals(BigInteger.ZERO);
+                m1 = m1.divide(valuesForM.get(index));
+                boolean ok2 = m1.equals(BigInteger.ZERO);
 
                 if (!ok1 || ok2) {
                     if (!used) {
@@ -291,11 +292,11 @@ public class EllipticalCurves {
                     }
                 }
 
-                BigInteger min1 = valuesForU.get(index).mod(mPlusOne);
-                BigInteger min2 = mPlusOne.subtract(valuesForU.get(index)).mod(mPlusOne);
+                BigInteger min1 = valuesForU.get(index).mod(m1);
+                BigInteger min2 = m1.subtract(valuesForU.get(index)).mod(m1);
 
                 valuesForU.add(min1.min(min2));
-                valuesForM.add(mPlusOne);
+                valuesForM.add(m1);
 
                 index++;
             } while (!valuesForM.get(index).equals(BigInteger.ONE));
@@ -305,31 +306,30 @@ public class EllipticalCurves {
             index--;
 
             while (index != 0) {
-                BigInteger chisOne = valuesForU.get(index - 1).multiply(a);
-                BigInteger chisOneNegate = chisOne.negate();
+                BigInteger top = valuesForU.get(index - 1).multiply(a);
+                BigInteger topNegative = top.negate();
 
-                chisOne = chisOne.add(BigInteger.ONE.multiply(b));
-                chisOneNegate = chisOneNegate.add(BigInteger.ONE.multiply(b));
+                top = top.add(BigInteger.ONE.multiply(b));
+                topNegative = topNegative.add(BigInteger.ONE.multiply(b));
 
-                BigInteger znam = a.pow(TWO.intValue());
-                znam = znam.add(BigInteger.ONE.multiply(b.pow(TWO.intValue())));
+                BigInteger top2 = a.negate();
+                BigInteger top2Negate = top2;
 
-                BigInteger chisTwo = a.negate();
-                BigInteger chisTwoNegate = chisTwo;
-                chisTwo = chisTwo.add(valuesForU.get(index - 1).multiply(b));
-                chisTwoNegate = chisTwoNegate.subtract(valuesForU.get(index - 1).multiply(b));
+                top2 = top2.add(valuesForU.get(index - 1).multiply(b));
+                top2Negate = top2Negate.subtract(valuesForU.get(index - 1).multiply(b));
 
-                if (chisOne.mod(znam).equals(BigInteger.ZERO)) {
-                    a = chisOne.divide(znam);
-                } else {
-                    a = chisOneNegate.divide(znam);
-                }
+                BigInteger bottom = a.pow(2).add(BigInteger.ONE.multiply(b.pow(2)));
 
-                if (chisTwo.mod(znam).equals(BigInteger.ZERO)) {
-                    b = chisTwo.divide(znam);
-                } else {
-                    b = chisTwoNegate.divide(znam);
-                }
+                if (top.mod(bottom).equals(BigInteger.ZERO))
+                    a = top.divide(bottom);
+                else
+                    a = topNegative.divide(bottom);
+
+                if (top2.mod(bottom).equals(BigInteger.ZERO))
+                    b = top2.divide(bottom);
+                else
+                    b = top2Negate.divide(bottom);
+
                 index--;
             }
 
@@ -348,33 +348,41 @@ public class EllipticalCurves {
         BigInteger a = ab.getKey();
         BigInteger b = ab.getValue();
 
-        ArrayList<BigInteger> valuesForT = new ArrayList<>();
-        valuesForT.add(b.multiply(TWO).negate());
-        valuesForT.add(a.multiply(TWO));
-        valuesForT.add(b.multiply(TWO));
-        valuesForT.add(a.multiply(TWO).negate());
+        //Множество значений T
+        ArrayList<BigInteger> T = new ArrayList<>();
+        T.add(a.multiply(TWO));
+        T.add(a.multiply(TWO).negate());
+        T.add(b.multiply(TWO));
+        T.add(b.multiply(TWO).negate());
 
-        for (BigInteger bigInteger : valuesForT) {
-            bigInteger = bigInteger.add(BigInteger.ONE).add(p);
-            if (bigInteger.mod(TWO).equals(BigInteger.ZERO) && bigInteger.divide(TWO).isProbablePrime(certainty)) {
-                return new Trio(p, bigInteger, bigInteger.divide(TWO));
-            } else if (bigInteger.mod(FOUR).equals(BigInteger.ZERO) && bigInteger.divide(FOUR).isProbablePrime(certainty)) {
-                return new Trio(p, bigInteger, bigInteger.divide(FOUR));
+        //Проверка
+        for (BigInteger t : T) {
+            BigInteger N = t.add(BigInteger.ONE).add(p);
+            BigInteger r = N.divide(TWO);
+            if (N.mod(TWO).equals(BigInteger.ZERO) && r.isProbablePrime(certainty)) {
+                return new Trio(p, N, r);
+            } else {
+                r = N.divide(FOUR);
+                if (N.mod(FOUR).equals(BigInteger.ZERO) && r.isProbablePrime(certainty)) {
+                    return new Trio(p, N, r);
+                }
             }
         }
         return null;
     }
 
-    //Шаг 4 - проверка полученных данных
+    //Шаг 4 - проверка полученных p, N, r
     boolean fourth(Trio pnr, int m) {
         if (pnr == null) {
             return false;
         }
-        if (pnr.getA().equals(pnr.getC())) {
+
+        BigInteger p = pnr.getA(), n = pnr.getB(), r = pnr.getC();
+        if (p.equals(r)) {
             return false;
         }
         for (int i = 1; i <= m; i++) {
-            if (pnr.getA().modPow(BigInteger.valueOf(i), pnr.getC()).equals(BigInteger.ONE)) {
+            if (p.modPow(BigInteger.valueOf(i), r).equals(BigInteger.ONE)) {
                 return false;
             }
         }
@@ -416,7 +424,7 @@ public class EllipticalCurves {
     }
 
     //Шаг 6 - проверка выбранной точки (сложение ее с собой N раз)
-    boolean sixth(Trio point, BigInteger n, BigInteger p) {
+    boolean sixth(Trio point, BigInteger N, BigInteger p) {
         if (point == null) {
             return true;
         }
@@ -425,8 +433,7 @@ public class EllipticalCurves {
         List<Trio> points = new ArrayList<>();
         points.add(result);
         try {
-            for (BigInteger i = BigInteger.ONE; i.compareTo(n.subtract(BigInteger.ONE)) < 0;
-                 i = i.add(BigInteger.ONE)) {
+            for (BigInteger i = BigInteger.ONE; i.compareTo(N.subtract(BigInteger.ONE)) < 0; i = i.add(BigInteger.ONE)) {
                 result = sumPoints(result, point, p);
                 if (result == null) {
                     return true;
@@ -443,28 +450,35 @@ public class EllipticalCurves {
     }
 
     //Сумма точек
-    Trio sumPoints(Trio result, Trio point, BigInteger p) {
+    Trio sumPoints(Trio firstPoint, Trio secondPoint, BigInteger p) {
         try {
-            if (result == null) {
+            if (firstPoint == null) {
                 return null;
             }
+
             BigInteger lambda;
-            if (result.getA().equals(point.getA()) && result.getB().equals(point.getB())) {
-                if (result.getB().equals(BigInteger.ZERO)) {
+            BigInteger x1 = firstPoint.getA(), y1 = firstPoint.getB();
+            BigInteger x2 = secondPoint.getA(), y2 = secondPoint.getB();
+            BigInteger a = firstPoint.getC();
+
+            if (x1.equals(x2) && y1.equals(y2)) {
+                if (y1.equals(BigInteger.ZERO)) {
                     return null;
                 } else {
-                    lambda = result.getA().pow(2);
-                    lambda = lambda.multiply(THREE).add(result.getC());
-                    lambda = lambda.multiply(TWO.multiply(result.getB()).modInverse(p));
+                    lambda = x1.pow(2);
+                    lambda = lambda.multiply(BigInteger.valueOf(3)).add(a);
+                    lambda = lambda.multiply(BigInteger.valueOf(2).multiply(y1).modInverse(p));
                 }
             } else {
-                BigInteger chis = point.getB().subtract(result.getB());
-                BigInteger znam = point.getA().subtract(result.getA());
-                lambda = chis.multiply(znam.modInverse(p));
+                BigInteger top = y2.subtract(y1);
+                BigInteger bottom = x2.subtract(x1);
+                lambda = top.multiply(bottom.modInverse(p));
             }
-            BigInteger x3 = lambda.pow(2).subtract(result.getA()).subtract(point.getA()).mod(p);
-            BigInteger y3 = result.getA().subtract(x3).multiply(lambda).subtract(result.getB()).mod(p);
-            return new Trio(x3, y3, result.getC());
+
+            BigInteger x3 = lambda.pow(2).subtract(x1).subtract(x2).mod(p);
+            BigInteger y3 = x1.subtract(x3).multiply(lambda).subtract(y1).mod(p);
+
+            return new Trio(x3, y3, a);
         } catch (ArithmeticException e) {
             return null;
         }
@@ -494,32 +508,30 @@ public class EllipticalCurves {
     }
 
     //Вывод данных в файл
-    void print(BigInteger p, Trio point, Trio check) throws IOException {
+    void print(BigInteger p, Trio point, Trio pnr) throws IOException {
         try (BufferedWriter bf = new BufferedWriter(new FileWriter("output.txt"))) {
-            bf.write("Параметры элептической кривой:\n");
+            bf.write("Параметры эллиптической кривой:\n");
             bf.write("p = " + p.toString() + "\n");
             bf.write("А = " + point.getC() + "\n");
 
             Trio q = point;
-            BigInteger nDivR = check.getB().divide(check.getC());
-
-            for (int i = 0; i < nDivR.intValue() - 1; i++) {
-                q = sumPoints(q, point, check.getA());
+            BigInteger nR = pnr.getB().divide(pnr.getC());
+            for (int i = 0; i < nR.intValue() - 1; i++) {
+                q = sumPoints(q, point, pnr.getA());
             }
 
             bf.write("Образующая точка - Q = (" + q.getA().toString() + ", " + q.getB().toString() + ")\n");
-            bf.write("Простого порядка - r = " + check.getC() + "\n");
+            bf.write("Простого порядка - r = " + pnr.getC() + "\n");
 
-//            System.out.println("Проверка образующей точки");
-            Trio res = q;
-            for (int i = 2; i < check.getC().intValue() + 1; i++) {
-                res = sumPoints(res, q, check.getA());
-                if (res == null) {
-                    System.out.println(i);
-                    break;
-                }
-//                System.out.println(res.getA() + " " + res.getB());
-            }
+//            Trio res = q;
+//            for (int i = 2; i < pnr.getC().intValue() + 1; i++) {
+//                res = sumPoints(res, q, pnr.getA());
+//                if (res == null) {
+//                    System.out.println(i);
+//                    break;
+//                }
+//                System.out.println(res.getA() + " " + res.getB());/
+//            }
         }
     }
 
