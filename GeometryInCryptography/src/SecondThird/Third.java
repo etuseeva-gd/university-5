@@ -92,16 +92,12 @@ public class Third {
                     break;
                 }
                 case 7: {
-                    break;
+                    sc.close();
+                    System.exit(0);
                 }
                 default: {
                     System.out.println("Неверная операция!");
                 }
-            }
-
-            if (Objects.equals(action, "7")) {
-                sc.close();
-                return;
             }
 
             System.out.println("Введите следующее действие:");

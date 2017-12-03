@@ -78,7 +78,7 @@ public class Second {
                 }
                 case 6: {
                     sc.close();
-                    return;
+                    System.exit(0);
                 }
                 default: {
                     System.out.println("Неверная операция!");
