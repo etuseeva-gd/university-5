@@ -237,7 +237,7 @@ public class Third {
             Pair<BigInteger, BigInteger> left = multPoint(s1t, params.Q, params.a, params.p);
 
             if (!isPointsEquals(left, right)) {
-                System.out.println("Подпись недействительна!");
+                System.out.println("Ошибка при генерации подписи!");
                 deleteAll();
                 System.exit(1);
             }
@@ -249,9 +249,6 @@ public class Third {
         deleteUnnecessaryFiles();
 
         write(s + "", "s.txt");
-
-        //Другие параметры монеты
-        Pair<BigInteger, BigInteger> R = getPoint(readOneStr("R.txt"));
     }
 
     //Store
@@ -412,7 +409,6 @@ public class Third {
             i = mStr.length() - 1;
         }
 
-        Collections.reverse(mess);
         return mess;
     }
 
