@@ -17,7 +17,7 @@ import static SecondThird.Second.*;
 
 public class Third {
     class Coin {
-        BigInteger m, s;
+        List<BigInteger> m, s;
         Pair<BigInteger, BigInteger> R;
     }
 
@@ -101,6 +101,7 @@ public class Third {
 
     //Gen params
     void zero() throws IOException {
+        deleteAll();
         //p a Q r
         new EllipticalCurves().genParams("common_params.txt");
     }
@@ -253,9 +254,11 @@ public class Third {
         CommonParams params = getCommonParams();
         Coin coin = getCoin();
 
-        if (coin.m.equals(BigInteger.ZERO)) {
-            System.out.println("Подпись недействительна! m = 0");
-            System.exit(1);
+        for (int i = 0; i < coin.m.size(); i++) {
+            if (coin.m.get(i).equals(BigInteger.ZERO)) {
+                System.out.println("Подпись недействительна! m = 0");
+                System.exit(1);
+            }
         }
 
         if (f(coin.R).equals(BigInteger.ZERO)) {
@@ -263,30 +266,30 @@ public class Third {
             System.exit(1);
         }
 
-        Pair<BigInteger, BigInteger> left = multPoint(coin.s, params.Q, params.a, params.p);
-        Pair<BigInteger, BigInteger> right1 = multPoint(f(coin.R), params.P, params.a, params.p);
-        Pair<BigInteger, BigInteger> right2 = multPoint(coin.m, coin.R, params.a, params.p);
-        Pair<BigInteger, BigInteger> right = sumPoints(right1, right2, params.a, params.p);
+        for (int i = 0; i < coin.m.size(); i++) {
+            BigInteger s = coin.s.get(i), m = coin.m.get(i);
 
-        if (!isPointsEquals(left, right)) {
-            System.out.println("Подпись недействительна! Соотношение не выполняется!");
-            System.exit(1);
+            Pair<BigInteger, BigInteger> left = multPoint(s, params.Q, params.a, params.p);
+            Pair<BigInteger, BigInteger> right1 = multPoint(f(coin.R), params.P, params.a, params.p);
+            Pair<BigInteger, BigInteger> right2 = multPoint(m, coin.R, params.a, params.p);
+            Pair<BigInteger, BigInteger> right = sumPoints(right1, right2, params.a, params.p);
+
+            if (!isPointsEquals(left, right)) {
+                System.out.println("Подпись недействительна! Соотношение не выполняется!");
+                System.exit(1);
+            }
         }
+
+        System.out.println("Подпись корректна!");
     }
 
-    Coin getCoin() {
-        try {
-            BufferedReader br = new BufferedReader(new FileReader("coin.txt"));
-            Coin coin = new Coin();
-            coin.m = new BigInteger(br.readLine());
-            coin.R = getPoint(br.readLine());
-            coin.s = new BigInteger(br.readLine());
-            br.close();
-            return coin;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+    Coin getCoin() throws IOException {
+        CommonParams params = getCommonParams();
+        Coin coin = new Coin();
+        coin.m = bigMessageToSmall(params.r);
+        coin.s = readNumbers("s.txt");
+        coin.R = getPoint(readOneStr("R.txt"));
+        return coin;
     }
 
     boolean isBelongsCurve(Pair<BigInteger, BigInteger> point, BigInteger a, BigInteger p) {
@@ -307,23 +310,23 @@ public class Third {
     }
 
     void deleteAll() throws IOException {
-//        Files.deleteIfExists(new File("common_params.txt").toPath());
-//        Files.deleteIfExists(new File("l.txt").toPath());
-//
-//        Files.deleteIfExists(new File("k1.txt").toPath());
-//        Files.deleteIfExists(new File("R1.txt").toPath());
-//
-//        Files.deleteIfExists(new File("R.txt").toPath());
-//        Files.deleteIfExists(new File("betta.txt").toPath());
-//        Files.deleteIfExists(new File("m1.txt").toPath());
-//
-//        Files.deleteIfExists(new File("s1.txt").toPath());
-//
-//        Files.deleteIfExists(new File("coin.txt").toPath());
-//
-//        Files.deleteIfExists(new File("s.txt").toPath());
-//
-//        Files.deleteIfExists(new File("step.txt").toPath());
+        Files.deleteIfExists(new File("common_params.txt").toPath());
+        Files.deleteIfExists(new File("l.txt").toPath());
+
+        Files.deleteIfExists(new File("k1.txt").toPath());
+        Files.deleteIfExists(new File("R1.txt").toPath());
+
+        Files.deleteIfExists(new File("R.txt").toPath());
+        Files.deleteIfExists(new File("betta.txt").toPath());
+        Files.deleteIfExists(new File("m1.txt").toPath());
+
+        Files.deleteIfExists(new File("s1.txt").toPath());
+
+        Files.deleteIfExists(new File("coin.txt").toPath());
+
+        Files.deleteIfExists(new File("s.txt").toPath());
+
+        Files.deleteIfExists(new File("step.txt").toPath());
     }
 
     void deleteUnnecessaryFiles() throws IOException {
