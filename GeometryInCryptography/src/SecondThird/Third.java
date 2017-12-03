@@ -22,6 +22,7 @@ public class Third {
     }
 
     public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
+//        new Third().bigMessageToSmall(BigInteger.valueOf(122));
         new Third().run();
     }
 
@@ -172,18 +173,17 @@ public class Third {
                 break;
             }
         } while (true);
-        write(R + "", "R.txt");
+        write(getStrPoint(R), "R.txt");
 
-        //Todo: check mod p and r
-        BigInteger betta = f(R).multiply(f(R1).modInverse(params.p)).mod(params.r);
+        BigInteger betta = f(R).multiply(f(R1).modInverse(params.r)).mod(params.r);
         write(betta + "", "betta.txt");
 
         List<BigInteger> m = bigMessageToSmall(params.r);
 
         StringBuilder m1 = new StringBuilder();
-        m.forEach(mt -> {
-            m1.append(alpha.multiply(betta.modInverse(params.p)).multiply(mt).mod(params.r)).append('\n');
-        });
+        for (BigInteger mt : m) {
+            m1.append(alpha.multiply(betta.modInverse(params.r)).multiply(mt).mod(params.r)).append('\n');
+        }
         write(m1 + "", "m1.txt");
     }
 
@@ -198,18 +198,16 @@ public class Third {
         List<BigInteger> m1 = readNumbers("m1.txt");
 
         StringBuilder s1 = new StringBuilder();
-        m1.forEach(m1t -> {
+
+        for (int i = 0; i < m1.size(); i++) {
+            BigInteger m1t = m1.get(i);
             if (m1t.equals(BigInteger.ZERO)) {
                 System.out.println("Не корректное m'!");
-                try {
-                    deleteAll();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                deleteAll();
                 System.exit(1);
             }
             s1.append(l.multiply(f(R1)).add(k1.multiply(m1t)).mod(params.r)).append('\n');
-        });
+        }
         write(s1 + "", "s1.txt");
     }
 
@@ -217,37 +215,37 @@ public class Third {
         CommonParams params = getCommonParams();
 
         Pair<BigInteger, BigInteger> R1 = getPoint(readOneStr("R1.txt"));
-        BigInteger m1 = new BigInteger(readOneStr("m1.txt"));
-
-        Pair<BigInteger, BigInteger> right1 = multPoint(f(R1), params.P, params.a, params.p);
-        Pair<BigInteger, BigInteger> right2 = multPoint(m1, R1, params.a, params.p);
-        Pair<BigInteger, BigInteger> right = sumPoints(right1, right2, params.a, params.p);
-
         BigInteger betta = new BigInteger(readOneStr("betta.txt"));
-        Pair<BigInteger, BigInteger> R = getPoint(readOneStr("R.txt"));
+
+        List<BigInteger> m1 = readNumbers("m1.txt");
         List<BigInteger> s1 = readNumbers("s1.txt");
 
         StringBuilder s = new StringBuilder();
-        s1.forEach(s1t -> {
+        for (int i = 0; i < s1.size(); i++) {
+            BigInteger m1t = m1.get(i), s1t = s1.get(i);
+
+            Pair<BigInteger, BigInteger> right1 = multPoint(f(R1), params.P, params.a, params.p);
+            Pair<BigInteger, BigInteger> right2 = multPoint(m1t, R1, params.a, params.p);
+            Pair<BigInteger, BigInteger> right = sumPoints(right1, right2, params.a, params.p);
+
             Pair<BigInteger, BigInteger> left = multPoint(s1t, params.Q, params.a, params.p);
 
             if (!isPointsEquals(left, right)) {
                 System.out.println("Подпись недействительна!");
-                try {
-                    deleteAll();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                deleteAll();
                 System.exit(1);
             }
 
             s.append(s1t.multiply(betta).mod(params.r)).append('\n');
-        });
+        }
 
         //Todo: maybe remove
         deleteUnnecessaryFiles();
 
         write(s + "", "s.txt");
+
+        //Другие параметры монеты
+        Pair<BigInteger, BigInteger> R = getPoint(readOneStr("R.txt"));
     }
 
     //Store
@@ -297,7 +295,7 @@ public class Third {
     }
 
     BigInteger f(Pair<BigInteger, BigInteger> point) {
-        return point.getValue();
+        return point.getKey();
     }
 
     private BigInteger getRandomNumber(BigInteger limit) throws NoSuchAlgorithmException {
@@ -309,23 +307,23 @@ public class Third {
     }
 
     void deleteAll() throws IOException {
-        Files.deleteIfExists(new File("common_params.txt").toPath());
-        Files.deleteIfExists(new File("l.txt").toPath());
-
-        Files.deleteIfExists(new File("k1.txt").toPath());
-        Files.deleteIfExists(new File("R1.txt").toPath());
-
-        Files.deleteIfExists(new File("R.txt").toPath());
-        Files.deleteIfExists(new File("betta.txt").toPath());
-        Files.deleteIfExists(new File("m1.txt").toPath());
-
-        Files.deleteIfExists(new File("s1.txt").toPath());
-
-        Files.deleteIfExists(new File("coin.txt").toPath());
-
-        Files.deleteIfExists(new File("s.txt").toPath());
-
-        Files.deleteIfExists(new File("step.txt").toPath());
+//        Files.deleteIfExists(new File("common_params.txt").toPath());
+//        Files.deleteIfExists(new File("l.txt").toPath());
+//
+//        Files.deleteIfExists(new File("k1.txt").toPath());
+//        Files.deleteIfExists(new File("R1.txt").toPath());
+//
+//        Files.deleteIfExists(new File("R.txt").toPath());
+//        Files.deleteIfExists(new File("betta.txt").toPath());
+//        Files.deleteIfExists(new File("m1.txt").toPath());
+//
+//        Files.deleteIfExists(new File("s1.txt").toPath());
+//
+//        Files.deleteIfExists(new File("coin.txt").toPath());
+//
+//        Files.deleteIfExists(new File("s.txt").toPath());
+//
+//        Files.deleteIfExists(new File("step.txt").toPath());
     }
 
     void deleteUnnecessaryFiles() throws IOException {
@@ -390,32 +388,22 @@ public class Third {
 
         byte[] byteArr = String.valueOf(message).getBytes();
         BigInteger m = new BigInteger(byteArr);
-        int len = String.valueOf(r).length() - 1;
+        String mStr = String.valueOf(m);
 
         List<BigInteger> mess = new ArrayList<>();
-        String mStr = String.valueOf(m);
-        {
-            int i = 0;
-            while (i + len < mStr.length()) {
-                mess.add(new BigInteger(mStr.substring(i, i + len)));
-                i += len;
-            }
 
-            if (i < mStr.length()) {
-                mess.add(new BigInteger(mStr.substring(i)));
+        int i = mStr.length() - 1;
+        while (i >= 0) {
+            int j = 0;
+            while (i - j >= 0 && new BigInteger(mStr.substring(i - j)).compareTo(r) < 0) {
+                j++;
             }
+            mess.add(new BigInteger(mStr.substring(i - j + 1)));
+            mStr = mStr.substring(0, i - j + 1);
+            i = mStr.length() - 1;
         }
-        return mess;
-    }
 
-    void fromSmallMessToBig(List<BigInteger> mess) {
-        StringBuilder out = new StringBuilder();
-        mess.forEach(m -> {
-            byte[] byteArr = m.toByteArray();
-            String partMes = new String(byteArr);
-            out.append(partMes);
-        });
-        System.out.println(out);
+        return mess;
     }
 
     List<BigInteger> readNumbers(String file) {
