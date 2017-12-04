@@ -73,6 +73,7 @@ public class EllipticalCurves {
                     break;
                 }
 
+                //6
                 if (!sixth(point, pnr.getB(), pnr.getA())) {
                     break;
                 }
@@ -90,7 +91,18 @@ public class EllipticalCurves {
     }
 
     public void genParams(String fileName) throws IOException {
-        int len = 9, m = 71;
+        int len = 10, m = 71;
+
+//        Scanner scanner = new Scanner(System.in);
+//        System.out.println("Введите длину числа p в битах:");
+//        int len = Integer.parseInt(scanner.nextLine());
+//        if (len < 8) {
+//            System.out.println("Длина в должна быть больше, либо равна 8");
+//            return;
+//        }
+//        System.out.println("Введите m:");
+//        int m = Integer.parseInt(scanner.nextLine());
+
         while (true) {
             BigInteger p;
             Troika pnr;
