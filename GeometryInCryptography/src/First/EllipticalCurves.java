@@ -36,7 +36,7 @@ public class EllipticalCurves {
 
         while (true) {
             BigInteger p;
-            Trio pnr;
+            Troika pnr;
 
             while (true) {
                 //1 шаг
@@ -63,7 +63,7 @@ public class EllipticalCurves {
             boolean ok = false;
             int k = 0;
 
-            Trio beginPoint, point;
+            Troika beginPoint, point;
             while (true) {
                 point = fifth(pnr); //5th
                 beginPoint = point;
@@ -93,7 +93,7 @@ public class EllipticalCurves {
         int len = 9, m = 71;
         while (true) {
             BigInteger p;
-            Trio pnr;
+            Troika pnr;
             while (true) {
                 p = first(len);
                 Pair<BigInteger, BigInteger> ab = second(p);
@@ -105,7 +105,7 @@ public class EllipticalCurves {
             }
             boolean ok = false;
             int k = 0;
-            Trio point;
+            Troika point;
             while (true) {
                 point = fifth(pnr);
                 if (iter == ++k) {
@@ -120,7 +120,7 @@ public class EllipticalCurves {
                 try (BufferedWriter bf = new BufferedWriter(new FileWriter(fileName))) {
                     bf.write(p.toString() + "\n");
                     bf.write(point.getC() + "\n");
-                    Trio q = point;
+                    Troika q = point;
                     BigInteger nDivR = pnr.getB().divide(pnr.getC());
                     for (int i = 0; i < nDivR.intValue() - 1; i++) {
                         q = sumPoints(q, point, pnr.getA());
@@ -144,7 +144,6 @@ public class EllipticalCurves {
     }
 
     //Шаг второй, Разложение простого числа на множители в Z|-D^1/2|
-    //Алгоритм Шенкса
     //p = a^2 + b^2
     Pair<BigInteger, BigInteger> second(BigInteger p) {
         Pair<BigInteger, BigInteger> w = findPrimeDecomposition(p, D);
@@ -221,7 +220,6 @@ public class EllipticalCurves {
         return res;
     }
 
-    //Алгоритм Шенкса
     Pair<BigInteger, BigInteger> shAlgorithm(BigInteger a, BigInteger p) {
         if (Y(a, p) == -1) {
             return new Pair<>(BigInteger.valueOf(-1), BigInteger.valueOf(-1));
@@ -340,7 +338,7 @@ public class EllipticalCurves {
     }
 
     //Шаг 3 - проверка коэффициетов
-    Trio third(Pair<BigInteger, BigInteger> ab, BigInteger p) {
+    Troika third(Pair<BigInteger, BigInteger> ab, BigInteger p) {
         if (ab == null || p == null) {
             return null;
         }
@@ -360,11 +358,11 @@ public class EllipticalCurves {
             BigInteger N = t.add(BigInteger.ONE).add(p);
             BigInteger r = N.divide(TWO);
             if (N.mod(TWO).equals(BigInteger.ZERO) && r.isProbablePrime(certainty)) {
-                return new Trio(p, N, r);
+                return new Troika(p, N, r);
             } else {
                 r = N.divide(FOUR);
                 if (N.mod(FOUR).equals(BigInteger.ZERO) && r.isProbablePrime(certainty)) {
-                    return new Trio(p, N, r);
+                    return new Troika(p, N, r);
                 }
             }
         }
@@ -372,7 +370,7 @@ public class EllipticalCurves {
     }
 
     //Шаг 4 - проверка полученных p, N, r
-    boolean fourth(Trio pnr, int m) {
+    boolean fourth(Troika pnr, int m) {
         if (pnr == null) {
             return false;
         }
@@ -390,7 +388,7 @@ public class EllipticalCurves {
     }
 
     //Шаг 5 - генерация произвольной точки и ее проверка
-    Trio fifth(Trio pnr) {
+    Troika fifth(Troika pnr) {
         try {
             BigInteger p = pnr.getA(), n = pnr.getB(), r = pnr.getC();
 
@@ -410,7 +408,7 @@ public class EllipticalCurves {
 
             //Проверка квадратичных вычетов/невычетов
             if ((r2.equals(n) && !(getLegendreSymbol(minusA, p) == 1)) || (r4.equals(n) && (getLegendreSymbol(minusA, p) == 1))) {
-                return new Trio(x0, y0, a);
+                return new Troika(x0, y0, a);
             } else {
                 return null;
             }
@@ -424,13 +422,13 @@ public class EllipticalCurves {
     }
 
     //Шаг 6 - проверка выбранной точки (сложение ее с собой N раз)
-    boolean sixth(Trio point, BigInteger N, BigInteger p) {
+    boolean sixth(Troika point, BigInteger N, BigInteger p) {
         if (point == null) {
             return true;
         }
-        Trio result = point;
+        Troika result = point;
 
-        List<Trio> points = new ArrayList<>();
+        List<Troika> points = new ArrayList<>();
         points.add(result);
         try {
             for (BigInteger i = BigInteger.ONE; i.compareTo(N.subtract(BigInteger.ONE)) < 0; i = i.add(BigInteger.ONE)) {
@@ -450,7 +448,7 @@ public class EllipticalCurves {
     }
 
     //Сумма точек
-    Trio sumPoints(Trio firstPoint, Trio secondPoint, BigInteger p) {
+    Troika sumPoints(Troika firstPoint, Troika secondPoint, BigInteger p) {
         try {
             if (firstPoint == null) {
                 return null;
@@ -478,7 +476,7 @@ public class EllipticalCurves {
             BigInteger x3 = lambda.pow(2).subtract(x1).subtract(x2).mod(p);
             BigInteger y3 = x1.subtract(x3).multiply(lambda).subtract(y1).mod(p);
 
-            return new Trio(x3, y3, a);
+            return new Troika(x3, y3, a);
         } catch (ArithmeticException e) {
             return null;
         }
@@ -486,8 +484,8 @@ public class EllipticalCurves {
 
     //Зона вывода данных
     //Вывод в файл координат X, Y
-    void writePoints(Trio point, BigInteger n, BigInteger p) throws IOException {
-        Trio result = point;
+    void writePoints(Troika point, BigInteger n, BigInteger p) throws IOException {
+        Troika result = point;
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("pointsX.txt"));
              BufferedWriter bufferedWriter1 = new BufferedWriter(new FileWriter("pointsY.txt"))) {
             bufferedWriter.write(result.getA() + "\n");
@@ -508,13 +506,13 @@ public class EllipticalCurves {
     }
 
     //Вывод данных в файл
-    void print(BigInteger p, Trio point, Trio pnr) throws IOException {
+    void print(BigInteger p, Troika point, Troika pnr) throws IOException {
         try (BufferedWriter bf = new BufferedWriter(new FileWriter("output.txt"))) {
             bf.write("Параметры эллиптической кривой:\n");
             bf.write("p = " + p.toString() + "\n");
             bf.write("А = " + point.getC() + "\n");
 
-            Trio q = point;
+            Troika q = point;
             BigInteger nR = pnr.getB().divide(pnr.getC());
             for (int i = 0; i < nR.intValue() - 1; i++) {
                 q = sumPoints(q, point, pnr.getA());
@@ -523,7 +521,7 @@ public class EllipticalCurves {
             bf.write("Образующая точка - Q = (" + q.getA().toString() + ", " + q.getB().toString() + ")\n");
             bf.write("Простого порядка - r = " + pnr.getC() + "\n");
 
-//            Trio res = q;
+//            Troika res = q;
 //            for (int i = 2; i < pnr.getC().intValue() + 1; i++) {
 //                res = sumPoints(res, q, pnr.getA());
 //                if (res == null) {
@@ -535,12 +533,12 @@ public class EllipticalCurves {
         }
     }
 
-    class Trio implements Comparable<Trio> {
+    class Troika implements Comparable<Troika> {
         private BigInteger a;
         private BigInteger b;
         private BigInteger c;
 
-        public Trio(BigInteger a, BigInteger b, BigInteger c) {
+        public Troika(BigInteger a, BigInteger b, BigInteger c) {
             this.a = a;
             this.b = b;
             this.c = c;
@@ -551,7 +549,7 @@ public class EllipticalCurves {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            Trio trio = (Trio) o;
+            Troika trio = (Troika) o;
 
             if (a != null ? !a.equals(trio.a) : trio.a != null) return false;
             if (b != null ? !b.equals(trio.b) : trio.b != null) return false;
@@ -579,7 +577,7 @@ public class EllipticalCurves {
         }
 
         @Override
-        public int compareTo(Trio o) {
+        public int compareTo(Troika o) {
             if (a.compareTo(o.a) != 0)
                 return a.compareTo(o.a);
             else {
