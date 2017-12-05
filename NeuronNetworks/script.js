@@ -5,15 +5,11 @@ class Graph {
     //Граф подается как из файла
     constructor(data) {
         const graphObj = parseGraphList(data);
-        console.log(graphObj);
 
         this.graph = {};
         for (let i = 0; i < graphObj.length; i++) {
             this.graph[graphObj[i][0]] = graphObj[i][1].filter(v => v !== '');
         }
-
-        console.log(this.graph);
-        console.log(this.isAcyclic());
     }
 
     createGraph() {
@@ -349,23 +345,64 @@ function fromFuncToGraph(funcObj, answer) {
     }
 }
 
-function main() {
+//Main
+
+console.log('Введите номер задания:');
+console.log('1: Создание графа');
+console.log('2: Создание функции по графу');
+console.log('3: Вычисление значения функции на графе');
+console.log('4: Построение графа по функции, переданной в префиксной скобочной записи');
+
+// console.log('5: Построение многослойной нейронной сети');
+// console.log('6: Реализация метода обратного распространения ошибки для многослойной НС');
+
+console.log('0: Выход');
+
+const stdin = process.openStdin();
+stdin.addListener('data', (data) => {
     const fileInput = 'input.txt', fileOutput = 'output.txt';
 
-    let data = readFile(fileInput);
+    let data1 = readFile(fileInput);
     // writeFile(fileOutput, first(data));
     // writeFile(fileOutput, second(data));
     // writeFile(fileOutput, fourth(data));
 
     // third();
 
-    const g = new Graph(data);
-}
+    const g = new Graph(data1);
 
-main();
+    const action = data.toString().trim();
+    switch (action) {
+        case '0': {
+            process.exit(0);
+            break;
+        }
+        case '1': {
+            first();
+            break;
+        }
+        case '2': {
+            second();
+            break;
+        }
+        case '3': {
+            third();
+            break;
+        }
+        case '4': {
+            fourth();
+            break;
+        }
+        case '5': {
+            break;
+        }
+        case '6': {
+            break;
+        }
+        default: {
+            console.log('Некорректные данные!');
+        }
+    }
 
-// const stdin = process.openStdin();
-// stdin.addListener("data", function(d) {
-//     console.log("you entered: [" +
-//         d.toString().trim() + "]");
-// });
+    console.log("Введите следующее действие:");
+});
