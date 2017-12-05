@@ -9,3 +9,4 @@ Protocols/.DS_Store
 .DS_Store
 NeuronNetworks/dist
 node_modules/
+/dist

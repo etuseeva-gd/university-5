@@ -1,6 +1,54 @@
 // const js2xmlparser = require("js2xmlparser");
 const fs = require('fs');
 
+class Graph {
+    //Граф подается как из файла
+    constructor(data) {
+        const graphObj = parseGraphList(data);
+        console.log(graphObj);
+
+        this.graph = {};
+        for (let i = 0; i < graphObj.length; i++) {
+            this.graph[graphObj[i][0]] = graphObj[i][1].filter(v => v !== '');
+        }
+
+        console.log(this.graph);
+        console.log(this.isAcyclic());
+    }
+
+    createGraph() {
+
+    }
+
+    //Если ацикличный, то вернет true
+    isAcyclic() {
+        const p = {}, color = {};
+        this.cycle = false;
+        for (const v in this.graph) {
+            p[v] = -1;
+            color[v] = 0;
+        }
+        for (const v in this.graph) {
+            this.dfs(v, color, p);
+        }
+        return !this.cycle;
+    }
+
+    dfs(v, color, p) {
+        color[v] = 1;
+        for (let i = 0; i < this.graph[v].length; i++) {
+            let to = this.graph[v][i];
+            if (color[to] === 0) {
+                p[to] = v;
+                this.dfs(to, color, p);
+            } else if (color[to] === 1) {
+                this.cycle = true;
+            }
+        }
+        color[v] = 2;
+    }
+}
+
 function readFile(fileName) {
     return fs.readFileSync(fileName, 'utf8', function (err, data) {
         if (err) {
@@ -306,10 +354,12 @@ function main() {
 
     let data = readFile(fileInput);
     // writeFile(fileOutput, first(data));
-    writeFile(fileOutput, second(data));
+    // writeFile(fileOutput, second(data));
     // writeFile(fileOutput, fourth(data));
 
     // third();
+
+    const g = new Graph(data);
 }
 
 main();
