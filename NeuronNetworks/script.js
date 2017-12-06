@@ -15,6 +15,7 @@ class Graph {
                 this.graph = this.createGraph(this.graphArray);
             } else {
                 this.graphBnf = this.parseBnfGraphToEdges(data);
+                this.graph = this.getGraphFromBnf(this.graphBnf);
             }
         }
     }
@@ -126,9 +127,12 @@ class Graph {
             }
         }
 
-        //Todo: проверка на корректность
-
-        const funcObj = JSON.parse(dataCopy);
+        let funcObj = null;
+        try {
+            funcObj = JSON.parse(dataCopy);
+        } catch (e) {
+            throw 'Не корректное количество скобочек!';
+        }
 
         const listEdges = {};
         this.fromFuncToGraph(funcObj, listEdges);
@@ -144,6 +148,22 @@ class Graph {
         return this.getBnf(objGraph);
     }
 
+    getGraphFromBnf(bnf) {
+        const graph = {};
+        const edges = bnf.edges;
+        for (let i = 0; i < edges.length; i++) {
+            const x = edges[i][0], y = edges[i][1];
+            if (!graph[x]) {
+                graph[x] = [];
+            }
+            if (!graph[y]) {
+                graph[y] = [];
+            }
+            graph[x].push(y);
+        }
+        return graph;
+    }
+
     //Вход: данные из файла
     parseGraphList(data) {
         data = data.split('\r').join('').split(' ').join('');
@@ -152,9 +172,11 @@ class Graph {
 
         const objGraph = [];
         lines.forEach(line => {
-            const [vertex, vertexesStr] = line.split(':');
-            const vertexes = vertexesStr.split(',');
-            objGraph.push([vertex, vertexes]);
+            if (line.length > 0) {
+                const [vertex, vertexesStr] = line.split(':');
+                const vertexes = vertexesStr.split(',');
+                objGraph.push([vertex, vertexes]);
+            }
         });
 
         return objGraph;
@@ -286,11 +308,31 @@ class Graph {
         }
     }
 
+    //Проверка все ли вершины определены
+    isCorrectVertexes() {
+        let err = '';
+        if (this.graph) {
+            let j = 1;
+            for (const v in this.graph) {
+                for (let i = 0; i < this.graph[v].length; i++) {
+                    if (!this.graph[this.graph[v][i]]) {
+                        err += `Вершина ${this.graph[v][i]} - не определена. (строка ${j})\n`;
+                    }
+                }
+                j++;
+            }
+        }
+        if (err.length > 0) {
+            throw err;
+        }
+    }
+
     createGraph(graphArray) {
         const graph = {};
         for (let i = 0; i < graphArray.length; i++) {
             graph[graphArray[i][0]] = graphArray[i][1].filter(v => v !== '');
         }
+        this.isCorrectVertexes();
         return graph;
     }
 
@@ -359,45 +401,44 @@ stdin.addListener('data', (data) => {
     const action = data.toString().trim();
 
     //todo: добавить xml в 1, 4
-    switch (action) {
-        case '1': {
-            //todo: добавить
-            //Сообщение об ошибке с указанием номера строки с ошибкой во входном файле
-            const graph = new Graph(fileData);
-            writeFile(fileOutput, graph.getBnf());
-            break;
-        }
-        case '2': {
-            const graph = new Graph(fileData, true);
-            if (graph.isAcyclic()) {
-                writeFile(fileOutput, "Данный граф содержит циклы!");
-            } else {
-                writeFile(fileOutput, graph.getFunctionFromBnf());
+    try {
+        switch (action) {
+            case '1': {
+                const graph = new Graph(fileData);
+                writeFile(fileOutput, graph.getBnf());
+                break;
             }
-            break;
+            case '2': {
+                const graph = new Graph(fileData, true);
+                if (!graph.isAcyclic()) {
+                    writeFile(fileOutput, 'Данный граф содержит циклы!');
+                } else {
+                    writeFile(fileOutput, graph.getFunctionFromBnf());
+                }
+                break;
+            }
+            case '3': {
+                const graph = new Graph(fileData);
+                writeFile(fileOutput, graph.calcFunctionFromGraph('operations.txt'));
+                break;
+            }
+            case '4': {
+                const graph = new Graph();
+                writeFile(fileOutput, graph.getBnfFromFunction(fileData));
+                break;
+            }
+            case '5': {
+                break;
+            }
+            case '6': {
+                break;
+            }
+            default: {
+                console.log('Некорректные данные!');
+            }
         }
-        case '3': {
-            const graph = new Graph(fileData);
-            writeFile(fileOutput, graph.calcFunctionFromGraph('operations.txt'));
-            break;
-        }
-        case '4': {
-            //todo добавить проверки:
-            //Сообщение об ошибке с указанием номера символа с ошибкой во входном файле. Проверка должна включать:
-            //наличие недопустимых символов в имени функции, ошибки в расстановке скобок
-            const graph = new Graph();
-            writeFile(fileOutput, graph.getBnfFromFunction(fileData));
-            break;
-        }
-        case '5': {
-            break;
-        }
-        case '6': {
-            break;
-        }
-        default: {
-            console.log('Некорректные данные!');
-        }
+    } catch (e) {
+        writeFile(fileOutput, e);
     }
 
     process.exit(0);
