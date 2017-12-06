@@ -416,6 +416,57 @@ stdin.addListener('data', (data) => {
     const fileInput = 'input.txt', fileOutput = 'output.txt';
     const fileXML = 'graph.xml';
 
+    const fileData = readFile(fileInput);
+    const action = data.toString().trim();
+
+    try {
+        switch (action) {
+            case '1': {
+                const graph = new Graph(fileData);
+                writeFile(fileOutput, graph.getBnf());
+                writeFile(fileXML, graph.getXML());
+                break;
+            }
+            case '2': {
+                const graph = new Graph(fileData, true);
+                if (!graph.isAcyclic()) {
+                    writeFile(fileOutput, 'Данный граф содержит циклы!');
+                } else {
+                    writeFile(fileOutput, graph.getFunctionFromBnf());
+                }
+                break;
+            }
+            case '3': {
+                const graph = new Graph(fileData);
+                writeFile(fileOutput, graph.calcFunctionFromGraph('operations.txt'));
+                break;
+            }
+            case '4': {
+                const graph = new Graph();
+                const bnf = graph.getBnfFromFunction(fileData);
+                graph.graph = graph.getGraphFromEdges(graph.parseBnfGraphToEdges(bnf));
+
+                writeFile(fileOutput, graph.getBnfFromFunction(fileData));
+                writeFile(fileXML, graph.getXML());
+                break;
+            }
+            case '5': {
+                break;
+            }
+            case '6': {
+                break;
+            }
+            default: {
+                console.log('Некорректные данные!');
+            }
+        }
+    } catch (e) {
+        writeFile(fileOutput, e);
+    }
+
+    process.exit(0);
+});
+
 class Neuron {
     constructor(inputs = [], weights = []) {
         this.inputs = inputs;
