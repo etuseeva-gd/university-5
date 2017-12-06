@@ -411,61 +411,61 @@ console.log('4: Построение графа по функции, перед�
 // console.log('6: Реализация метода обратного распространения ошибки для многослойной НС');
 console.log('P.S. Входной файл: input.txt, Выходной файл: output.txt, Файл с операциями для 3 задания в operations.txt');
 
-const stdin = process.openStdin();
-stdin.addListener('data', (data) => {
-    const fileInput = 'input.txt', fileOutput = 'output.txt';
-    const fileXML = 'graph.xml';
-
-    const fileData = readFile(fileInput);
-    const action = data.toString().trim();
-
-    try {
-        switch (action) {
-            case '1': {
-                const graph = new Graph(fileData);
-                writeFile(fileOutput, graph.getBnf());
-                writeFile(fileXML, graph.getXML());
-                break;
-            }
-            case '2': {
-                const graph = new Graph(fileData, true);
-                if (!graph.isAcyclic()) {
-                    writeFile(fileOutput, 'Данный граф содержит циклы!');
-                } else {
-                    writeFile(fileOutput, graph.getFunctionFromBnf());
-                }
-                break;
-            }
-            case '3': {
-                const graph = new Graph(fileData);
-                writeFile(fileOutput, graph.calcFunctionFromGraph('operations.txt'));
-                break;
-            }
-            case '4': {
-                const graph = new Graph();
-                const bnf = graph.getBnfFromFunction(fileData);
-                graph.graph = graph.getGraphFromEdges(graph.parseBnfGraphToEdges(bnf));
-
-                writeFile(fileOutput, graph.getBnfFromFunction(fileData));
-                writeFile(fileXML, graph.getXML());
-                break;
-            }
-            case '5': {
-                break;
-            }
-            case '6': {
-                break;
-            }
-            default: {
-                console.log('Некорректные данные!');
-            }
-        }
-    } catch (e) {
-        writeFile(fileOutput, e);
-    }
-
-    process.exit(0);
-});
+// const stdin = process.openStdin();
+// stdin.addListener('data', (data) => {
+//     const fileInput = 'input.txt', fileOutput = 'output.txt';
+//     const fileXML = 'graph.xml';
+//
+//     const fileData = readFile(fileInput);
+//     const action = data.toString().trim();
+//
+//     try {
+//         switch (action) {
+//             case '1': {
+//                 const graph = new Graph(fileData);
+//                 writeFile(fileOutput, graph.getBnf());
+//                 writeFile(fileXML, graph.getXML());
+//                 break;
+//             }
+//             case '2': {
+//                 const graph = new Graph(fileData, true);
+//                 if (!graph.isAcyclic()) {
+//                     writeFile(fileOutput, 'Данный граф содержит циклы!');
+//                 } else {
+//                     writeFile(fileOutput, graph.getFunctionFromBnf());
+//                 }
+//                 break;
+//             }
+//             case '3': {
+//                 const graph = new Graph(fileData);
+//                 writeFile(fileOutput, graph.calcFunctionFromGraph('operations.txt'));
+//                 break;
+//             }
+//             case '4': {
+//                 const graph = new Graph();
+//                 const bnf = graph.getBnfFromFunction(fileData);
+//                 graph.graph = graph.getGraphFromEdges(graph.parseBnfGraphToEdges(bnf));
+//
+//                 writeFile(fileOutput, graph.getBnfFromFunction(fileData));
+//                 writeFile(fileXML, graph.getXML());
+//                 break;
+//             }
+//             case '5': {
+//                 break;
+//             }
+//             case '6': {
+//                 break;
+//             }
+//             default: {
+//                 console.log('Некорректные данные!');
+//             }
+//         }
+//     } catch (e) {
+//         writeFile(fileOutput, e);
+//     }
+//
+//     process.exit(0);
+// });
 
 class Neuron {
     constructor(inputs = [], weights = []) {
@@ -494,6 +494,44 @@ function f(x) {
     return 1 / (1 + Math.exp(-1 * x));
 }
 
+class Layer {
+    constructor(inputs = [], weights = [[]]) {
+        this.inputs = inputs;
+        this.weights = weights;
+    }
+
+    setX(inputs) {
+        this.inputs = inputs;
+    }
+
+    calcY(x = this.inputs, w = this.weights) {
+        const y = [];
+        for (let j = 0; j < x.length; j++) {
+            let yj = 0;
+            for (let k = 0; k < w[0].length; k++) {
+                yj += w[j][k] * x[k];
+            }
+            y.push(f(yj));
+        }
+        return y;
+    }
+}
+
+class Network {
+    constructor(inputs = [], weights = [[]]) {
+        this.inputs = inputs;
+        this.weights = weights;
+    }
+
+    calcY(x = this.inputs, ws = this.weights) {
+        ws.forEach(w => {
+            const l = new Layer(x, w);
+            x = l.calcY().slice(0);
+        });
+        return x;
+    }
+}
+
 const input = [1, 0];
 const ws = [[[0.45, 0.78], [-0.12, 0.13]], [[1.5], [-2.3]]];
 
@@ -514,7 +552,11 @@ for (let i = 0; i < ws.length; i++) {
         }
         y.push(f(yj));
     }
+
     x = y.slice(0);
 }
 
 console.log(x);
+
+const n = new Network(input, ws);
+console.log(n.calcY());
