@@ -1,9 +1,0 @@
-<?xml version='1.0'?>
-<graph>
-    <a>1-c</a>
-    <a>1-d</a>
-    <b>1-b</b>
-    <b>2-c</b>
-    <c>2-d</c>
-    <d>_</d>
-</graph>
