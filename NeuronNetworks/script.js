@@ -483,10 +483,10 @@ class Layer {
 
     calcY(x = this.inputs, w = this.weights) {
         const y = [];
-        for (let j = 0; j < x.length; j++) {
+        for (let j = 0; j < w[0].length; j++) {
             let yj = 0;
-            for (let k = 0; k < w[j].length; k++) {
-                yj += w[j][k] * x[k];
+            for (let k = 0; k < x.length; k++) {
+                yj += w[k][j] * x[k];
             }
             y.push(f(yj));
         }
@@ -496,20 +496,25 @@ class Layer {
 }
 
 class Network {
-    constructor(inputs = [], weights = [[]]) {
-        this.inputs = inputs;
+    constructor(weights = [[]]) {
         this.weights = weights;
         //this.layers = [];
     }
 
-    calcY(x = this.inputs, ws = this.weights) {
-        let y = x.slice(0);
+    calcY(inputs, ws = this.weights) {
+        let y = inputs.slice(0);
         ws.forEach(w => {
             const l = new Layer(y, w);
             y = l.calcY().slice(0);
             //this.layers.push(l);
         });
         return y;
+    }
+
+    train(inputs, outputs) {
+        const y = this.calcY(inputs);
+        const deltas = y.map((yi, i) => outputs[i] - yi);
+        console.log(deltas);
     }
 }
 
@@ -518,32 +523,28 @@ const input = [1, 0];
 const ws = [[[0.45, 0.78], [-0.12, 0.13]], [[1.5], [-2.3]]];
 
 //Количество матриц (слои)
-let x = input;
-for (let i = 0; i < ws.length; i++) {
-    const w = ws[i];
-    let y = [];
+// let x = input;
+// for (let i = 0; i < ws.length; i++) {
+//     const w = ws[i];
+//     let y = [];
+//
+//     for (let j = 0; j < w[0].length; j++) {
+//         let yj = 0;
+//         for (let k = 0; k < x.length; k++) {
+//             yj += w[k][j] * x[k];
+//         }
+//         y.push(f(yj));
+//     }
+//
+//     x = y.slice(0);
+// }
+// console.log(x);
 
-    //Количество входов в слой
-    const n = x.length;
-    for (let j = 0; j < n; j++) {
-        let yj = 0;
-
-        //Количество выходов
-        for (let k = 0; k < w[j].length; k++) {
-            yj += w[j][k] * x[k];
-        }
-        y.push(f(yj));
-    }
-
-    x = y.slice(0);
-}
-
-console.log(x);
-
-const n = new Network(input, ws);
-console.log(n.calcY());
-console.log(n);
+const n = new Network(ws);
+console.log(n.calcY(input));
 
 //Для второй задачи
 const inp = [[1, 0], [0, 1], [0, 0], [1, 1]];
 const out = [1, 1, 0, 0];
+
+// n.train(inp[0], out[0]);
