@@ -363,15 +363,23 @@ stdin.addListener('data', (data) => {
     const fileInput = 'input.txt', fileOutput = 'output.txt';
     const fileData = readFile(fileInput);
     const action = data.toString().trim();
+
+    //todo: добавить xml в 1, 4
     switch (action) {
         case '1': {
+            //todo: добавить
+            //Сообщение об ошибке с указанием номера строки с ошибкой во входном файле
             const graph = new Graph(fileData);
             writeFile(fileOutput, graph.getBnf());
             break;
         }
         case '2': {
             const graph = new Graph(fileData, true);
-            writeFile(fileOutput, graph.getFunctionFromBnf());
+            if (graph.isAcyclic()) {
+                writeFile(fileOutput, "Данный граф содержит циклы!");
+            } else {
+                writeFile(fileOutput, graph.getFunctionFromBnf());
+            }
             break;
         }
         case '3': {
@@ -380,6 +388,9 @@ stdin.addListener('data', (data) => {
             break;
         }
         case '4': {
+            //todo добавить проверки:
+            //Сообщение об ошибке с указанием номера символа с ошибкой во входном файле. Проверка должна включать:
+            //наличие недопустимых символов в имени функции, ошибки в расстановке скобок
             const graph = new Graph();
             writeFile(fileOutput, graph.getBnfFromFunction(fileData));
             break;
