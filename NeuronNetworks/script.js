@@ -1,8 +1,7 @@
-// const js2xmlparser = require("js2xmlparser");
 const fs = require('fs');
 
 class Graph {
-    //Граф подается как из файла
+    //Вход: данные из файла
     constructor(data, isBnf = false) {
         this.graphArray = null;
         this.graph = null;
@@ -342,11 +341,6 @@ function writeFile(fileName, text) {
     });
 }
 
-// function objToXML(name, obj) {
-//     const xml = js2xmlparser.parse(name, obj);
-//     writeFile(`xml_${name}.txt`, xml);
-// }
-
 //Main
 
 console.log('Введите номер задания:');
@@ -356,7 +350,7 @@ console.log('3: Вычисление значения функции на гра
 console.log('4: Построение графа по функции, переданной в префиксной скобочной записи (Вход: Функция графа)');
 // console.log('5: Построение многослойной нейронной сети');
 // console.log('6: Реализация метода обратного распространения ошибки для многослойной НС');
-console.log('P.S. Входной файл: input.txt, Выходной файл: output.txt, Файл с операциями для 3 задания в operations.txt')
+console.log('P.S. Входной файл: input.txt, Выходной файл: output.txt, Файл с операциями для 3 задания в operations.txt');
 
 const stdin = process.openStdin();
 stdin.addListener('data', (data) => {
@@ -405,5 +399,6 @@ stdin.addListener('data', (data) => {
             console.log('Некорректные данные!');
         }
     }
+
     process.exit(0);
 });
