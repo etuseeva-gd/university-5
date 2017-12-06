@@ -5,7 +5,7 @@ class Graph {
     constructor(data, isBnf = false) {
         this.graphArray = null;
         this.graph = null;
-        this.graphBnf = null;
+        this.graphEdges = null;
 
         if (data) {
             if (!isBnf) {
@@ -14,10 +14,27 @@ class Graph {
                 // { a: [ 'b' ], b: [ 'c' ], c: [ 'a' ] } }
                 this.graph = this.createGraph(this.graphArray);
             } else {
-                this.graphBnf = this.parseBnfGraphToEdges(data);
-                this.graph = this.getGraphFromBnf(this.graphBnf);
+                this.graphEdges = this.parseBnfGraphToEdges(data);
+                this.graph = this.getGraphFromEdges(this.graphEdges);
             }
         }
+    }
+
+    getXML() {
+        let xml = '<?xml version="1.0" encoding="UTF-8"?>';
+        xml += '<graph>';
+        for (let v in this.graph) {
+            for (let i = 0; i < this.graph[v].length; i++) {
+                const u = this.graph[v][i];
+                xml += `
+<edge>
+    <startVertex>${v}</startVertex>
+    <endVertev>${u}</endVertev>
+</edge>`;
+            }
+        }
+        xml += '</graph>';
+        return xml;
     }
 
     getBnf(graph) {
@@ -61,7 +78,7 @@ class Graph {
     }
 
     getFunctionFromBnf() {
-        let answer = this.getFunctionFromBNF(this.graphBnf.sinks, this.graphBnf.edges);
+        let answer = this.getFunctionFromBNF(this.graphEdges.sinks, this.graphEdges.edges);
         answer = JSON.stringify(answer);
 
         const signs = ['"', ':', '{', '}'],
@@ -148,7 +165,7 @@ class Graph {
         return this.getBnf(objGraph);
     }
 
-    getGraphFromBnf(bnf) {
+    getGraphFromEdges(bnf) {
         const graph = {};
         const edges = bnf.edges;
         for (let i = 0; i < edges.length; i++) {
@@ -397,15 +414,17 @@ console.log('P.S. Входной файл: input.txt, Выходной файл:
 const stdin = process.openStdin();
 stdin.addListener('data', (data) => {
     const fileInput = 'input.txt', fileOutput = 'output.txt';
+    const fileXML = 'graph.xml';
+
     const fileData = readFile(fileInput);
     const action = data.toString().trim();
 
-    //todo: добавить xml в 1, 4
     try {
         switch (action) {
             case '1': {
                 const graph = new Graph(fileData);
                 writeFile(fileOutput, graph.getBnf());
+                writeFile(fileXML, graph.getXML());
                 break;
             }
             case '2': {
@@ -424,7 +443,11 @@ stdin.addListener('data', (data) => {
             }
             case '4': {
                 const graph = new Graph();
+                const bnf = graph.getBnfFromFunction(fileData);
+                graph.graph = graph.getGraphFromEdges(graph.parseBnfGraphToEdges(bnf));
+
                 writeFile(fileOutput, graph.getBnfFromFunction(fileData));
+                writeFile(fileXML, graph.getXML());
                 break;
             }
             case '5': {
