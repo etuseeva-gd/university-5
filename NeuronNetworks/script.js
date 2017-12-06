@@ -278,7 +278,9 @@ class Graph {
                     if (!answer[p]) {
                         answer[p] = [];
                     }
-                    answer[p].push(vertex);
+                    if (!answer[p].find(v => v === vertex)) {
+                        answer[p].push(vertex);
+                    }
                 });
             }
             this.fromFuncToGraph(funcObj[vertex], answer);
