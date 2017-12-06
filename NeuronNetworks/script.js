@@ -467,29 +467,6 @@ console.log('P.S. Входной файл: input.txt, Выходной файл:
 //     process.exit(0);
 // });
 
-class Neuron {
-    constructor(inputs = [], weights = []) {
-        this.inputs = inputs;
-        this.weights = weights;
-    }
-
-    setInputs(inputs) {
-        this.inputs = inputs;
-    }
-
-    weightedSum(inputs = this.inputs, weights = this.weights) {
-        return inputs.map((inp, i) => inp * weights[i]).reduce((x, y) => x + y, 0);
-    }
-
-    evaluate(inputs = this.inputs) {
-        return this.activate(this.weightedSum(inputs));
-    }
-
-    activate(value) {
-        return 1 / (1 + Math.exp(-1 * value));
-    }
-}
-
 function f(x) {
     return 1 / (1 + Math.exp(-1 * x));
 }
@@ -500,19 +477,20 @@ class Layer {
         this.weights = weights;
     }
 
-    setX(inputs) {
-        this.inputs = inputs;
+    setY(outputs = []) {
+        this.ouputs = outputs;
     }
 
     calcY(x = this.inputs, w = this.weights) {
         const y = [];
         for (let j = 0; j < x.length; j++) {
             let yj = 0;
-            for (let k = 0; k < w[0].length; k++) {
+            for (let k = 0; k < w[j].length; k++) {
                 yj += w[j][k] * x[k];
             }
             y.push(f(yj));
         }
+        //this.setY(y);
         return y;
     }
 }
@@ -521,17 +499,21 @@ class Network {
     constructor(inputs = [], weights = [[]]) {
         this.inputs = inputs;
         this.weights = weights;
+        //this.layers = [];
     }
 
     calcY(x = this.inputs, ws = this.weights) {
+        let y = x.slice(0);
         ws.forEach(w => {
-            const l = new Layer(x, w);
-            x = l.calcY().slice(0);
+            const l = new Layer(y, w);
+            y = l.calcY().slice(0);
+            //this.layers.push(l);
         });
-        return x;
+        return y;
     }
 }
 
+//Для первой задачи
 const input = [1, 0];
 const ws = [[[0.45, 0.78], [-0.12, 0.13]], [[1.5], [-2.3]]];
 
@@ -547,7 +529,7 @@ for (let i = 0; i < ws.length; i++) {
         let yj = 0;
 
         //Количество выходов
-        for (let k = 0; k < w[0].length; k++) {
+        for (let k = 0; k < w[j].length; k++) {
             yj += w[j][k] * x[k];
         }
         y.push(f(yj));
@@ -560,3 +542,8 @@ console.log(x);
 
 const n = new Network(input, ws);
 console.log(n.calcY());
+console.log(n);
+
+//Для второй задачи
+const inp = [[1, 0], [0, 1], [0, 0], [1, 1]];
+const out = [1, 1, 0, 0];
