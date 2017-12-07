@@ -471,6 +471,12 @@ function f(x) {
     return 1 / (1 + Math.exp(-1 * x));
 }
 
+function df(x) {
+    return f(x) * (1 - f(x));
+}
+
+const learnRate = 0.01;
+
 class Layer {
     constructor(weights = [[]]) {
         this.weights = weights;
@@ -485,6 +491,8 @@ class Layer {
     }
 
     calcY(x, w = this.weights) {
+        this.setX(x);
+
         const y = [];
         for (let j = 0; j < w[0].length; j++) {
             let yj = 0;
@@ -493,19 +501,31 @@ class Layer {
             }
             y.push(f(yj));
         }
+
+        this.setY(y);
         return y;
     }
 
     calcDeltas(deltas, w = this.weights) {
-        this.deltas = [];
+        this.deltas = deltas;
+
+        const deltasPrLayer = [];
         for (let i = 0; i < w.length; i++) {
             let d = 0;
             for (let j = 0; j < deltas.length; j++) {
                 d += w[i][j] * deltas[j];
             }
-            this.deltas.push(d);
+            deltasPrLayer.push(d);
         }
-        return this.deltas;
+        return deltasPrLayer;
+    }
+
+    recalcW(deltas = this.deltas, w = this.weights, x = this.inputs, y = this.ouputs) {
+        for (let i = 0; i < w.length; i++) {
+            for (let j = 0; j < w[i].length; j++) {
+                w[i][j] += learnRate * deltas[j] * df(y[j]) * x[i];
+            }
+        }
     }
 }
 
@@ -522,10 +542,18 @@ class Network {
         return y;
     }
 
-    train(inputs, outputs) {
-        const y = this.calcY(inputs);
-        const deltas = y.map((yi, i) => outputs[i] - yi);
-        this.calcDeltas(deltas);
+    train(inputs, outputs, rounds = 10) {
+        for (let k = 0; k < rounds; k++) {
+            inputs.forEach((input, i) => {
+                const y = this.calcY(input);
+                // console.log(y);
+                const deltas = y.map((yj, j) => outputs[i][j] - yj);
+                console.log(`Итерация - ${k + 1}, ошибка = ${deltas}`);
+                this.calcDeltas(deltas);
+                this.recalcW();
+            });
+            console.log();
+        }
     }
 
     calcDeltas(deltas, layers = this.layers) {
@@ -533,6 +561,10 @@ class Network {
         for (let i = layers.length - 1; i >= 0; i--) {
             d = layers[i].calcDeltas(d).slice(0);
         }
+    }
+
+    recalcW(layers = this.layers) {
+        layers.forEach(layers => layers.recalcW());
     }
 }
 
@@ -559,12 +591,14 @@ const ws = [[[0.45, 0.78], [-0.12, 0.13]], [[1.5], [-2.3]]];
 // console.log(x);
 
 const n = new Network(ws);
-console.log(n.calcY(input));
+// console.log(n.calcY(input));
 
 //Для второй задачи
 const inp = [[1, 0], [0, 1], [0, 0], [1, 1]];
 const out = [[1], [1], [0], [0]];
 
-n.train(inp[0], out[0]);
+n.train(inp, out, 10);
 
-console.log(1);
+inp.forEach(i => {
+    console.log(n.calcY(i));
+});
