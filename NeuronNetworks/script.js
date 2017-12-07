@@ -472,16 +472,19 @@ function f(x) {
 }
 
 class Layer {
-    constructor(inputs = [], weights = [[]]) {
-        this.inputs = inputs;
+    constructor(weights = [[]]) {
         this.weights = weights;
+    }
+
+    setX(inputs = []) {
+        this.inputs = inputs;
     }
 
     setY(outputs = []) {
         this.ouputs = outputs;
     }
 
-    calcY(x = this.inputs, w = this.weights) {
+    calcY(x, w = this.weights) {
         const y = [];
         for (let j = 0; j < w[0].length; j++) {
             let yj = 0;
@@ -490,23 +493,31 @@ class Layer {
             }
             y.push(f(yj));
         }
-        //this.setY(y);
         return y;
+    }
+
+    calcDeltas(deltas, w = this.weights) {
+        this.deltas = [];
+        for (let i = 0; i < w.length; i++) {
+            let d = 0;
+            for (let j = 0; j < deltas.length; j++) {
+                d += w[i][j] * deltas[j];
+            }
+            this.deltas.push(d);
+        }
+        return this.deltas;
     }
 }
 
 class Network {
     constructor(weights = [[]]) {
-        this.weights = weights;
-        //this.layers = [];
+        this.layers = weights.map(w => new Layer(w));
     }
 
-    calcY(inputs, ws = this.weights) {
+    calcY(inputs, layers = this.layers) {
         let y = inputs.slice(0);
-        ws.forEach(w => {
-            const l = new Layer(y, w);
-            y = l.calcY().slice(0);
-            //this.layers.push(l);
+        layers.forEach(layer => {
+            y = layer.calcY(y).slice(0);
         });
         return y;
     }
@@ -514,7 +525,14 @@ class Network {
     train(inputs, outputs) {
         const y = this.calcY(inputs);
         const deltas = y.map((yi, i) => outputs[i] - yi);
-        console.log(deltas);
+        this.calcDeltas(deltas);
+    }
+
+    calcDeltas(deltas, layers = this.layers) {
+        let d = deltas.slice(0);
+        for (let i = layers.length - 1; i >= 0; i--) {
+            d = layers[i].calcDeltas(d).slice(0);
+        }
     }
 }
 
@@ -545,6 +563,8 @@ console.log(n.calcY(input));
 
 //Для второй задачи
 const inp = [[1, 0], [0, 1], [0, 0], [1, 1]];
-const out = [1, 1, 0, 0];
+const out = [[1], [1], [0], [0]];
 
-// n.train(inp[0], out[0]);
+n.train(inp[0], out[0]);
+
+console.log(1);
