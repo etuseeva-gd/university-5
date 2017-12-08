@@ -533,6 +533,23 @@ class Network {
         });
         return res;
     }
+
+    getXML(layers = this.layers) {
+        let xml = '<?xml version="1.0" encoding="UTF-8"?>';
+        xml += '<network>';
+        layers.forEach(layer => {
+            xml += `<layer>`;
+            const w = layer.weights;
+            for (let i = 0; i < w.length; i++) {
+                for (let j = 0; j < w[i].length; j++) {
+                    xml += `<weight>${w[i][j]}</weight>`;
+                }
+            }
+            xml += `</layer>`;
+        });
+        xml += '</network>';
+        return xml;
+    }
 }
 
 function readFile(fileName) {
@@ -570,7 +587,7 @@ const stdin = process.openStdin();
 stdin.addListener('data', (data) => {
     const fileInput = 'input.txt', fileOutput = 'output.txt';
     const fileInputMatrix = 'matrix.txt', fileInputTrain = 'train_samples.txt';
-    const fileXML = 'graph.xml';
+    const graphXML = 'graph.xml', networkXML = 'network.xml';
 
     const fileData = readFile(fileInput);
     const action = data.toString().trim();
@@ -579,8 +596,11 @@ stdin.addListener('data', (data) => {
         switch (action) {
             case '1': {
                 const graph = new Graph(fileData);
+
                 writeFile(fileOutput, graph.getBnf());
-                writeFile(fileXML, graph.getXML());
+
+                console.log('Xml в graph.xml');
+                writeFile(graphXML, graph.getXML());
                 break;
             }
             case '2': {
@@ -603,14 +623,20 @@ stdin.addListener('data', (data) => {
                 graph.graph = graph.getGraphFromEdges(graph.parseBnfGraphToEdges(bnf));
 
                 writeFile(fileOutput, graph.getBnfFromFunction(fileData));
-                writeFile(fileXML, graph.getXML());
+
+                console.log('Xml в graph.xml');
+                writeFile(graphXML, graph.getXML());
                 break;
             }
             case '5': {
                 const m = Network.parseMatrix(readFile(fileInputMatrix));
                 const input = Network.parseInputVector(readFile(fileInput));
                 const network = new Network(m);
+
                 writeFile(fileOutput, network.calcY(input));
+
+                console.log('Xml в network.xml');
+                writeFile(networkXML, network.getXML());
                 break;
             }
             case '6': {
@@ -618,6 +644,7 @@ stdin.addListener('data', (data) => {
                 const testSamples = Network.parseTestSamples(readFile(fileInputTrain));
                 const iters = +readFile('iters.txt');
                 const network = new Network(m);
+
                 writeFile(fileOutput, network.train(testSamples.inputs,
                     testSamples.outputs, iters));
                 break;
@@ -630,5 +657,6 @@ stdin.addListener('data', (data) => {
         writeFile(fileOutput, e);
     }
 
+    console.log('Результат вычислений в output.txt');
     process.exit(0);
 });

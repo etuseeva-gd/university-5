@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="UTF-8"?><network><layer><weight>0.1</weight><weight>-0.15</weight><weight>-0.1</weight><weight>0.5</weight></layer><layer><weight>0.3</weight><weight>-1.5</weight></layer></network>
