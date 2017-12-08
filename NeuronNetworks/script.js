@@ -1,5 +1,6 @@
 const fs = require('fs');
 
+//Задание 1-4
 class Graph {
     //Вход: данные из файла
     constructor(data, isBnf = false) {
@@ -383,89 +384,7 @@ class Graph {
     }
 }
 
-function readFile(fileName) {
-    return fs.readFileSync(fileName, 'utf8', function (err, data) {
-        if (err) {
-            throw err;
-        }
-        return data;
-    });
-}
-
-function writeFile(fileName, text) {
-    fs.writeFileSync(fileName, text, function (err) {
-        if (err) {
-            throw err;
-        }
-    });
-}
-
-//Main
-
-console.log('Введите номер задания:');
-console.log('1: Создание графа (Вход: Список списков графа)');
-console.log('2: Создание функции по графу (Вход: БНФ графа)');
-console.log('3: Вычисление значения функции на графе (Вход: Список списков графа, операции)');
-console.log('4: Построение графа по функции, переданной в префиксной скобочной записи (Вход: Функция графа)');
-// console.log('5: Построение многослойной нейронной сети');
-// console.log('6: Реализация метода обратного распространения ошибки для многослойной НС');
-console.log('P.S. Входной файл: input.txt, Выходной файл: output.txt, Файл с операциями для 3 задания в operations.txt');
-
-// const stdin = process.openStdin();
-// stdin.addListener('data', (data) => {
-//     const fileInput = 'input.txt', fileOutput = 'output.txt';
-//     const fileXML = 'graph.xml';
-//
-//     const fileData = readFile(fileInput);
-//     const action = data.toString().trim();
-//
-//     try {
-//         switch (action) {
-//             case '1': {
-//                 const graph = new Graph(fileData);
-//                 writeFile(fileOutput, graph.getBnf());
-//                 writeFile(fileXML, graph.getXML());
-//                 break;
-//             }
-//             case '2': {
-//                 const graph = new Graph(fileData, true);
-//                 if (!graph.isAcyclic()) {
-//                     writeFile(fileOutput, 'Данный граф содержит циклы!');
-//                 } else {
-//                     writeFile(fileOutput, graph.getFunctionFromBnf());
-//                 }
-//                 break;
-//             }
-//             case '3': {
-//                 const graph = new Graph(fileData);
-//                 writeFile(fileOutput, graph.calcFunctionFromGraph('operations.txt'));
-//                 break;
-//             }
-//             case '4': {
-//                 const graph = new Graph();
-//                 const bnf = graph.getBnfFromFunction(fileData);
-//                 graph.graph = graph.getGraphFromEdges(graph.parseBnfGraphToEdges(bnf));
-//
-//                 writeFile(fileOutput, graph.getBnfFromFunction(fileData));
-//                 writeFile(fileXML, graph.getXML());
-//                 break;
-//             }
-//             case '5': {
-//                 break;
-//             }
-//             case '6': {
-//                 break;
-//             }
-//             default: {
-//                 console.log('Некорректные данные!');
-//             }
-//         }
-//     } catch (e) {
-//         writeFile(fileOutput, e);
-//     }
-//
-//     process.exit(0);
-// });
+//Задания 5-6
 
 class Layer {
     constructor(weights = [[]]) {
@@ -543,6 +462,7 @@ class Network {
     }
 
     train(inputs, outputs, rounds = 10) {
+        let errors = '';
         for (let k = 0; k < rounds; k++) {
             let error = 0;
             inputs.forEach((input, i) => {
@@ -563,8 +483,9 @@ class Network {
                 }
                 error += locErr;
             });
-            console.log(k, error / inputs.length);
+            errors += `Итерация - ${k + 1}, средняя ошибка = ${error / inputs.length}`;
         }
+        return errors;
     }
 
     calcDeltas(deltas, layers = this.layers) {
@@ -591,6 +512,11 @@ class Network {
         return m;
     }
 
+    static parseInputVector(data) {
+        data = data.split(' ').join(' ').split('\r').join('');
+        return JSON.parse(`${data}`);
+    }
+
     static parseTestSamples(data) {
         data = data.split(' ').join('').split('\r').join('');
         const lines = data.split('\n');
@@ -609,6 +535,102 @@ class Network {
     }
 }
 
+function readFile(fileName) {
+    return fs.readFileSync(fileName, 'utf8', function (err, data) {
+        if (err) {
+            throw err;
+        }
+        return data;
+    });
+}
+
+function writeFile(fileName, text) {
+    fs.writeFileSync(fileName, text, function (err) {
+        if (err) {
+            throw err;
+        }
+    });
+}
+
+//Пользовательсякий интерфейс
+console.log('Введите номер задания:');
+console.log('1: Создание графа (Вход: Список списков графа)');
+console.log('2: Создание функции по графу (Вход: БНФ графа)');
+console.log('3: Вычисление значения функции на графе (Вход: Список списков графа, операции)');
+console.log('4: Построение графа по функции, переданной в префиксной скобочной записи (Вход: Функция графа)');
+console.log('5: Построение многослойной нейронной сети');
+console.log('6: Реализация метода обратного распространения ошибки для многослойной НС');
+console.log('P.S.1 Входной файл: input.txt, Выходной файл: output.txt');
+console.log('P.S.2 Файл с операциями для 3 задания в operations.txt');
+console.log('P.S.3 Файл с матрицами для 5-6 задания в matrix.txt');
+console.log('P.S.3 Файл с тренировочными примерами для 6 задания в train_samples.txt');
+
+const stdin = process.openStdin();
+stdin.addListener('data', (data) => {
+    const fileInput = 'input.txt', fileOutput = 'output.txt';
+    const fileInputMatrix = 'matrix.txt', fileInputTrain = 'train_samples.txt';
+    const fileXML = 'graph.xml';
+
+    const fileData = readFile(fileInput);
+    const action = data.toString().trim();
+
+    try {
+        switch (action) {
+            case '1': {
+                const graph = new Graph(fileData);
+                writeFile(fileOutput, graph.getBnf());
+                writeFile(fileXML, graph.getXML());
+                break;
+            }
+            case '2': {
+                const graph = new Graph(fileData, true);
+                if (!graph.isAcyclic()) {
+                    writeFile(fileOutput, 'Данный граф содержит циклы!');
+                } else {
+                    writeFile(fileOutput, graph.getFunctionFromBnf());
+                }
+                break;
+            }
+            case '3': {
+                const graph = new Graph(fileData);
+                writeFile(fileOutput, graph.calcFunctionFromGraph('operations.txt'));
+                break;
+            }
+            case '4': {
+                const graph = new Graph();
+                const bnf = graph.getBnfFromFunction(fileData);
+                graph.graph = graph.getGraphFromEdges(graph.parseBnfGraphToEdges(bnf));
+
+                writeFile(fileOutput, graph.getBnfFromFunction(fileData));
+                writeFile(fileXML, graph.getXML());
+                break;
+            }
+            case '5': {
+                const m = Network.parseMatrix(readFile(fileInputMatrix));
+                const input = Network.parseInputVector(readFile(fileInput));
+                const network = new Network(m);
+                writeFile(fileOutput, network.calcY(input));
+                break;
+            }
+            case '6': {
+                const m = Network.parseMatrix(readFile(fileInputMatrix));
+                const testSamples = Network.parseTestSamples(readFile(fileInputTrain));
+                const network = new Network(m);
+                writeFile(fileOutput, network.train(testSamples.inputs,
+                    testSamples.outputs, 10));
+                break;
+            }
+            default: {
+                console.log('Некорректные данные!');
+            }
+        }
+    } catch (e) {
+        writeFile(fileOutput, e);
+    }
+
+    process.exit(0);
+});
+
 // const n = new Network(ws);
 // console.log(n.calcY(input));
 // const inp = [[1, 0], [0, 1], [0, 0], [1, 1]];
@@ -616,3 +638,9 @@ class Network {
 // n.train(inp, out, 1000);
 // console.log(parseMatrix(readFile('input.txt')));
 // console.log(parseTestSamples(readFile('input.txt')));
+
+const m = Network.parseMatrix(readFile(fileInputMatrix));
+const testSamples = Network.parseTestSamples(readFile(fileInputTrain));
+const network = new Network(m);
+writeFile(fileOutput, network.train(testSamples.inputs,
+    testSamples.outputs, 10));
