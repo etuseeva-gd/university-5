@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?><graph>
+<edge>
+    <startVertex>a</startVertex>
+    <endVertev>b</endVertev>
+</edge>
+<edge>
+    <startVertex>a</startVertex>
+    <endVertev>c</endVertev>
+</edge>
+<edge>
+    <startVertex>c</startVertex>
+    <endVertev>d</endVertev>
+</edge>
+<edge>
+    <startVertex>c</startVertex>
+    <endVertev>e</endVertev>
+</edge>
+<edge>
+    <startVertex>f</startVertex>
+    <endVertev>a</endVertev>
+</edge>
+<edge>
+    <startVertex>e</startVertex>
+    <endVertev>d</endVertev>
+</edge></graph>
