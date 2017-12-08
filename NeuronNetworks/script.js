@@ -483,7 +483,7 @@ class Network {
                 }
                 error += locErr;
             });
-            errors += `Итерация - ${k + 1}, средняя ошибка = ${error / inputs.length}`;
+            errors += `Итерация - ${k + 1}, средняя ошибка = ${error / inputs.length}\n`;
         }
         return errors;
     }
@@ -527,8 +527,8 @@ class Network {
         lines.forEach(line => {
             if (line !== '') {
                 const sp = line.split('->');
-                res.inputs.push(sp[0]);
-                res.outputs.push(sp[1]);
+                res.inputs.push(JSON.parse(sp[0]));
+                res.outputs.push(JSON.parse(sp[1]));
             }
         });
         return res;
@@ -564,6 +564,7 @@ console.log('P.S.1 Входной файл: input.txt, Выходной файл
 console.log('P.S.2 Файл с операциями для 3 задания в operations.txt');
 console.log('P.S.3 Файл с матрицами для 5-6 задания в matrix.txt');
 console.log('P.S.3 Файл с тренировочными примерами для 6 задания в train_samples.txt');
+console.log('P.S.3 Файл с количеством итераций для 6 задания в iters.txt');
 
 const stdin = process.openStdin();
 stdin.addListener('data', (data) => {
@@ -615,9 +616,10 @@ stdin.addListener('data', (data) => {
             case '6': {
                 const m = Network.parseMatrix(readFile(fileInputMatrix));
                 const testSamples = Network.parseTestSamples(readFile(fileInputTrain));
+                const iters = +readFile('iters.txt');
                 const network = new Network(m);
                 writeFile(fileOutput, network.train(testSamples.inputs,
-                    testSamples.outputs, 10));
+                    testSamples.outputs, iters));
                 break;
             }
             default: {
@@ -630,17 +632,3 @@ stdin.addListener('data', (data) => {
 
     process.exit(0);
 });
-
-// const n = new Network(ws);
-// console.log(n.calcY(input));
-// const inp = [[1, 0], [0, 1], [0, 0], [1, 1]];
-// const out = [[1], [1], [0], [0]];
-// n.train(inp, out, 1000);
-// console.log(parseMatrix(readFile('input.txt')));
-// console.log(parseTestSamples(readFile('input.txt')));
-
-const m = Network.parseMatrix(readFile(fileInputMatrix));
-const testSamples = Network.parseTestSamples(readFile(fileInputTrain));
-const network = new Network(m);
-writeFile(fileOutput, network.train(testSamples.inputs,
-    testSamples.outputs, 10));
