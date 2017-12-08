@@ -467,17 +467,6 @@ console.log('P.S. Входной файл: input.txt, Выходной файл:
 //     process.exit(0);
 // });
 
-const learnRate = 0.5, alpha = 2;
-
-function f(x) {
-    return 1 / (1 + Math.exp(-1 * x * alpha));
-    // return x >= 0.5 ? 1 : 0;
-}
-
-function df(x) {
-    return alpha * f(x) * (1 - f(x));
-}
-
 class Layer {
     constructor(weights = [[]]) {
         this.weights = weights;
@@ -500,7 +489,7 @@ class Layer {
             for (let k = 0; k < x.length; k++) {
                 yj += w[k][j] * x[k];
             }
-            y.push(f(yj));
+            y.push(Layer.f(yj));
         }
 
         this.setY(y);
@@ -524,9 +513,19 @@ class Layer {
     recalcW(deltas = this.deltas, w = this.weights, x = this.inputs, y = this.ouputs) {
         for (let i = 0; i < w.length; i++) {
             for (let j = 0; j < w[i].length; j++) {
-                w[i][j] += learnRate * deltas[j] * df(y[j]) * x[i];
+                const learnRate = 0.5;
+                w[i][j] += learnRate * deltas[j] * Layer.df(y[j]) * x[i];
             }
         }
+    }
+
+    static f(x, alpha = 2) {
+        return 1 / (1 + Math.exp(-1 * x * alpha));
+        // return x >= 0.5 ? 1 : 0;
+    }
+
+    static df(x, alpha = 2) {
+        return alpha * Layer.f(x) * (1 - Layer.f(x));
     }
 }
 
