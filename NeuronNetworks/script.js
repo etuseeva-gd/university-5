@@ -467,16 +467,16 @@ console.log('P.S. Входной файл: input.txt, Выходной файл:
 //     process.exit(0);
 // });
 
+const learnRate = 0.1, alpha = 2;
+
 function f(x) {
-    return 1 / (1 + Math.exp(-1 * x));
+    return 1 / (1 + Math.exp(-1 * x * alpha));
     // return x >= 0.5 ? 1 : 0;
 }
 
 function df(x) {
-    return f(x) * (1 - f(x));
+    return alpha * f(x) * (1 - f(x));
 }
-
-const learnRate = 0.1;
 
 class Layer {
     constructor(weights = [[]]) {
@@ -546,17 +546,22 @@ class Network {
     train(inputs, outputs, rounds = 10) {
         for (let k = 0; k < rounds; k++) {
             inputs.forEach((input, i) => {
-                const y = this.calcY(input);
-                // console.log(y);
-                const deltas = y.map((yj, j) => outputs[i][j] - yj);
-                // console.log(`Итерация - ${k + 1}, ошибка = ${deltas}`);
-                console.log(deltas);
-                if (Math.abs(deltas) > 0.2) {
-                    this.calcDeltas(deltas);
-                    this.recalcW();
+                for (let jj = 0; jj < 100; jj++) {
+                    const y = this.calcY(input);
+                    const deltas = y.map((yj, j) => outputs[i][j] - yj);
+                    const error = deltas.reduce((res, d) => {
+                        res += 0.5 * d * d;
+                        return res;
+                    }, 0);
+                    console.log(error);
+                    if (error > 0.02) {
+                        this.calcDeltas(deltas);
+                        this.recalcW();
+                    } else {
+                        break;
+                    }
                 }
             });
-            console.log();
         }
     }
 
@@ -575,7 +580,7 @@ class Network {
 //Для первой задачи
 const input = [1, 0];
 const ws = [[[0.21, 0.31], [-0.4, -0.2]], [[0.2], [-0.5]]];
-
+// const ws = [[[0.45, 0.78], [-0.12, 0.13]], [[1.5], [-2.3]]];
 // const ws = [[[1, -1], [-1, 1]], [[1], [1]]];
 
 //Количество матриц (слои)
@@ -603,7 +608,7 @@ const n = new Network(ws);
 const inp = [[1, 0], [0, 1], [0, 0], [1, 1]];
 const out = [[1], [1], [0], [0]];
 
-n.train(inp, out, 1000);
+n.train(inp, out, 100);
 
 inp.forEach((i, ii) => {
     console.log(`${i} -> ${out[ii]}`);
