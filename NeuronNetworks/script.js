@@ -578,42 +578,42 @@ class Network {
     recalcW(layers = this.layers) {
         layers.forEach(layers => layers.recalcW());
     }
+
+    static parseMatrix(data) {
+        data = data.split('  ').join(' ').split('\r').join('');
+        const lines = data.split('\n');
+        const m = [];
+        lines.forEach(line => {
+            if (line !== '') {
+                const ms = line.split(':')[1].trim();
+                m.push(JSON.parse(`[${ms}]`));
+            }
+        });
+        return m;
+    }
+
+    static parseTestSamples(data) {
+        data = data.split(' ').join('').split('\r').join('');
+        const lines = data.split('\n');
+        const res = {
+            inputs: [],
+            outputs: [],
+        };
+        lines.forEach(line => {
+            if (line !== '') {
+                const sp = line.split('->');
+                res.inputs.push(sp[0]);
+                res.outputs.push(sp[1]);
+            }
+        });
+        return res;
+    }
 }
 
-//Для первой задачи
-const input = [1, 0];
-// const ws = [[[0.21, 0.31], [-0.4, -0.2]], [[0.2], [-0.5]]];
-const ws = [[[0.45, 0.78], [-0.12, 0.13]], [[1.5], [-2.3]]];
-// const ws = [[[1, -1], [-1, 1]], [[1], [1]]];
-
-//Количество матриц (слои)
-// let x = input;
-// for (let i = 0; i < ws.length; i++) {
-//     const w = ws[i];
-//     let y = [];
-//
-//     for (let j = 0; j < w[0].length; j++) {
-//         let yj = 0;
-//         for (let k = 0; k < x.length; k++) {
-//             yj += w[k][j] * x[k];
-//         }
-//         y.push(f(yj));
-//     }
-//
-//     x = y.slice(0);
-// }
-// console.log(x);
-
-const n = new Network(ws);
+// const n = new Network(ws);
 // console.log(n.calcY(input));
-
-//Для второй задачи
-const inp = [[1, 0], [0, 1], [0, 0], [1, 1]];
-const out = [[1], [1], [0], [0]];
-
-n.train(inp, out, 1000);
-
-inp.forEach((i, ii) => {
-    console.log(`${i} -> ${out[ii]}`);
-    console.log(n.calcY(i));
-});
+// const inp = [[1, 0], [0, 1], [0, 0], [1, 1]];
+// const out = [[1], [1], [0], [0]];
+// n.train(inp, out, 1000);
+// console.log(parseMatrix(readFile('input.txt')));
+// console.log(parseTestSamples(readFile('input.txt')));
