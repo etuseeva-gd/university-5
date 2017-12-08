@@ -467,7 +467,7 @@ console.log('P.S. Входной файл: input.txt, Выходной файл:
 //     process.exit(0);
 // });
 
-const learnRate = 0.1, alpha = 2;
+const learnRate = 0.5, alpha = 2;
 
 function f(x) {
     return 1 / (1 + Math.exp(-1 * x * alpha));
@@ -545,23 +545,26 @@ class Network {
 
     train(inputs, outputs, rounds = 10) {
         for (let k = 0; k < rounds; k++) {
+            let error = 0;
             inputs.forEach((input, i) => {
-                for (let jj = 0; jj < 100; jj++) {
+                let locErr = 0;
+                for (let jj = 0; jj < 1; jj++) {
                     const y = this.calcY(input);
                     const deltas = y.map((yj, j) => outputs[i][j] - yj);
-                    const error = deltas.reduce((res, d) => {
+                    locErr = deltas.reduce((res, d) => {
                         res += 0.5 * d * d;
                         return res;
                     }, 0);
-                    console.log(error);
-                    if (error > 0.02) {
+                    if (locErr > 0.01) {
                         this.calcDeltas(deltas);
                         this.recalcW();
                     } else {
                         break;
                     }
                 }
+                error += locErr;
             });
+            console.log(k, error / inputs.length);
         }
     }
 
@@ -579,8 +582,8 @@ class Network {
 
 //Для первой задачи
 const input = [1, 0];
-const ws = [[[0.21, 0.31], [-0.4, -0.2]], [[0.2], [-0.5]]];
-// const ws = [[[0.45, 0.78], [-0.12, 0.13]], [[1.5], [-2.3]]];
+// const ws = [[[0.21, 0.31], [-0.4, -0.2]], [[0.2], [-0.5]]];
+const ws = [[[0.45, 0.78], [-0.12, 0.13]], [[1.5], [-2.3]]];
 // const ws = [[[1, -1], [-1, 1]], [[1], [1]]];
 
 //Количество матриц (слои)
@@ -608,7 +611,7 @@ const n = new Network(ws);
 const inp = [[1, 0], [0, 1], [0, 0], [1, 1]];
 const out = [[1], [1], [0], [0]];
 
-n.train(inp, out, 100);
+n.train(inp, out, 1000);
 
 inp.forEach((i, ii) => {
     console.log(`${i} -> ${out[ii]}`);
