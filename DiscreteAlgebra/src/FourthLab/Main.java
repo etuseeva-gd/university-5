@@ -67,7 +67,7 @@ public class Main {
                         return;
                     } else {
                         int[] genSet = readGenSet(reader);
-                        ArrayList<Integer> result = buildSemiRing(genSet, sum, mult);
+                        ArrayList<Integer> result = getSubRing(genSet, sum, mult);
                         System.out.println("Подкольцо:");
                         for (Integer aResult : result) {
                             System.out.print(aResult + " ");
@@ -506,27 +506,31 @@ public class Main {
         return -1;
     }
 
-    private static ArrayList<Integer> buildSemiRing(Integer[] semiRing, int[][] elementsSum, int[][] elementsMul) {
-        ArrayList<Integer> result = new ArrayList<>(Arrays.asList(semiRing));
-        int size;
+    private static List<Integer> getSubRing(int[] genSet, int[][] sum, int[][] mult) {
+        List<Integer> subRing = new ArrayList<>();
+        for (int i = 0; i < genSet.length; i++) {
+            subRing.add(genSet[i]);
+        }
+        int n;
         do {
-            size = result.size();
-            for (int i = 0; i < size; i++) {
-                for (int j = 0; j < size; j++) {
-                    int newSum = elementsSum[i][j];
-                    int newMul = elementsMul[i][j];
-                    if (!result.contains(newSum)) {
-                        result.add(newSum);
+            n = subRing.size();
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    int element = sum[i][j];
+                    if (!subRing.contains(element)) {
+                        subRing.add(element);
                     }
-                    if (!result.contains(newMul)) {
-                        result.add(newMul);
+                    element = mult[i][j];
+                    if (!subRing.contains(element)) {
+                        subRing.add(element);
                     }
                 }
             }
-        } while (size != result.size());
-        return result;
+        } while (n != subRing.size());
+        return subRing;
     }
 
+    //Проверка свойств кольца
     boolean isRing(int[][] sum, int[][] mult) {
         if (!isСommutative(sum) || !isAssociative(sum) ||
                 !hasOppositeElementAdd(sum) || !hasNeutralElementAdd(sum) ||
