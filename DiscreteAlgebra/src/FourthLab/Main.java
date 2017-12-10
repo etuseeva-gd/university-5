@@ -89,7 +89,7 @@ public class Main {
                     }
                     break;
                 }
-                case "5":
+                case "5": {
                     int p = Integer.parseInt(reader2.readLine());
                     String[] split = reader2.readLine().split(" ");
                     HashMap<Integer, Integer> result = new HashMap<>();
@@ -102,44 +102,45 @@ public class Main {
                         System.out.println(entry.getKey() + " -> " + entry.getValue());
                     }
                     break;
+                }
                 case "6": {
-                    p = Integer.parseInt(reader1.readLine());
-                    split = reader1.readLine().split(" ");
-                    ArrayList<Integer> e = new ArrayList<>();
-                    for (String aSplit : split) {
-                        e.add(Integer.parseInt(aSplit));
+                    int p = Integer.parseInt(reader1.readLine());
+                    String[] split = reader1.readLine().split(" ");
+                    int[] m = new int[split.length];
+                    for (int i = 0; i < split.length; i++) {
+                        m[i] = Integer.parseInt(split[i]);
                     }
-                    int[] m = new int[e.size()];
-                    for (int i = 0; i < e.size(); i++) {
-                        m[i] = e.get(i);
-                    }
+
                     System.out.println("Модуль: " + p);
-                    System.out.println("m(x): " + printPolynom(m));
+                    System.out.println("m(x): " + printPolynomial(m));
                     System.out.print("Элементы алгебраического расширения: ");
-                    ArrayList<int[]> extention = getElementsExtention(p, m);
+
+                    List<int[]> expansion = getElementsExtention(p, m);
+
                     int maxLength = 0;
-                    for (int i = 0; i < extention.size(); i++) {
-                        String s = printPolynom(extention.get(i));
+                    for (int i = 0; i < expansion.size(); i++) {
+                        String s = printPolynomial(expansion.get(i));
                         if (s.length() > maxLength) {
                             maxLength = s.length();
                         }
                         System.out.print(s);
-                        if (i < extention.size() - 1) {
+                        if (i < expansion.size() - 1) {
                             System.out.print(", ");
                         }
-                        if (i == extention.size() - 1) {
+                        if (i == expansion.size() - 1) {
                             System.out.println();
                         }
                     }
-                    System.out.println("Таблицы Кэли");
-                    for (int i = 0; i < extention.size(); i++) {
+
+                    System.out.println("Таблицы Кэли:");
+                    for (int i = 0; i < expansion.size(); i++) {
                         if (i == 0) {
                             System.out.print("+");
                             for (int j = 0; j < maxLength; j++) {
                                 System.out.print(' ');
                             }
-                            for (int[] anExtention : extention) {
-                                String s = printPolynom(anExtention);
+                            for (int[] anExtention : expansion) {
+                                String s = printPolynomial(anExtention);
                                 System.out.print(s);
                                 for (int j = 0; j < maxLength - s.length() + 1; j++) {
                                     System.out.print(' ');
@@ -147,16 +148,16 @@ public class Main {
                             }
                             System.out.println();
                         }
-                        for (int j = 0; j < extention.size(); j++) {
+                        for (int j = 0; j < expansion.size(); j++) {
                             if (j == 0) {
-                                String s = printPolynom(extention.get(i));
+                                String s = printPolynomial(expansion.get(i));
                                 System.out.print(s);
                                 for (int k = 0; k < maxLength - s.length() + 1; k++) {
                                     System.out.print(' ');
                                 }
                             }
-                            int[] add = div(toAdd(extention.get(i), extention.get(j), p), m, p);
-                            String str = printPolynom(add);
+                            int[] add = div(toAdd(expansion.get(i), expansion.get(j), p), m, p);
+                            String str = printPolynomial(add);
                             System.out.print(str);
                             for (int k = 0; k < maxLength - str.length() + 1; k++) {
                                 System.out.print(' ');
@@ -165,14 +166,14 @@ public class Main {
                         System.out.println();
                     }
                     System.out.println();
-                    for (int i = 0; i < extention.size(); i++) {
+                    for (int i = 0; i < expansion.size(); i++) {
                         if (i == 0) {
                             System.out.print("*");
                             for (int j = 0; j < maxLength; j++) {
                                 System.out.print(' ');
                             }
-                            for (int[] anExtention : extention) {
-                                String s = printPolynom(anExtention);
+                            for (int[] anExtention : expansion) {
+                                String s = printPolynomial(anExtention);
                                 System.out.print(s);
                                 for (int l = 0; l < maxLength - s.length() + 1; l++) {
                                     System.out.print(' ');
@@ -181,16 +182,16 @@ public class Main {
                             System.out.println();
                         }
 
-                        for (int j = 0; j < extention.size(); j++) {
+                        for (int j = 0; j < expansion.size(); j++) {
                             if (j == 0) {
-                                String s = printPolynom(extention.get(i));
+                                String s = printPolynomial(expansion.get(i));
                                 System.out.print(s);
                                 for (int l = 0; l < maxLength - s.length() + 1; l++) {
                                     System.out.print(' ');
                                 }
                             }
-                            int[] add = div(mult(extention.get(i), extention.get(j), p), m, p);
-                            String str = printPolynom(add);
+                            int[] add = div(mult(expansion.get(i), expansion.get(j), p), m, p);
+                            String str = printPolynomial(add);
                             System.out.print(str);
                             for (int k = 0; k < maxLength - str.length() + 1; k++) {
                                 System.out.print(' ');
@@ -327,33 +328,32 @@ public class Main {
         return result;
     }
 
-    private static ArrayList<int[]> getElementsExtention(int p, int[] m) {
-        int deg = m.length - 1;
-        int amount = (int) Math.pow(p, deg);
-        ArrayList<int[]> extention = new ArrayList<>();
-        int[] polynom = new int[m.length];
+    List<int[]> getElementsExtention(int p, int[] m) {
+        int amount = (int) Math.pow(p, m.length - 1);
+        List<int[]> expansion = new ArrayList<>();
+        int[] polynomial = new int[m.length];
         for (int i = 0; i < amount; i++) {
-            extention.add(polynom);
-            polynom = getPolynom(polynom, p);
+            expansion.add(polynomial);
+            polynomial = getPolynomial(polynomial, p);
         }
-        return extention;
+        return expansion;
     }
 
-    private static int[] getPolynom(int[] m, int p) {
-        int[] polynom = new int[m.length];
-        System.arraycopy(m, 0, polynom, 0, m.length);
-        for (int i = 0; i < polynom.length; i++) {
-            if (polynom[i] == p - 1) {
-                polynom[i] = 0;
+    int[] getPolynomial(int[] m, int p) {
+        int[] polynomial = m.clone();
+//        System.arraycopy(m, 0, polynomial, 0, m.length);
+        for (int i = 0; i < polynomial.length; i++) {
+            if (polynomial[i] == p - 1) {
+                polynomial[i] = 0;
             } else {
-                polynom[i]++;
+                polynomial[i]++;
                 break;
             }
         }
-        return polynom;
+        return polynomial;
     }
 
-    private static String printPolynom(int[] m) {
+    String printPolynomial(int[] m) {
         StringBuilder builder = new StringBuilder();
         boolean flag = true;
         for (int i = 0; i < m.length; i++) {
@@ -361,9 +361,7 @@ public class Main {
                 if (i > 0 && !flag) {
                     builder.append("+");
                 }
-
                 flag = false;
-
                 if (i == 0) {
                     builder.append(m[i]);
                 } else {
