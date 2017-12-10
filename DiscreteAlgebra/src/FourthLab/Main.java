@@ -112,7 +112,7 @@ public class Main {
 
                     List<int[]> expansion = getElementsExtention(p, m);
                     System.out.print("Элементы алгебраического расширения: ");
-                    int maxLength = 0;
+                    int rowLength = 0;
                     for (int i = 0; i < expansion.size(); i++) {
                         String s = printPolynomial(expansion.get(i));
                         String prefix = ", ";
@@ -120,12 +120,12 @@ public class Main {
                             prefix = "\n";
                         }
                         System.out.print(s + prefix);
-                        maxLength = Math.max(maxLength, s.length());
+                        rowLength = Math.max(rowLength, s.length());
                     }
 
                     System.out.println("Таблицы Кэли:");
-                    printCayleyTable(m, p, expansion, maxLength, 0);
-                    printCayleyTable(m, p, expansion, maxLength, 1);
+                    printCayleyTable(m, p, expansion, rowLength, 0);
+                    printCayleyTable(m, p, expansion, rowLength, 1);
                     break;
                 }
                 default: {
@@ -138,7 +138,7 @@ public class Main {
         }
     }
 
-    void printCayleyTable(int[] m, int p, List<int[]> ex, int maxLength, int type) {
+    void printCayleyTable(int[] m, int p, List<int[]> ex, int rowLength, int type) {
         for (int i = 0; i < ex.size(); i++) {
             if (i == 0) {
                 if (type == 0) {
@@ -146,13 +146,13 @@ public class Main {
                 } else {
                     System.out.print("*");
                 }
-                for (int j = 0; j < maxLength; j++) {
+                for (int j = 0; j < rowLength; j++) {
                     System.out.print(' ');
                 }
-                for (int[] anExtention : ex) {
-                    String s = printPolynomial(anExtention);
-                    System.out.print(s);
-                    for (int j = 0; j < maxLength - s.length() + 1; j++) {
+                for (int[] e : ex) {
+                    String str = printPolynomial(e);
+                    System.out.print(str);
+                    for (int k = 0; k < rowLength - str.length() + 1; k++) {
                         System.out.print(' ');
                     }
                 }
@@ -160,9 +160,9 @@ public class Main {
             }
             for (int j = 0; j < ex.size(); j++) {
                 if (j == 0) {
-                    String s = printPolynomial(ex.get(i));
-                    System.out.print(s);
-                    for (int k = 0; k < maxLength - s.length() + 1; k++) {
+                    String str = printPolynomial(ex.get(i));
+                    System.out.print(str);
+                    for (int k = 0; k < rowLength - str.length() + 1; k++) {
                         System.out.print(' ');
                     }
                 }
@@ -170,7 +170,7 @@ public class Main {
                         mod(mult(ex.get(i), ex.get(j), p), m, p);
                 String str = printPolynomial(polynomial);
                 System.out.print(str);
-                for (int k = 0; k < maxLength - str.length() + 1; k++) {
+                for (int k = 0; k < rowLength - str.length() + 1; k++) {
                     System.out.print(' ');
                 }
             }
