@@ -120,80 +120,12 @@ public class Main {
                             prefix = "\n";
                         }
                         System.out.print(s + prefix);
-
                         maxLength = Math.max(maxLength, s.length());
                     }
 
                     System.out.println("Таблицы Кэли:");
-                    for (int i = 0; i < expansion.size(); i++) {
-                        if (i == 0) {
-                            System.out.print("+");
-                            for (int j = 0; j < maxLength; j++) {
-                                System.out.print(' ');
-                            }
-                            for (int[] anExtention : expansion) {
-                                String s = printPolynomial(anExtention);
-                                System.out.print(s);
-                                for (int j = 0; j < maxLength - s.length() + 1; j++) {
-                                    System.out.print(' ');
-                                }
-                            }
-                            System.out.println();
-                        }
-                        for (int j = 0; j < expansion.size(); j++) {
-                            if (j == 0) {
-                                String s = printPolynomial(expansion.get(i));
-                                System.out.print(s);
-                                for (int k = 0; k < maxLength - s.length() + 1; k++) {
-                                    System.out.print(' ');
-                                }
-                            }
-                            int[] add = mod(add(expansion.get(i), expansion.get(j), p), m, p);
-                            String str = printPolynomial(add);
-                            System.out.print(str);
-                            for (int k = 0; k < maxLength - str.length() + 1; k++) {
-                                System.out.print(' ');
-                            }
-                        }
-                        System.out.println();
-                    }
-
-
-                    System.out.println();
-                    for (int i = 0; i < expansion.size(); i++) {
-                        if (i == 0) {
-                            System.out.print("*");
-                            for (int j = 0; j < maxLength; j++) {
-                                System.out.print(' ');
-                            }
-                            for (int[] anExtention : expansion) {
-                                String s = printPolynomial(anExtention);
-                                System.out.print(s);
-                                for (int l = 0; l < maxLength - s.length() + 1; l++) {
-                                    System.out.print(' ');
-                                }
-                            }
-                            System.out.println();
-                        }
-
-                        for (int j = 0; j < expansion.size(); j++) {
-                            if (j == 0) {
-                                String s = printPolynomial(expansion.get(i));
-                                System.out.print(s);
-                                for (int l = 0; l < maxLength - s.length() + 1; l++) {
-                                    System.out.print(' ');
-                                }
-                            }
-                            int[] add = mod(mult(expansion.get(i), expansion.get(j), p), m, p);
-                            String str = printPolynomial(add);
-                            System.out.print(str);
-                            for (int k = 0; k < maxLength - str.length() + 1; k++) {
-                                System.out.print(' ');
-                            }
-                        }
-                        System.out.println();
-                    }
-
+                    printCayleyTable(m, p, expansion, maxLength, 0);
+                    printCayleyTable(m, p, expansion, maxLength, 1);
                     break;
                 }
                 default: {
@@ -206,8 +138,45 @@ public class Main {
         }
     }
 
-    void printCayleyTable() {
-
+    void printCayleyTable(int[] m, int p, List<int[]> ex, int maxLength, int type) {
+        for (int i = 0; i < ex.size(); i++) {
+            if (i == 0) {
+                if (type == 0) {
+                    System.out.print("+");
+                } else {
+                    System.out.print("*");
+                }
+                for (int j = 0; j < maxLength; j++) {
+                    System.out.print(' ');
+                }
+                for (int[] anExtention : ex) {
+                    String s = printPolynomial(anExtention);
+                    System.out.print(s);
+                    for (int j = 0; j < maxLength - s.length() + 1; j++) {
+                        System.out.print(' ');
+                    }
+                }
+                System.out.println();
+            }
+            for (int j = 0; j < ex.size(); j++) {
+                if (j == 0) {
+                    String s = printPolynomial(ex.get(i));
+                    System.out.print(s);
+                    for (int k = 0; k < maxLength - s.length() + 1; k++) {
+                        System.out.print(' ');
+                    }
+                }
+                int[] polynomial = type == 0 ? mod(mult(ex.get(i), ex.get(j), p), m, p) :
+                        mod(mult(ex.get(i), ex.get(j), p), m, p);
+                String str = printPolynomial(polynomial);
+                System.out.print(str);
+                for (int k = 0; k < maxLength - str.length() + 1; k++) {
+                    System.out.print(' ');
+                }
+            }
+            System.out.println();
+        }
+        System.out.println();
     }
 
     boolean isRing(int[][] sum, int[][] mult) {
