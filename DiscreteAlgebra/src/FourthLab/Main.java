@@ -101,15 +101,15 @@ public class Main {
                         return;
                     } else {
                         int[] genSet = readGenSet(reader);
-                        HashMap<Integer, ArrayList<Integer>> result = buildFactorRing(getIdeal(genSet, sum, mult), mult);
+                        HashMap<Integer, List<Integer>> factorRing = getFactorRing(getIdeal(genSet, sum, mult), mult);
 
                         System.out.println("Фактор-кольцо по идеалу:");
-                        for (Map.Entry<Integer, ArrayList<Integer>> entry : result.entrySet()) {
-                            System.out.print(entry.getKey() + ": ");
-                            for (Integer integer : entry.getValue()) {
+                        factorRing.forEach((key, value) -> {
+                            System.out.print(key + ": ");
+                            for (Integer integer : value) {
                                 System.out.print(integer + " ");
                             }
-                        }
+                        });
                     }
                     break;
                 }
@@ -417,28 +417,28 @@ public class Main {
         return builder.toString();
     }
 
-    private static HashMap<Integer, ArrayList<Integer>> buildFactorRing(ArrayList<Integer> ideal, int[][] elementsSum) {
-        HashMap<Integer, ArrayList<Integer>> result = new HashMap<>();
-        ArrayList<Integer> ring = new ArrayList<>();
-        for (int i = 0; i < elementsSum.length; i++) {
-            ring.add(i);
+    HashMap<Integer, List<Integer>> getFactorRing(List<Integer> ideal, int[][] sum) {
+        HashMap<Integer, List<Integer>> factorRing = new HashMap<>();
+        int[] ring = new int[sum.length];
+        for (int i = 0; i < sum.length; i++) {
+            ring[i] = i;
         }
-        boolean[] used = new boolean[elementsSum.length];
-        for (int i = 0; i < elementsSum.length; i++) {
+        boolean[] used = new boolean[sum.length];
+        for (int i = 0; i < sum.length; i++) {
             if (!used[i]) {
                 used[i] = true;
-                for (int j = 0; j < elementsSum.length; j++) {
-                    if (ideal.contains(elementsSum[i][getJ(ring, j)])) {
-                        if (!result.containsKey(i)) {
-                            result.put(i, new ArrayList<Integer>());
+                for (int j = 0; j < sum.length; j++) {
+                    if (ideal.contains(sum[i][getJ(ring.length, j)])) {
+                        if (!factorRing.containsKey(i)) {
+                            factorRing.put(i, new ArrayList<>());
                         }
-                        result.get(i).add(j);
+                        factorRing.get(i).add(j);
                         used[j] = true;
                     }
                 }
             }
         }
-        return result;
+        return factorRing;
     }
 
     List<Integer> getIdeal(int[] genSet, int[][] sum, int[][] mult) {
