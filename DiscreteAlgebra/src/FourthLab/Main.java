@@ -67,43 +67,28 @@ public class Main {
                         return;
                     } else {
                         int[] genSet = readGenSet(reader);
-                        ArrayList<Integer> result = getSubRing(genSet, sum, mult);
+                        List<Integer> subRing = getSubRing(genSet, sum, mult);
+
                         System.out.println("Подкольцо:");
-                        for (Integer aResult : result) {
-                            System.out.print(aResult + " ");
+                        for (Integer element : subRing) {
+                            System.out.print(element + " ");
                         }
                     }
                     break;
                 }
                 case "3": {
-                    n = Integer.parseInt(reader.readLine());
-                    System.out.println("Модуль: " + n);
-                    elementsSum = new int[n][n];
-                    for (int i = 0; i < n; i++) {
-                        String[] split = reader.readLine().split(" ");
-                        for (int j = 0; j < n; j++) {
-                            elementsSum[i][j] = Integer.parseInt(split[j]);
-                        }
-                    }
-                    elementsMul = new int[n][n];
-                    for (int i = 0; i < n; i++) {
-                        String[] split = reader.readLine().split(" ");
-                        for (int j = 0; j < n; j++) {
-                            elementsMul[i][j] = Integer.parseInt(split[j]);
-                        }
-                    }
-                    if (!isRing(elementsSum, elementsMul)) {
+                    int[][][] cayleyTables = readCayleyTables(reader);
+                    int[][] sum = cayleyTables[0], mult = cayleyTables[1];
+                    if (!isRing(sum, mult)) {
+                        System.out.println("Не кольцо!");
                         return;
                     } else {
-                        String[] split = reader.readLine().split(" ");
-                        Integer[] ideal = new Integer[split.length];
-                        for (int i = 0; i < split.length; i++) {
-                            ideal[i] = Integer.parseInt(split[i]);
-                        }
-                        ArrayList<Integer> result = buildIdeal(ideal, elementsSum, elementsMul);
+                        int[] genSet = readGenSet(reader);
+                        List<Integer> ideal = getIdeal(genSet, sum, mult);
+
                         System.out.println("Идеал:");
-                        for (Integer aResult : result) {
-                            System.out.print(aResult + " ");
+                        for (Integer element : ideal) {
+                            System.out.print(element + " ");
                         }
                     }
                     break;
@@ -133,7 +118,7 @@ public class Main {
                         for (int i = 0; i < split.length; i++) {
                             ideal[i] = Integer.parseInt(split[i]);
                         }
-                        HashMap<Integer, ArrayList<Integer>> result = buildFactorRing(buildIdeal(ideal, elementsSum, elementsMul), elementsSum);
+                        HashMap<Integer, ArrayList<Integer>> result = buildFactorRing(getIdeal(ideal, elementsSum, elementsMul), elementsSum);
                         System.out.println("Фактор-кольцо по идеалу:");
                         for (Map.Entry<Integer, ArrayList<Integer>> entry : result.entrySet()) {
                             System.out.print(entry.getKey() + ": ");
@@ -472,29 +457,32 @@ public class Main {
         return result;
     }
 
-    private static ArrayList<Integer> buildIdeal(Integer[] ideal, int[][] elementsSum, int[][] elementsMul) {
-        ArrayList<Integer> result = new ArrayList<>(Arrays.asList(ideal));
+    List<Integer> getIdeal(int[] genSet, int[][] sum, int[][] mult) {
+        List<Integer> ideal = new ArrayList<>();
+        for (int i = 0; i < genSet.length; i++) {
+            ideal.add(genSet[i]);
+        }
         ArrayList<Integer> ring = new ArrayList<>();
-        for (int i = 0; i < elementsSum.length; i++) {
+        for (int i = 0; i < sum.length; i++) {
             ring.add(i);
         }
         int size;
         do {
-            size = result.size();
+            size = ideal.size();
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
-                    int newSum = elementsSum[i][findContr(ring, j)];
-                    int newMul = elementsMul[i][ring.get(j)];
-                    if (!result.contains(newSum)) {
-                        result.add(newSum);
+                    int element = sum[i][findContr(ring, j)];
+                    if (!ideal.contains(element)) {
+                        ideal.add(element);
                     }
-                    if (!result.contains(newMul)) {
-                        result.add(newMul);
+                    element = mult[i][ring.get(j)];
+                    if (!ideal.contains(element)) {
+                        ideal.add(element);
                     }
                 }
             }
-        } while (size != result.size());
-        return result;
+        } while (size != ideal.size());
+        return ideal;
     }
 
     private static int findContr(ArrayList<Integer> ring, int j) {
@@ -506,7 +494,7 @@ public class Main {
         return -1;
     }
 
-    private static List<Integer> getSubRing(int[] genSet, int[][] sum, int[][] mult) {
+    List<Integer> getSubRing(int[] genSet, int[][] sum, int[][] mult) {
         List<Integer> subRing = new ArrayList<>();
         for (int i = 0; i < genSet.length; i++) {
             subRing.add(genSet[i]);
