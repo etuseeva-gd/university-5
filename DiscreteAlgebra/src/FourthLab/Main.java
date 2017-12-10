@@ -10,35 +10,6 @@ public class Main {
         new Main().run();
     }
 
-    int[][][] readCayleyTables(BufferedReader reader) throws IOException {
-        int n = Integer.parseInt(reader.readLine());
-        int[][] sum = new int[n][n];
-        for (int i = 0; i < n; i++) {
-            String[] split = reader.readLine().split(" ");
-            for (int j = 0; j < n; j++) {
-                sum[i][j] = Integer.parseInt(split[j]);
-            }
-        }
-
-        int[][] mult = new int[n][n];
-        for (int i = 0; i < n; i++) {
-            String[] split = reader.readLine().split(" ");
-            for (int j = 0; j < n; j++) {
-                mult[i][j] = Integer.parseInt(split[j]);
-            }
-        }
-        return new int[][][]{sum, mult};
-    }
-
-    int[] readGenSet(BufferedReader reader) throws IOException {
-        String[] split = reader.readLine().split(" ");
-        int[] genSet = new int[split.length];
-        for (int i = 0; i < split.length; i++) {
-            genSet[i] = Integer.parseInt(split[i]);
-        }
-        return genSet;
-    }
-
     void run() {
         System.out.println("Выберите, что вы хотите сделать:");
         System.out.println("1 - Проверить свойства кольца");
@@ -88,17 +59,24 @@ public class Main {
                     break;
                 }
                 case "3": {
-                    int p = Integer.parseInt(reader.readLine());
                     String[] split = reader.readLine().split(" ");
-                    HashMap<Integer, Integer> result = new HashMap<>();
-                    for (String aSplit1 : split) {
-                        int temp = Integer.parseInt(aSplit1);
-                        result.put(temp, temp % p);
+                    int firstP = Integer.parseInt(split[0]),
+                            secondP = Integer.parseInt(split[1]);
+
+                    int[] ring = new int[secondP];
+                    for (int i = 0; i < secondP; i++) {
+                        ring[i] = i;
                     }
+
+                    HashMap<Integer, Integer> mapping = new HashMap<>();
+                    for (int r : ring) {
+                        mapping.put(r, r % firstP);
+                    }
+
                     System.out.println("Отображение:");
-                    for (Map.Entry<Integer, Integer> entry : result.entrySet()) {
-                        System.out.println(entry.getKey() + " -> " + entry.getValue());
-                    }
+                    mapping.forEach((key, value) -> {
+                        System.out.println(key + " -> " + value);
+                    });
                     break;
                 }
                 case "4": {
@@ -138,45 +116,33 @@ public class Main {
         }
     }
 
-    void printCayleyTable(int[] m, int p, List<int[]> ex, int rowLength, int type) {
-        for (int i = 0; i < ex.size(); i++) {
-            if (i == 0) {
-                if (type == 0) {
-                    System.out.print("+");
-                } else {
-                    System.out.print("*");
-                }
-                for (int j = 0; j < rowLength; j++) {
-                    System.out.print(' ');
-                }
-                for (int[] e : ex) {
-                    String str = printPolynomial(e);
-                    System.out.print(str);
-                    for (int k = 0; k < rowLength - str.length() + 1; k++) {
-                        System.out.print(' ');
-                    }
-                }
-                System.out.println();
+    int[][][] readCayleyTables(BufferedReader reader) throws IOException {
+        int n = Integer.parseInt(reader.readLine());
+        int[][] sum = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            String[] split = reader.readLine().split(" ");
+            for (int j = 0; j < n; j++) {
+                sum[i][j] = Integer.parseInt(split[j]);
             }
-            for (int j = 0; j < ex.size(); j++) {
-                if (j == 0) {
-                    String str = printPolynomial(ex.get(i));
-                    System.out.print(str);
-                    for (int k = 0; k < rowLength - str.length() + 1; k++) {
-                        System.out.print(' ');
-                    }
-                }
-                int[] polynomial = type == 0 ? mod(mult(ex.get(i), ex.get(j), p), m, p) :
-                        mod(mult(ex.get(i), ex.get(j), p), m, p);
-                String str = printPolynomial(polynomial);
-                System.out.print(str);
-                for (int k = 0; k < rowLength - str.length() + 1; k++) {
-                    System.out.print(' ');
-                }
-            }
-            System.out.println();
         }
-        System.out.println();
+
+        int[][] mult = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            String[] split = reader.readLine().split(" ");
+            for (int j = 0; j < n; j++) {
+                mult[i][j] = Integer.parseInt(split[j]);
+            }
+        }
+        return new int[][][]{sum, mult};
+    }
+
+    int[] readGenSet(BufferedReader reader) throws IOException {
+        String[] split = reader.readLine().split(" ");
+        int[] genSet = new int[split.length];
+        for (int i = 0; i < split.length; i++) {
+            genSet[i] = Integer.parseInt(split[i]);
+        }
+        return genSet;
     }
 
     boolean isRing(int[][] sum, int[][] mult) {
@@ -521,5 +487,46 @@ public class Main {
         x = x1;
         y = y1;
         return x;
+    }
+
+    void printCayleyTable(int[] m, int p, List<int[]> ex, int rowLength, int type) {
+        for (int i = 0; i < ex.size(); i++) {
+            if (i == 0) {
+                if (type == 0) {
+                    System.out.print("+");
+                } else {
+                    System.out.print("*");
+                }
+                for (int j = 0; j < rowLength; j++) {
+                    System.out.print(' ');
+                }
+                for (int[] e : ex) {
+                    String str = printPolynomial(e);
+                    System.out.print(str);
+                    for (int k = 0; k < rowLength - str.length() + 1; k++) {
+                        System.out.print(' ');
+                    }
+                }
+                System.out.println();
+            }
+            for (int j = 0; j < ex.size(); j++) {
+                if (j == 0) {
+                    String str = printPolynomial(ex.get(i));
+                    System.out.print(str);
+                    for (int k = 0; k < rowLength - str.length() + 1; k++) {
+                        System.out.print(' ');
+                    }
+                }
+                int[] polynomial = type == 0 ? mod(mult(ex.get(i), ex.get(j), p), m, p) :
+                        mod(mult(ex.get(i), ex.get(j), p), m, p);
+                String str = printPolynomial(polynomial);
+                System.out.print(str);
+                for (int k = 0; k < rowLength - str.length() + 1; k++) {
+                    System.out.print(' ');
+                }
+            }
+            System.out.println();
+        }
+        System.out.println();
     }
 }
