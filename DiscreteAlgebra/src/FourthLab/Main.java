@@ -43,14 +43,12 @@ public class Main {
         System.out.println("Выберите, что вы хотите сделать:");
         System.out.println("1 - Проверить свойства кольца");
         System.out.println("2 - Построить подкольцо, идеал, фактор-кольцо по идеалу");
-        System.out.println("5 - Построить гомоморфизм между двумя кольцами");
-        System.out.println("3 - Построить алгебраическое расширение");
+        System.out.println("3 - Построить гомоморфизм между двумя кольцами");
+        System.out.println("4 - Построить алгебраическое расширение");
 
         Scanner scanner = new Scanner(System.in);
         String action = scanner.nextLine();
-        try (BufferedReader reader = new BufferedReader(new FileReader("input.txt"));
-             BufferedReader reader1 = new BufferedReader(new FileReader("inputExt.txt"));
-             BufferedReader reader2 = new BufferedReader(new FileReader("inputHomo.txt"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("input.txt"))) {
             switch (action) {
                 case "1": {
                     int[][][] cayleyTables = readCayleyTables(reader);
@@ -89,9 +87,9 @@ public class Main {
                     }
                     break;
                 }
-                case "5": {
-                    int p = Integer.parseInt(reader2.readLine());
-                    String[] split = reader2.readLine().split(" ");
+                case "3": {
+                    int p = Integer.parseInt(reader.readLine());
+                    String[] split = reader.readLine().split(" ");
                     HashMap<Integer, Integer> result = new HashMap<>();
                     for (String aSplit1 : split) {
                         int temp = Integer.parseInt(aSplit1);
@@ -103,33 +101,27 @@ public class Main {
                     }
                     break;
                 }
-                case "6": {
-                    int p = Integer.parseInt(reader1.readLine());
-                    String[] split = reader1.readLine().split(" ");
+                case "4": {
+                    int p = Integer.parseInt(reader.readLine());
+                    String[] split = reader.readLine().split(" ");
                     int[] m = new int[split.length];
                     for (int i = 0; i < split.length; i++) {
                         m[i] = Integer.parseInt(split[i]);
                     }
-
-                    System.out.println("Модуль: " + p);
-                    System.out.println("m(x): " + printPolynomial(m));
-                    System.out.print("Элементы алгебраического расширения: ");
+                    System.out.println("Многочлен m(x) = " + printPolynomial(m));
 
                     List<int[]> expansion = getElementsExtention(p, m);
-
+                    System.out.print("Элементы алгебраического расширения: ");
                     int maxLength = 0;
                     for (int i = 0; i < expansion.size(); i++) {
                         String s = printPolynomial(expansion.get(i));
-                        if (s.length() > maxLength) {
-                            maxLength = s.length();
-                        }
-                        System.out.print(s);
-                        if (i < expansion.size() - 1) {
-                            System.out.print(", ");
-                        }
+                        String prefix = ", ";
                         if (i == expansion.size() - 1) {
-                            System.out.println();
+                            prefix = "\n";
                         }
+                        System.out.print(s + prefix);
+
+                        maxLength = Math.max(maxLength, s.length());
                     }
 
                     System.out.println("Таблицы Кэли:");
@@ -341,7 +333,6 @@ public class Main {
 
     int[] getPolynomial(int[] m, int p) {
         int[] polynomial = m.clone();
-//        System.arraycopy(m, 0, polynomial, 0, m.length);
         for (int i = 0; i < polynomial.length; i++) {
             if (polynomial[i] == p - 1) {
                 polynomial[i] = 0;
