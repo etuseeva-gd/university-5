@@ -444,7 +444,7 @@ public class Main {
             if (!used[i]) {
                 used[i] = true;
                 for (int j = 0; j < elementsSum.length; j++) {
-                    if (ideal.contains(elementsSum[i][findContr(ring, j)])) {
+                    if (ideal.contains(elementsSum[i][getJ(ring, j)])) {
                         if (!result.containsKey(i)) {
                             result.put(i, new ArrayList<Integer>());
                         }
@@ -462,32 +462,32 @@ public class Main {
         for (int i = 0; i < genSet.length; i++) {
             ideal.add(genSet[i]);
         }
-        ArrayList<Integer> ring = new ArrayList<>();
+        int[] ring = new int[sum.length];
         for (int i = 0; i < sum.length; i++) {
-            ring.add(i);
+            ring[i] = i;
         }
-        int size;
+        int n;
         do {
-            size = ideal.size();
-            for (int i = 0; i < size; i++) {
-                for (int j = 0; j < size; j++) {
-                    int element = sum[i][findContr(ring, j)];
-                    if (!ideal.contains(element)) {
+            n = ideal.size();
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    int element = sum[i][getJ(ring.length, j)];
+                    if (element != -1 && !ideal.contains(element)) {
                         ideal.add(element);
                     }
-                    element = mult[i][ring.get(j)];
+                    element = mult[i][ring[j]];
                     if (!ideal.contains(element)) {
                         ideal.add(element);
                     }
                 }
             }
-        } while (size != ideal.size());
+        } while (n != ideal.size());
         return ideal;
     }
 
-    private static int findContr(ArrayList<Integer> ring, int j) {
-        for (int i = 0; i < ring.size(); i++) {
-            if ((j + i) % ring.size() == 0) {
+    private static int getJ(int j, int n) {
+        for (int i = 0; i < n; i++) {
+            if ((i + j) % n == 0) {
                 return i;
             }
         }
