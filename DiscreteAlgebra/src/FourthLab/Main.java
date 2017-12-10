@@ -30,7 +30,6 @@ public class Main {
                     int[][][] cayleyTables = readCayleyTables(reader);
                     int[][] sum = cayleyTables[0], mult = cayleyTables[1];
                     if (!isRing(sum, mult)) {
-                        System.out.println("Не кольцо!");
                         return;
                     } else {
                         int[] genSet = readGenSet(reader);
