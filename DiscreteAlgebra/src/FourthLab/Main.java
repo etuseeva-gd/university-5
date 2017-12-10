@@ -517,7 +517,7 @@ public class Main {
                         System.out.print(' ');
                     }
                 }
-                int[] polynomial = type == 0 ? mod(mult(ex.get(i), ex.get(j), p), m, p) :
+                int[] polynomial = type == 0 ? mod(add(ex.get(i), ex.get(j), p), m, p) :
                         mod(mult(ex.get(i), ex.get(j), p), m, p);
                 String str = printPolynomial(polynomial);
                 System.out.print(str);
