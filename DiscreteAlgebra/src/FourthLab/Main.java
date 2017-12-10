@@ -148,7 +148,7 @@ public class Main {
                                     System.out.print(' ');
                                 }
                             }
-                            int[] add = div(toAdd(expansion.get(i), expansion.get(j), p), m, p);
+                            int[] add = mod(add(expansion.get(i), expansion.get(j), p), m, p);
                             String str = printPolynomial(add);
                             System.out.print(str);
                             for (int k = 0; k < maxLength - str.length() + 1; k++) {
@@ -157,6 +157,8 @@ public class Main {
                         }
                         System.out.println();
                     }
+
+
                     System.out.println();
                     for (int i = 0; i < expansion.size(); i++) {
                         if (i == 0) {
@@ -182,7 +184,7 @@ public class Main {
                                     System.out.print(' ');
                                 }
                             }
-                            int[] add = div(mult(expansion.get(i), expansion.get(j), p), m, p);
+                            int[] add = mod(mult(expansion.get(i), expansion.get(j), p), m, p);
                             String str = printPolynomial(add);
                             System.out.print(str);
                             for (int k = 0; k < maxLength - str.length() + 1; k++) {
@@ -191,6 +193,7 @@ public class Main {
                         }
                         System.out.println();
                     }
+
                     break;
                 }
                 default: {
@@ -203,33 +206,16 @@ public class Main {
         }
     }
 
-    private static int[] mult(int[] x, int[] y, int p) {
-        ArrayList<Integer> z = new ArrayList<>();
-        for (int i = 0; i < x.length + y.length; i++) {
-            z.add(0);
-        }
-        for (int i = 0; i < x.length; i++) {
-            for (int j = 0; j < y.length; j++) {
-                z.set(i + j, (z.get(i + j) + ((x[i] * y[j]) % p)) % p);
-            }
-        }
-        while (z.size() > 1 && z.get(z.size() - 1) == 0) {
-            z.remove(z.size() - 1);
-        }
+    void printCayleyTable() {
 
-        int[] result = new int[z.size()];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = z.get(i);
-        }
-        return result;
     }
 
-    private static int[] div(int[] x, int[] y, int p) {
+    int[] mod(int[] x, int[] y, int p) {
         ArrayList<Integer> z = new ArrayList<>();
         for (int aX : x) {
             z.add(aX);
         }
-        if (x.length < y.length || extendedEuklid(y[y.length - 1], p) != 1) {
+        if (x.length < y.length || extendedEuclid(y[y.length - 1], p) != 1) {
             int[] result = new int[z.size()];
             for (int i = 0; i < result.length; i++) {
                 result[i] = z.get(i);
@@ -266,17 +252,16 @@ public class Main {
         return result;
     }
 
-    private static int modInverse(int x, int p) {
-        return (extendedEuklid(x, p) % p + p) % p;
+    int modInverse(int x, int p) {
+        return (extendedEuclid(x, p) % p + p) % p;
     }
 
-    private static int extendedEuklid(int a, int b) {
-        int d, x, y;
+    int extendedEuclid(int a, int b) {
+        int x, y;
         int r0 = a, r1 = b, x0 = 1, x1 = 0, y0 = 0, y1 = 1;
         while (true) {
             int q = r0 / r1;
             int r = r0 % r1;
-
             if (r == 0)
                 break;
             else {
@@ -290,14 +275,13 @@ public class Main {
                 y1 = y;
             }
         }
-        d = r1;
         x = x1;
         y = y1;
         return x;
     }
 
-    private static int[] toAdd(int[] x, int[] y, int p) {
-        ArrayList<Integer> z = new ArrayList<>();
+    int[] add(int[] x, int[] y, int p) {
+        List<Integer> z = new ArrayList<>();
         if (x.length > y.length) {
             for (int aX : x) {
                 z.add(aX);
@@ -313,6 +297,27 @@ public class Main {
         while (z.size() > 1 && z.get(z.size() - 1) == 0) {
             z.remove(z.size() - 1);
         }
+        int[] result = new int[z.size()];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = z.get(i);
+        }
+        return result;
+    }
+
+    int[] mult(int[] x, int[] y, int p) {
+        ArrayList<Integer> z = new ArrayList<>();
+        for (int i = 0; i < x.length + y.length; i++) {
+            z.add(0);
+        }
+        for (int i = 0; i < x.length; i++) {
+            for (int j = 0; j < y.length; j++) {
+                z.set(i + j, (z.get(i + j) + ((x[i] * y[j]) % p)) % p);
+            }
+        }
+        while (z.size() > 1 && z.get(z.size() - 1) == 0) {
+            z.remove(z.size() - 1);
+        }
+
         int[] result = new int[z.size()];
         for (int i = 0; i < result.length; i++) {
             result[i] = z.get(i);
