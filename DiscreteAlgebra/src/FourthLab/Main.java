@@ -12,10 +12,10 @@ public class Main {
 
     void run() {
         System.out.println("Выберите, что вы хотите сделать:");
-        System.out.println("1 - Проверить свойства кольца");
-        System.out.println("2 - Построить подкольцо, идеал, фактор-кольцо по идеалу");
-        System.out.println("3 - Построить гомоморфизм между двумя кольцами");
-        System.out.println("4 - Построить алгебраическое расширение");
+        System.out.println("1 - Проверить свойства кольца;");
+        System.out.println("2 - Построить подкольцо, идеал, фактор-кольцо по идеалу (по порождающему множеству);");
+        System.out.println("3 - Построить гомоморфизм между двумя кольцами;");
+        System.out.println("4 - Построить алгебраическое расширение;");
 
         Scanner scanner = new Scanner(System.in);
         String action = scanner.nextLine();
@@ -39,12 +39,14 @@ public class Main {
                         for (Integer element : subRing) {
                             System.out.print(element + " ");
                         }
+                        System.out.println();
 
                         List<Integer> ideal = getIdeal(genSet, sum, mult);
                         System.out.println("Идеал:");
                         for (Integer element : ideal) {
                             System.out.print(element + " ");
                         }
+                        System.out.println();
 
                         HashMap<Integer, List<Integer>> factorRing = getFactorRing(ideal, mult);
                         System.out.println("Фактор-кольцо по идеалу:");
@@ -85,6 +87,7 @@ public class Main {
                     for (int i = 0; i < split.length; i++) {
                         m[i] = Integer.parseInt(split[i]);
                     }
+                    System.out.println("Модуль поля = " + p);
                     System.out.println("Многочлен m(x) = " + printPolynomial(m));
 
                     List<int[]> expansion = getElementsExtention(p, m);
@@ -265,7 +268,7 @@ public class Main {
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
                     int element = sum[i][getJ(ring.length, j)];
-                    if (element != -1 && !ideal.contains(element)) {
+                    if (!ideal.contains(element)) {
                         ideal.add(element);
                     }
                     element = mult[i][ring[j]];
@@ -302,7 +305,7 @@ public class Main {
         return factorRing;
     }
 
-    int getJ(int j, int n) {
+    int getJ(int n, int j) {
         for (int i = 0; i < n; i++) {
             if ((i + j) % n == 0) {
                 return i;
