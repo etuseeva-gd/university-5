@@ -42,9 +42,7 @@ public class Main {
     void run() {
         System.out.println("Выберите, что вы хотите сделать:");
         System.out.println("1 - Проверить свойства кольца");
-        System.out.println("2 - Построить подкольцо");
-        System.out.println("3 - Построить идеал");
-        System.out.println("4 - Построить фактор-кольцо по идеалу");
+        System.out.println("2 - Построить подкольцо, идеал, фактор-кольцо по идеалу");
         System.out.println("5 - Построить гомоморфизм между двумя кольцами");
         System.out.println("3 - Построить алгебраическое расширение");
 
@@ -67,42 +65,20 @@ public class Main {
                         return;
                     } else {
                         int[] genSet = readGenSet(reader);
-                        List<Integer> subRing = getSubRing(genSet, sum, mult);
 
+                        List<Integer> subRing = getSubRing(genSet, sum, mult);
                         System.out.println("Подкольцо:");
                         for (Integer element : subRing) {
                             System.out.print(element + " ");
                         }
-                    }
-                    break;
-                }
-                case "3": {
-                    int[][][] cayleyTables = readCayleyTables(reader);
-                    int[][] sum = cayleyTables[0], mult = cayleyTables[1];
-                    if (!isRing(sum, mult)) {
-                        System.out.println("Не кольцо!");
-                        return;
-                    } else {
-                        int[] genSet = readGenSet(reader);
-                        List<Integer> ideal = getIdeal(genSet, sum, mult);
 
+                        List<Integer> ideal = getIdeal(genSet, sum, mult);
                         System.out.println("Идеал:");
                         for (Integer element : ideal) {
                             System.out.print(element + " ");
                         }
-                    }
-                    break;
-                }
-                case "4": {
-                    int[][][] cayleyTables = readCayleyTables(reader);
-                    int[][] sum = cayleyTables[0], mult = cayleyTables[1];
-                    if (!isRing(sum, mult)) {
-                        System.out.println("Не кольцо!");
-                        return;
-                    } else {
-                        int[] genSet = readGenSet(reader);
-                        HashMap<Integer, List<Integer>> factorRing = getFactorRing(getIdeal(genSet, sum, mult), mult);
 
+                        HashMap<Integer, List<Integer>> factorRing = getFactorRing(ideal, mult);
                         System.out.println("Фактор-кольцо по идеалу:");
                         factorRing.forEach((key, value) -> {
                             System.out.print(key + ": ");
