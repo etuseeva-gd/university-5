@@ -94,31 +94,15 @@ public class Main {
                     break;
                 }
                 case "4": {
-                    n = Integer.parseInt(reader.readLine());
-                    System.out.println("Модуль: " + n);
-                    elementsSum = new int[n][n];
-                    for (int i = 0; i < n; i++) {
-                        String[] split = reader.readLine().split(" ");
-                        for (int j = 0; j < n; j++) {
-                            elementsSum[i][j] = Integer.parseInt(split[j]);
-                        }
-                    }
-                    elementsMul = new int[n][n];
-                    for (int i = 0; i < n; i++) {
-                        String[] split = reader.readLine().split(" ");
-                        for (int j = 0; j < n; j++) {
-                            elementsMul[i][j] = Integer.parseInt(split[j]);
-                        }
-                    }
-                    if (!isRing(elementsSum, elementsMul)) {
+                    int[][][] cayleyTables = readCayleyTables(reader);
+                    int[][] sum = cayleyTables[0], mult = cayleyTables[1];
+                    if (!isRing(sum, mult)) {
+                        System.out.println("Не кольцо!");
                         return;
                     } else {
-                        String[] split = reader.readLine().split(" ");
-                        Integer[] ideal = new Integer[split.length];
-                        for (int i = 0; i < split.length; i++) {
-                            ideal[i] = Integer.parseInt(split[i]);
-                        }
-                        HashMap<Integer, ArrayList<Integer>> result = buildFactorRing(getIdeal(ideal, elementsSum, elementsMul), elementsSum);
+                        int[] genSet = readGenSet(reader);
+                        HashMap<Integer, ArrayList<Integer>> result = buildFactorRing(getIdeal(genSet, sum, mult), mult);
+
                         System.out.println("Фактор-кольцо по идеалу:");
                         for (Map.Entry<Integer, ArrayList<Integer>> entry : result.entrySet()) {
                             System.out.print(entry.getKey() + ": ");
@@ -485,7 +469,7 @@ public class Main {
         return ideal;
     }
 
-    private static int getJ(int j, int n) {
+    int getJ(int j, int n) {
         for (int i = 0; i < n; i++) {
             if ((i + j) % n == 0) {
                 return i;
@@ -518,7 +502,6 @@ public class Main {
         return subRing;
     }
 
-    //Проверка свойств кольца
     boolean isRing(int[][] sum, int[][] mult) {
         if (!isСommutative(sum) || !isAssociative(sum) ||
                 !hasOppositeElementAdd(sum) || !hasNeutralElementAdd(sum) ||
