@@ -1,7 +1,6 @@
 package FourthLab;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
@@ -528,9 +527,10 @@ public class Main {
         return result;
     }
 
-    private static boolean isRing(int[][] elementsSum, int[][] elementsMul) {
-        if (!isComSum(elementsSum) || !isAss(elementsSum) || !hasCounter(elementsSum) || !hasNeutralSum(elementsSum)
-                || !isAss(elementsMul) || !isDistr(elementsSum, elementsMul)) {
+    boolean isRing(int[][] sum, int[][] mult) {
+        if (!isСommutative(sum) || !isAssociative(sum) ||
+                !hasOppositeElementAdd(sum) || !hasNeutralElementAdd(sum) ||
+                !isAssociative(mult) || !isDistributive(sum, mult)) {
             System.out.println("Данное множество не является кольцом!");
             return false;
         } else {
@@ -539,12 +539,22 @@ public class Main {
         }
     }
 
-    private static boolean isDistr(int[][] elementsSum, int[][] elementsMul) {
-        for (int i = 0; i < elementsSum.length; i++) {
-            for (int j = 0; j < elementsSum.length; j++) {
-                for (int k = 0; k < elementsSum.length; k++) {
-                    if ((elementsMul[i][elementsSum[j][k]] != elementsSum[elementsMul[i][j]][elementsMul[i][k]]) ||
-                            (elementsMul[elementsSum[j][k]][i] != elementsSum[elementsMul[j][i]][elementsMul[k][i]])) {
+    boolean isСommutative(int[][] m) {
+        for (int i = 0; i < m.length; i++) {
+            for (int j = 0; j < m.length; j++) {
+                if (m[i][j] != m[j][i]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    boolean isAssociative(int[][] m) {
+        for (int i = 0; i < m.length; i++) {
+            for (int j = 0; j < m.length; j++) {
+                for (int k = 0; k < m.length; k++) {
+                    if (m[m[i][j]][k] != m[i][m[j][k]]) {
                         return false;
                     }
                 }
@@ -553,57 +563,47 @@ public class Main {
         return true;
     }
 
-    private static boolean hasNeutralSum(int[][] elements) {
-        for (int[] element : elements) {
-            boolean isNeutral = true;
-            for (int j = 0; j < elements.length; j++) {
-                if (element[j] != j) {
-                    isNeutral = false;
+    boolean isDistributive(int[][] sum, int[][] mult) {
+        for (int i = 0; i < sum.length; i++) {
+            for (int j = 0; j < sum.length; j++) {
+                for (int k = 0; k < sum.length; k++) {
+                    if ((mult[i][sum[j][k]] != sum[mult[i][j]][mult[i][k]]) ||
+                            (mult[sum[j][k]][i] != sum[mult[j][i]][mult[k][i]])) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    boolean hasNeutralElementAdd(int[][] m) {
+        for (int i = 0; i < m.length; i++) {
+            boolean neutral = true;
+            for (int j = 0; j < m.length; j++) {
+                if (m[i][j] != j) {
+                    neutral = false;
                     break;
                 }
             }
-            if (isNeutral) {
+            if (neutral) {
                 return true;
             }
         }
         return false;
     }
 
-    private static boolean hasCounter(int[][] elements) {
-        for (int[] element : elements) {
-            boolean hasCounter = false;
-            for (int j = 0; j < elements.length; j++) {
-                if (element[j] == 0) {
-                    hasCounter = true;
+    boolean hasOppositeElementAdd(int[][] m) {
+        for (int i = 0; i < m.length; i++) {
+            boolean opposite = false;
+            for (int j = 0; j < m.length; j++) {
+                if (m[i][j] == 0) {
+                    opposite = true;
                     break;
                 }
             }
-            if (!hasCounter) {
+            if (!opposite) {
                 return false;
-            }
-        }
-        return true;
-    }
-
-    private static boolean isAss(int[][] elements) {
-        for (int[] element : elements) {
-            for (int j = 0; j < elements.length; j++) {
-                for (int k = 0; k < elements.length; k++) {
-                    if (elements[element[j]][k] != element[elements[j][k]]) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
-    private static boolean isComSum(int[][] elements) {
-        for (int i = 0; i < elements.length; i++) {
-            for (int j = 0; j < elements.length; j++) {
-                if (elements[i][j] != elements[j][i]) {
-                    return false;
-                }
             }
         }
         return true;
